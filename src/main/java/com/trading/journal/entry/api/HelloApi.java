@@ -23,7 +23,7 @@ public interface HelloApi {
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
             @RequestParam(value = "size", defaultValue = "10", required = false) Integer size,
             @ApiParam(name = "sort", value = "A array with property and direction such as \"id,asc\", \"name,desc\"")
-            @RequestParam(value = "sort", required = false) String[] sort);
+            @RequestParam(value = "sort", required = false) String... sort);
 
     @ApiOperation(notes = "Create new", value = "Create new")
     @ApiResponses(@ApiResponse(code = 201, message = "Record created"))
