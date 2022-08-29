@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <property name="environment" value="${ENVIRONMENT:-DEFAULT}" />
+    <springProperty name="service" source="spring.application.name" />
+
+    <appender name="Console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <param name="pattern" value="%cyan(%d{HH:mm:ss.SSS}) %highlight(%-5level) [%magenta(%t)] %yellow(%class{0}.%M %L): %msg%n%throwable" />
+        </encoder>
+    </appender>
+
+    <appender name="Logstash" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <provider class="net.logstash.logback.composite.loggingevent.ArgumentsJsonProvider" />
+            <customFields>
+                {"service":"${service}","environment":"${environment}"}
+            </customFields>
+        </encoder>
+    </appender>
+
+    <root level="info">
+        <if condition='property("environment").equals("DEFAULT")'>
+            <then>
+                <appender-ref ref="Console" />
+            </then>
+            <else>
+                <appender-ref ref="Logstash" />
+            </else>
+        </if>
+    </root>
+</configuration>

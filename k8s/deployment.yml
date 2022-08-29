@@ -1,0 +1,73 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: trading-journal-entry
+  namespace: trading-journal
+  labels:
+    app: trading-journal-entry
+spec:
+  selector:
+    matchLabels:
+      app: trading-journal-entry
+  replicas: 1
+  minReadySeconds: 20
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  template:
+    metadata:
+      labels:
+        app: trading-journal-entry
+      annotations:
+        prometheus.io/scrape: 'true'
+        prometheus.io/port: '8080'
+        prometheus.io/path: '/prometheus'
+    spec:
+      volumes:
+        - name: trading-journal-public-key
+          configMap:
+            name: trading-journal-public-key
+      terminationGracePeriodSeconds: 1
+      containers:
+        - name: trading-journal-entry
+          image: allanweber/trading-journal-entry:latest
+          imagePullPolicy: Always
+          readinessProbe:
+            httpGet:
+              path: /health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 60
+          livenessProbe:
+            httpGet:
+              path: /health/liveness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 60
+          resources:
+            limits:
+              cpu: '2'
+              memory: '2048Mi'
+            requests:
+              cpu: '1'
+              memory: '1024Mi'
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: trading-journal-public-key
+              readOnly: false
+              mountPath: '/etc/ssl/certs/public_key.pem'
+              subPath: public_key.pem
+          env:
+            - name: ES_JAVA_OPTS
+              value: '-Xmx2048m -Xms2048m'
+            - name:   MONGO_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: trading-journal-entry-prd
+                  key:   MONGO_PASS
+          envFrom:
+            - configMapRef:
+                name: trading-journal-entry-prd

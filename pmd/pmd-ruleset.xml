@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<ruleset name="All Java Rules" xmlns="http://pmd.sourceforge.net/ruleset/2.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://pmd.sourceforge.net/ruleset/2.0.0 https://pmd.sourceforge.io/ruleset_2_0_0.xsd">
+    <description>PMD rules initial subset, PMD version 6.29.0</description>
+
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="GuardLogStatement" />
+    </rule>
+    <rule ref="category/java/codestyle.xml">
+        <exclude name="LongVariable" />
+        <exclude name="ShortClassName"/>
+        <exclude name="ShortVariable" />
+        <exclude name="ShortMethodName" />
+        <exclude name="LocalVariableCouldBeFinal" />
+        <exclude name="MethodArgumentCouldBeFinal" />
+    </rule>
+    <rule ref="category/java/codestyle.xml/ClassNamingConventions">
+        <properties>
+            <property name="utilityClassPattern" value="[A-Z][a-zA-Z0-9]*" />
+        </properties>
+    </rule>
+    <rule ref="category/java/codestyle.xml/TooManyStaticImports">
+        <properties>
+            <property name="maximumStaticImports" value="10" />
+        </properties>
+    </rule>
+    <rule ref="category/java/design.xml">
+        <exclude name="LoosePackageCoupling" />
+        <exclude name="LawOfDemeter" />
+        <exclude name="FinalFieldCouldBeStatic" />
+        <exclude name="UseUtilityClass" />
+    </rule>
+    <rule ref="category/java/documentation.xml">
+        <exclude name="UncommentedEmptyConstructor" />
+        <exclude name="CommentContent" />
+        <exclude name="CommentRequired" />
+    </rule>
+    <rule ref="category/java/documentation.xml/CommentSize">
+        <properties>
+            <property name="maxLines" value="10" />
+            <property name="maxLineLength" value="100" />
+        </properties>
+    </rule>
+
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="DataflowAnomalyAnalysis" />
+        <exclude name="BeanMembersShouldSerialize" />
+        <exclude name="InvalidLogMessageFormat" />
+        <exclude name="AvoidAccessibilityAlteration"/>
+    </rule>
+    <rule ref="category/java/multithreading.xml" />
+    <rule ref="category/java/performance.xml">
+        <exclude name="AvoidInstantiatingObjectsInLoops" />
+    </rule>
+    <rule ref="category/java/security.xml" />
+</ruleset>
