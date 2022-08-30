@@ -3,6 +3,7 @@ package com.trading.journal.entry.pageable;
 import com.trading.journal.entry.ApplicationException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,9 +12,12 @@ import org.springframework.data.domain.Sort;
 import java.util.ArrayList;
 import java.util.List;
 
+import static java.util.Optional.ofNullable;
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
+@Getter
 public class PageableRequest {
 
     private static final String COMMA = ",";
@@ -23,9 +27,19 @@ public class PageableRequest {
 
     private String[] sort;
 
+    private String[] filter;
+
     public Pageable pageable() {
         Sort sortable = loadSort();
         return PageRequest.of(page, size, sortable);
+    }
+
+    public List<Filter> filters() {
+        return loadFilter();
+    }
+
+    public boolean hasFilter() {
+        return ofNullable(filter).map(f -> f.length > 0).orElse(false);
     }
 
     private Sort loadSort() {
@@ -48,5 +62,24 @@ public class PageableRequest {
             sortable = Sort.by(orders);
         }
         return sortable;
+    }
+
+    private List<Filter> loadFilter() {
+        List<Filter> filters = new ArrayList<>();
+        if (filter != null && filter.length > 0) {
+            if (filter.length % 2 != 0) {
+                throw new ApplicationException("Filter is invalid. It must be a pair of field and value");
+            }
+            String field = null;
+            for (int index = 0; index < filter.length; index++) {
+                if (index % 2 == 0) {
+                    field = filter[index].trim();
+                } else {
+                    String value = filter[index].trim();
+                    filters.add(new Filter(field, value));
+                }
+            }
+        }
+        return filters;
     }
 }

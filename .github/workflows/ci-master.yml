@@ -28,11 +28,11 @@ jobs:
         with:
           name: $APP_NAME
           path: target/*.jar
-      - name: Create Tag
-        uses: negz/create-tag@v1
-        with:
-          version: ${{ steps.build-version.outputs.APP_VERSION }}
-          token: ${{ secrets.PACKAGE_TOKEN }}
+#      - name: Create Tag
+#        uses: negz/create-tag@v1
+#        with:
+#          version: ${{ steps.build-version.outputs.APP_VERSION }}
+#          token: ${{ secrets.PACKAGE_TOKEN }}
       - name: Save version
         uses: noobly314/share-data@v1
         with:

@@ -18,7 +18,7 @@ class PageableRequestTest {
     @Test
     void pageable() {
         String[] sort = new String[]{"name", "asc", "id", "desc", "age", "asc"};
-        PageableRequest pageableRequest = new PageableRequest(1, 20, sort);
+        PageableRequest pageableRequest = PageableRequest.builder().page(1).size(20).sort(sort).build();
 
         Pageable pageable = pageableRequest.pageable();
 
@@ -34,7 +34,7 @@ class PageableRequestTest {
     @Test
     void pageableSort() {
         String[] sort = new String[]{" name", "  asc", "id  ", "desc  ", "age ", " asc"};
-        PageableRequest pageableRequest = new PageableRequest(1, 20, sort);
+        PageableRequest pageableRequest = PageableRequest.builder().page(1).size(20).sort(sort).build();
 
         Pageable pageable = pageableRequest.pageable();
 
@@ -50,7 +50,7 @@ class PageableRequestTest {
     @Test
     void pageableSortException() {
         String[] sort = new String[]{"name", "desc", "age"};
-        PageableRequest pageableRequest = new PageableRequest(1, 20, sort);
+        PageableRequest pageableRequest = PageableRequest.builder().page(1).size(20).sort(sort).build();
 
         ApplicationException exception = assertThrows(ApplicationException.class, pageableRequest::pageable);
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
@@ -61,7 +61,7 @@ class PageableRequestTest {
     @Test
     void pageableDirectionException() {
         String[] sort = new String[]{"name", "asc", "id", "abc", "age", "asc"};
-        PageableRequest pageableRequest = new PageableRequest(1, 20, sort);
+        PageableRequest pageableRequest = PageableRequest.builder().page(1).size(20).sort(sort).build();
 
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, pageableRequest::pageable);
         assertThat(exception.getMessage()).contains("Invalid value 'abc' for orders given; Has to be either 'desc' or 'asc'");
