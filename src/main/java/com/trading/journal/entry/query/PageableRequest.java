@@ -1,6 +1,7 @@
-package com.trading.journal.entry.pageable;
+package com.trading.journal.entry.query;
 
 import com.trading.journal.entry.ApplicationException;
+import com.trading.journal.entry.query.data.Filter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -8,19 +9,20 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-
-import static java.util.Optional.ofNullable;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Getter
 public class PageableRequest {
+    public static final String SPLIT_DELIMITER = "\\.";
 
-    private static final String COMMA = ",";
     private int page;
 
     private int size;
@@ -34,12 +36,8 @@ public class PageableRequest {
         return PageRequest.of(page, size, sortable);
     }
 
-    public List<Filter> filters() {
-        return loadFilter();
-    }
-
-    public boolean hasFilter() {
-        return ofNullable(filter).map(f -> f.length > 0).orElse(false);
+    public List<Filter> getFilters() {
+        return loadFilters();
     }
 
     private Sort loadSort() {
@@ -64,22 +62,38 @@ public class PageableRequest {
         return sortable;
     }
 
-    private List<Filter> loadFilter() {
-        List<Filter> filters = new ArrayList<>();
+    private List<Filter> loadFilters() {
+        List<Filter> filterList = new ArrayList<>();
         if (filter != null && filter.length > 0) {
             if (filter.length % 2 != 0) {
-                throw new ApplicationException("Filter is invalid. It must be a pair of field and value");
+                throw new ApplicationException("Filter is invalid. It must be a pair of FieldName.Operation and Value");
             }
             String field = null;
+            FilterOperation operation = null;
             for (int index = 0; index < filter.length; index++) {
                 if (index % 2 == 0) {
-                    field = filter[index].trim();
+                    String[] fieldAdnOperator = filter[index].trim().split(SPLIT_DELIMITER);
+                    if (fieldAdnOperator.length != 2) {
+                        throw new ApplicationException(String.format("Field name %s is invalid, must be FieldName.Operation", filter[index].trim()));
+                    }
+                    field = fieldAdnOperator[0];
+                    operation = FilterOperation.fromValue(fieldAdnOperator[1]);
+                    if (operation == null) {
+                        throw new ApplicationException(String.format("%s operation is invalid", fieldAdnOperator[1]));
+                    }
                 } else {
                     String value = filter[index].trim();
-                    filters.add(new Filter(field, value));
+                    filterList.add(new Filter(field, operation, value));
                 }
             }
         }
-        return filters;
+        return filterList;
+    }
+
+    private static List<String> split(String search, String delimiter) {
+        return Stream.of(search.split(delimiter))
+                .map(String::trim)
+                .filter(StringUtils::hasText)
+                .collect(Collectors.toList());
     }
 }

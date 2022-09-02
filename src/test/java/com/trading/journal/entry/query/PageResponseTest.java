@@ -1,7 +1,10 @@
-package com.trading.journal.entry.pageable;
+package com.trading.journal.entry.query;
 
+import com.trading.journal.entry.query.data.PageResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 
 import java.util.List;
 import java.util.stream.IntStream;
@@ -17,10 +20,12 @@ class PageResponseTest {
                 .page(0)
                 .size(10)
                 .build();
-        long total = 100;
+
         List<Integer> items = IntStream.rangeClosed(1, 10).boxed().toList();
 
-        PageResponse<Integer> pageResponse = new PageResponse<>(pageableRequest, total, items);
+        Page<Integer> page = new PageImpl<>(items, pageableRequest.pageable(), 100);
+
+        PageResponse<Integer> pageResponse = new PageResponse<>(page);
 
         assertThat(pageResponse.getCurrentPage()).isEqualTo(0);
         assertThat(pageResponse.getTotalPages()).isEqualTo(10);
@@ -35,10 +40,12 @@ class PageResponseTest {
                 .page(0)
                 .size(10)
                 .build();
-        long total = 31;
+
         List<Integer> items = IntStream.rangeClosed(1, 10).boxed().toList();
 
-        PageResponse<Integer> pageResponse = new PageResponse<>(pageableRequest, total, items);
+        Page<Integer> page = new PageImpl<>(items, pageableRequest.pageable(), 31);
+
+        PageResponse<Integer> pageResponse = new PageResponse<>(page);
 
         assertThat(pageResponse.getCurrentPage()).isEqualTo(0);
         assertThat(pageResponse.getTotalPages()).isEqualTo(4);
@@ -53,10 +60,12 @@ class PageResponseTest {
                 .page(0)
                 .size(10)
                 .build();
-        long total = 29;
+
         List<Integer> items = IntStream.rangeClosed(1, 10).boxed().toList();
 
-        PageResponse<Integer> pageResponse = new PageResponse<>(pageableRequest, total, items);
+        Page<Integer> page = new PageImpl<>(items, pageableRequest.pageable(), 29);
+
+        PageResponse<Integer> pageResponse = new PageResponse<>(page);
 
         assertThat(pageResponse.getCurrentPage()).isEqualTo(0);
         assertThat(pageResponse.getTotalPages()).isEqualTo(3);

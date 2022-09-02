@@ -1,7 +1,7 @@
 package com.trading.journal.entry.entries;
 
-import com.trading.journal.entry.pageable.PageResponse;
-import com.trading.journal.entry.pageable.PageableRequest;
+import com.trading.journal.entry.query.data.PageResponse;
+import com.trading.journal.entry.query.PageableRequest;
 
 public interface EntryService {
 

@@ -7,7 +7,7 @@ import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
-import com.trading.journal.entry.pageable.PageResponse;
+import com.trading.journal.entry.query.data.PageResponse;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -245,7 +245,7 @@ class EntryControllerPagingTest {
                         .path("/entry")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
-                        .queryParam("filter", "symbol", "MSFT")
+                        .queryParam("filter", "symbol.eq", "MSFT")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -271,7 +271,7 @@ class EntryControllerPagingTest {
                         .path("/entry")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
-                        .queryParam("filter", "date", "2022-08-31")
+                        .queryParam("filter", "date.btn", "2022-08-31")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -290,6 +290,37 @@ class EntryControllerPagingTest {
                     assertThat(response.getItems()).extracting(Entry::getPrice)
                             .extracting(Double::intValue)
                             .containsExactlyInAnyOrder(60, 70, 80, 90, 100);
+                });
+    }
+
+    @DisplayName("Entry get 1 item without sort filtering by date with only year month and day and symbol")
+    @Test
+    void noSortFilterByDateAndSymbol() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entry")
+                        .queryParam("page", "0")
+                        .queryParam("size", "5")
+                        .queryParam("filter", "date.btn", "2022-08-31", "symbol.eq", "MSFT")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(1);
+                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getTotalPages()).isEqualTo(1);
+                    assertThat(response.getTotalItems()).isEqualTo(1L);
+                    assertThat(response.getItems()).extracting(Entry::getDate)
+                            .extracting(LocalDateTime::getDayOfMonth)
+                            .containsOnly(31);
+                    assertThat(response.getItems()).extracting(Entry::getPrice)
+                            .extracting(Double::intValue)
+                            .containsOnly(60);
                 });
     }
 }
