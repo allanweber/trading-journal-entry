@@ -1,8 +1,9 @@
-package com.trading.journal.entry.pageable;
+package com.trading.journal.entry.query.data;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -18,10 +19,10 @@ public class PageResponse<T> {
 
     private int currentPage;
 
-    public PageResponse(PageableRequest pageRequest, long total, List<T> items) {
-        this.items = items;
-        this.totalItems = total;
-        this.currentPage = pageRequest.getPage();
-        this.totalPages = (int) (total / pageRequest.getSize()) + ((int) (total % pageRequest.getSize()) > 0 ? 1 : 0);
+    public PageResponse(Page<T> page) {
+        this.items = page.getContent();
+        this.totalItems = page.getTotalElements();
+        this.currentPage = page.getNumber();
+        this.totalPages = page.getTotalPages();
     }
 }
