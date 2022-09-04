@@ -353,6 +353,35 @@ class EntryControllerPagingTest {
                 });
     }
 
+    @DisplayName("Entry get 3 items without sort filtering by price in range value including exact value")
+    @Test
+    void noSortFilterByPriceRangeWithExactValue() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entry")
+                        .queryParam("page", "0")
+                        .queryParam("size", "5")
+                        .queryParam("filter", "price.gte", "120.31", "price.lte", "140.59")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(3);
+                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getTotalPages()).isEqualTo(1);
+                    assertThat(response.getTotalItems()).isEqualTo(3L);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol)
+                            .containsExactlyInAnyOrder("AAPL", "NVDA", "TSLA");
+                    assertThat(response.getItems()).extracting(Entry::getPrice)
+                            .containsOnly(120.31, 130.00, 140.59);
+                });
+    }
+
     @DisplayName("Entry get 1 item without sort filtering by exact price")
     @Test
     void noSortFilterByPrice() {
