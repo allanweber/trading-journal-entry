@@ -9,12 +9,9 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,6 +19,10 @@ import java.util.stream.Stream;
 @Getter
 public class PageableRequest {
     public static final String SPLIT_DELIMITER = "\\.";
+    public static final int EXPECTED_LENGTH = 2;
+
+    public static final int FIELD_INDEX = 0;
+    public static final int OPERATION_INDEX = 1;
 
     private int page;
 
@@ -43,13 +44,13 @@ public class PageableRequest {
     private Sort loadSort() {
         Sort sortable = Sort.by("id").ascending();
         if (sort != null && sort.length > 0) {
-            if (sort.length % 2 != 0) {
+            if (sort.length % EXPECTED_LENGTH != 0) {
                 throw new ApplicationException("Sort is invalid. It must be a pair of column and direction");
             }
             List<Sort.Order> orders = new ArrayList<>();
             String column = null;
             for (int index = 0; index < sort.length; index++) {
-                if (index % 2 == 0) {
+                if (index % EXPECTED_LENGTH == 0) {
                     column = sort[index].trim();
                 } else {
                     Sort.Direction direction = Sort.Direction.fromString(sort[index].trim());
@@ -65,35 +66,32 @@ public class PageableRequest {
     private List<Filter> loadFilters() {
         List<Filter> filterList = new ArrayList<>();
         if (filter != null && filter.length > 0) {
-            if (filter.length % 2 != 0) {
+            if (filter.length % EXPECTED_LENGTH != 0) {
                 throw new ApplicationException("Filter is invalid. It must be a pair of FieldName.Operation and Value");
             }
-            String field = null;
-            FilterOperation operation = null;
+            Filter.FilterBuilder filterBuilder = null;
             for (int index = 0; index < filter.length; index++) {
-                if (index % 2 == 0) {
-                    String[] fieldAdnOperator = filter[index].trim().split(SPLIT_DELIMITER);
-                    if (fieldAdnOperator.length != 2) {
-                        throw new ApplicationException(String.format("Field name %s is invalid, must be FieldName.Operation", filter[index].trim()));
-                    }
-                    field = fieldAdnOperator[0];
-                    operation = FilterOperation.fromValue(fieldAdnOperator[1]);
-                    if (operation == null) {
-                        throw new ApplicationException(String.format("%s operation is invalid", fieldAdnOperator[1]));
-                    }
+                if (index % EXPECTED_LENGTH == 0) {
+                    filterBuilder = buildFilter(filter[index]);
                 } else {
-                    String value = filter[index].trim();
-                    filterList.add(new Filter(field, operation, value));
+                    Filter build = filterBuilder.value(filter[index].trim()).build();
+                    filterList.add(build);
                 }
             }
         }
         return filterList;
     }
 
-    private static List<String> split(String search, String delimiter) {
-        return Stream.of(search.split(delimiter))
-                .map(String::trim)
-                .filter(StringUtils::hasText)
-                .collect(Collectors.toList());
+    private Filter.FilterBuilder buildFilter(String filedAndOperation) {
+        String[] fieldAdnOperator = filedAndOperation.trim().split(SPLIT_DELIMITER);
+        if (fieldAdnOperator.length != EXPECTED_LENGTH) {
+            throw new ApplicationException(String.format("Field name %s is invalid, must be FieldName.Operation", filedAndOperation));
+        }
+        FilterOperation operation = FilterOperation.fromValue(fieldAdnOperator[OPERATION_INDEX]);
+        if (operation == null) {
+            throw new ApplicationException(String.format("%s operation is invalid", fieldAdnOperator[OPERATION_INDEX]));
+        }
+        String field = fieldAdnOperator[FIELD_INDEX];
+        return Filter.builder().field(field).operation(operation);
     }
 }

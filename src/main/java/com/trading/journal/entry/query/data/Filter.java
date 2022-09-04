@@ -1,12 +1,25 @@
 package com.trading.journal.entry.query.data;
 
 import com.trading.journal.entry.query.FilterOperation;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
-public record Filter(
-        @NotBlank(message = "Filter name is required") String field,
-        @NotNull(message = "Filed operation is required") FilterOperation operation,
-        @NotBlank(message = "Filter value is required") String value) {
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Getter
+public class Filter {
+    @NotBlank(message = "Filter name is required")
+    private String field;
+
+    @NotNull(message = "Filed operation is required")
+    private FilterOperation operation;
+
+    @NotBlank(message = "Filter value is required")
+    private String value;
 }

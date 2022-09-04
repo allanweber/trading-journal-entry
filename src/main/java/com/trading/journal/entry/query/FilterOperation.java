@@ -9,12 +9,10 @@ import lombok.RequiredArgsConstructor;
 public enum FilterOperation {
 
     EQUAL("eq", "Equal"),
-    NOT_EQUAL("neq", "Not equal"),
     GREATER_THAN("gt", "Greater than"),
     GREATER_THAN_OR_EQUAL_TO("gte", "Greater than or equal"),
     LESS_THAN("lt", "Less than"),
-    LESS_THAN_OR_EQUAL_TO("lte", "Less than or equal"),
-    BETWEEN("btn", "Between");
+    LESS_THAN_OR_EQUAL_TO("lte", "Less than or equal");
 
     private final String operation;
 
@@ -27,12 +25,13 @@ public enum FilterOperation {
     }
 
     public static FilterOperation fromValue(String value) {
+        FilterOperation operation = null;
         for (FilterOperation op : FilterOperation.values()) {
             if (String.valueOf(op.operation).equalsIgnoreCase(value)) {
-                return op;
+                operation = op;
             }
         }
-        return null;
+        return operation;
     }
 
 }

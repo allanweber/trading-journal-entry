@@ -1,39 +1,37 @@
 package com.trading.journal.entry.query;
 
-import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.query.data.Filter;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.function.Function;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 
 public class QueryCriteriaBuilder<T> {
 
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final Map<String, Class<?>> fields;
 
-    private static final Map<String, Function<Filter, Criteria>> FILTER_CRITERIA = new HashMap<>();
+    private static final Map<String, BiFunction<Filter, Class<?>, Criteria>> FILTER_CRITERIA = new ConcurrentHashMap<>();
 
     static {
-        FILTER_CRITERIA.put(FilterOperation.EQUAL.name(), condition -> Criteria.where(condition.field()).is(condition.value()));
-        FILTER_CRITERIA.put(FilterOperation.NOT_EQUAL.name(), condition -> Criteria.where(condition.field()).ne(condition.value()));
-        FILTER_CRITERIA.put(FilterOperation.GREATER_THAN.name(), condition -> Criteria.where(condition.field()).gt(condition.value()));
-        FILTER_CRITERIA.put(FilterOperation.GREATER_THAN_OR_EQUAL_TO.name(), condition -> Criteria.where(condition.field()).gte(condition.value()));
-        FILTER_CRITERIA.put(FilterOperation.LESS_THAN.name(), condition -> Criteria.where(condition.field()).lt(condition.value()));
-        FILTER_CRITERIA.put(FilterOperation.LESS_THAN_OR_EQUAL_TO.name(), condition -> Criteria.where(condition.field()).lte(condition.value()));
-        FILTER_CRITERIA.put(FilterOperation.BETWEEN.name(), condition -> {
-            if (condition.field().contains("date")) {
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
-                LocalDateTime startDate = LocalDateTime.parse(condition.value().concat(" 00:00:00"), formatter);
-                LocalDateTime endDate = LocalDateTime.parse(condition.value().concat(" 23:59:59"), formatter);
-                return Criteria.where(condition.field()).gte(startDate).lt(endDate);
-            } else {
-                throw new IllegalArgumentException(String.format("Invalid between for type %s", condition.field()));
+        FILTER_CRITERIA.put(FilterOperation.EQUAL.name(), (filter, filedType) -> {
+            if (filedType.getSimpleName().toLowerCase(Locale.getDefault()).contains("localdate")) {
+                LocalDateTime startDate = LocalDateTime.parse(filter.getValue().concat(" 00:00:00"), DATE_FORMATTER);
+                LocalDateTime endDate = LocalDateTime.parse(filter.getValue().concat(" 23:59:59"), DATE_FORMATTER);
+                return Criteria.where(filter.getField()).gte(startDate).lte(endDate);
             }
+            return Criteria.where(filter.getField()).is(convertValueToType(filter, filedType));
         });
+        FILTER_CRITERIA.put(FilterOperation.GREATER_THAN.name(), (filter, filedType) -> Criteria.where(filter.getField()).gt(convertValueToType(filter, filedType)));
+        FILTER_CRITERIA.put(FilterOperation.GREATER_THAN_OR_EQUAL_TO.name(), (filter, filedType) -> Criteria.where(filter.getField()).gte(convertValueToType(filter, filedType)));
+        FILTER_CRITERIA.put(FilterOperation.LESS_THAN.name(), (filter, filedType) -> Criteria.where(filter.getField()).lt(convertValueToType(filter, filedType)));
+        FILTER_CRITERIA.put(FilterOperation.LESS_THAN_OR_EQUAL_TO.name(), (filter, filedType) -> Criteria.where(filter.getField()).lte(convertValueToType(filter, filedType)));
     }
 
     public QueryCriteriaBuilder(Class<T> clazz) {
@@ -42,20 +40,17 @@ public class QueryCriteriaBuilder<T> {
     }
 
     public Query buildQuery(List<Filter> filters) {
-        Map<Filter, Class<?>> filterAndType = filters.stream()
-                .collect(Collectors.toMap(filter -> filter, filter -> fields.get(filter.field())));
+        Map<Filter, Class<?>> filterAndType = filters.parallelStream()
+                .collect(Collectors.toMap(filter -> filter, filter -> fields.get(filter.getField())));
 
         Query query = new Query();
-        if (!filters.isEmpty()) {
+        if (!filterAndType.isEmpty()) {
             List<Criteria> criteriaAndClause = new ArrayList<>();
             Criteria criteria = new Criteria();
 
-            filters.forEach(condition -> {
-                Function<Filter, Criteria> function = FILTER_CRITERIA.get(condition.operation().name());
-                if (function == null) {
-                    throw new ApplicationException(String.format("Invalid function param type: %s", condition.operation()));
-                }
-                criteriaAndClause.add(function.apply(condition));
+            filterAndType.forEach((filter, filedType) -> {
+                BiFunction<Filter, Class<?>, Criteria> function = FILTER_CRITERIA.get(filter.getOperation().name());
+                criteriaAndClause.add(function.apply(filter, filedType));
             });
 
             if (!criteriaAndClause.isEmpty()) {
@@ -63,5 +58,28 @@ public class QueryCriteriaBuilder<T> {
             }
         }
         return query;
+    }
+
+    private static Object convertValueToType(Filter filter, Class<?> filedType) {
+        String fieldTypeName = filedType.getSimpleName().toLowerCase(Locale.getDefault());
+        Object value;
+        if (fieldTypeName.contains("double")) {
+            value = Double.parseDouble(filter.getValue());
+        } else if (fieldTypeName.contains("int")) {
+            value = Integer.parseInt(filter.getValue());
+        } else if (fieldTypeName.contains("bigdecimal")) {
+            value = new BigDecimal(filter.getValue());
+        } else if (fieldTypeName.contains("localdate")) {
+            value = switch (filter.getOperation()) {
+                case GREATER_THAN, GREATER_THAN_OR_EQUAL_TO ->
+                        LocalDateTime.parse(filter.getValue().concat(" 00:00:00"), DATE_FORMATTER);
+                case LESS_THAN, LESS_THAN_OR_EQUAL_TO ->
+                        LocalDateTime.parse(filter.getValue().concat(" 23:59:59"), DATE_FORMATTER);
+                default -> LocalDateTime.parse(filter.getValue(), DATE_FORMATTER);
+            };
+        } else {
+            value = filter.getValue();
+        }
+        return value;
     }
 }

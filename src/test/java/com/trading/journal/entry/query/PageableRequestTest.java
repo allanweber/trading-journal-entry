@@ -16,7 +16,7 @@ import static org.junit.Assert.assertThrows;
 
 class PageableRequestTest {
 
-    @DisplayName("Load pageable request")
+    @DisplayName("Load pageable request with sort")
     @Test
     void pageable() {
         String[] sort = new String[]{"name", "asc", "id", "desc", "age", "asc"};
@@ -31,6 +31,20 @@ class PageableRequestTest {
         assertThat(Objects.requireNonNull(pageable.getSort().getOrderFor("name")).getDirection()).isEqualTo(Sort.Direction.ASC);
         assertThat(Objects.requireNonNull(pageable.getSort().getOrderFor("id")).getDirection()).isEqualTo(Sort.Direction.DESC);
         assertThat(Objects.requireNonNull(pageable.getSort().getOrderFor("age")).getDirection()).isEqualTo(Sort.Direction.ASC);
+    }
+
+    @DisplayName("Load pageable request without sort")
+    @Test
+    void pageableNoSort() {
+        PageableRequest pageableRequest = PageableRequest.builder().page(1).size(20).build();
+
+        Pageable pageable = pageableRequest.pageable();
+
+        assertThat(pageableRequest.getFilters()).isEmpty();
+        assertThat(pageable.getPageNumber()).isEqualTo(1);
+        assertThat(pageable.getPageSize()).isEqualTo(20);
+        assertThat(pageable.getSort().get()).hasSize(1);
+        assertThat(Objects.requireNonNull(pageable.getSort().getOrderFor("id")).getDirection()).isEqualTo(Sort.Direction.ASC);
     }
 
     @DisplayName("Load pageable request even with extra spaces in sort")
@@ -74,15 +88,15 @@ class PageableRequestTest {
     @DisplayName("Load Filters")
     @Test
     void filters() {
-        String[] filter = {"field1.eq", "abc", "field2.gte", "123", "field3.btn", "2022-02-22"};
+        String[] filter = {"field1.eq", "abc", "field2.gte", "123", "field3.lt", "2022-02-22"};
         PageableRequest pageableRequest = PageableRequest.builder().filter(filter).build();
 
         List<Filter> filters = pageableRequest.getFilters();
 
         assertThat(filters).isNotEmpty();
-        assertThat(filters).extracting(Filter::field).containsExactlyInAnyOrder("field1", "field2", "field3");
-        assertThat(filters).extracting(Filter::operation).containsExactlyInAnyOrder(FilterOperation.EQUAL, FilterOperation.GREATER_THAN_OR_EQUAL_TO, FilterOperation.BETWEEN);
-        assertThat(filters).extracting(Filter::value).containsExactlyInAnyOrder("abc", "123", "2022-02-22");
+        assertThat(filters).extracting(Filter::getField).containsExactlyInAnyOrder("field1", "field2", "field3");
+        assertThat(filters).extracting(Filter::getOperation).containsExactlyInAnyOrder(FilterOperation.EQUAL, FilterOperation.GREATER_THAN_OR_EQUAL_TO, FilterOperation.LESS_THAN);
+        assertThat(filters).extracting(Filter::getValue).containsExactlyInAnyOrder("abc", "123", "2022-02-22");
     }
 
     @DisplayName("Filter with invalid length, must be pair")

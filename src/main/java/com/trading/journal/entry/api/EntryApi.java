@@ -14,7 +14,7 @@ import javax.validation.Valid;
 @RequestMapping("/entry")
 public interface EntryApi {
 
-    String DESCRIPTION = "Available filters:eq (Equal), neq(Not equal), gt(Greater than), gte(Greater than or equal), lt(Less than), lte(Less than or equal), btn(Between). eg. 'FieldName.Operation', 'Value'";
+    String DESCRIPTION = "Available filters:eq (Equal), gt(Greater than), gte(Greater than or equal), lt(Less than), lte(Less than or equal). eg. 'FieldName.Operation', 'Value'";
 
     @ApiOperation(notes = "Get all entries", value = "Get all entries")
     @ApiResponses(@ApiResponse(code = 200, message = "Entries retrieved"))

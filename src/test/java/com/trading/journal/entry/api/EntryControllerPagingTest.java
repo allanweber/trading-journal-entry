@@ -60,9 +60,9 @@ class EntryControllerPagingTest {
         mongoTemplate.save(Entry.builder().price(100.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 23, 25, 30)).build(), "paging-tenancy");
 
         mongoTemplate.save(Entry.builder().price(110.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(120.00).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
+        mongoTemplate.save(Entry.builder().price(120.31).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
         mongoTemplate.save(Entry.builder().price(130.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(140.00).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
+        mongoTemplate.save(Entry.builder().price(140.59).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
         mongoTemplate.save(Entry.builder().price(150.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
     }
 
@@ -271,7 +271,7 @@ class EntryControllerPagingTest {
                         .path("/entry")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
-                        .queryParam("filter", "date.btn", "2022-08-31")
+                        .queryParam("filter", "date.eq", "2022-08-31")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -302,7 +302,7 @@ class EntryControllerPagingTest {
                         .path("/entry")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
-                        .queryParam("filter", "date.btn", "2022-08-31", "symbol.eq", "MSFT")
+                        .queryParam("filter", "date.eq", "2022-08-31", "symbol.eq", "MSFT")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -321,6 +321,64 @@ class EntryControllerPagingTest {
                     assertThat(response.getItems()).extracting(Entry::getPrice)
                             .extracting(Double::intValue)
                             .containsOnly(60);
+                });
+    }
+
+    @DisplayName("Entry get 3 items without sort filtering by price in range value")
+    @Test
+    void noSortFilterByPriceRange() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entry")
+                        .queryParam("page", "0")
+                        .queryParam("size", "5")
+                        .queryParam("filter", "price.gt", "120.30", "price.lt", "140.60")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(3);
+                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getTotalPages()).isEqualTo(1);
+                    assertThat(response.getTotalItems()).isEqualTo(3L);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol)
+                            .containsExactlyInAnyOrder("AAPL", "NVDA", "TSLA");
+                    assertThat(response.getItems()).extracting(Entry::getPrice)
+                            .containsOnly(120.31, 130.00, 140.59);
+                });
+    }
+
+    @DisplayName("Entry get 1 item without sort filtering by exact price")
+    @Test
+    void noSortFilterByPrice() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entry")
+                        .queryParam("page", "0")
+                        .queryParam("size", "5")
+                        .queryParam("filter", "price.eq", "120.31")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(1);
+                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getTotalPages()).isEqualTo(1);
+                    assertThat(response.getTotalItems()).isEqualTo(1L);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol)
+                            .containsOnly("AAPL");
+                    assertThat(response.getItems()).extracting(Entry::getPrice)
+                            .containsOnly(120.31);
                 });
     }
 }
