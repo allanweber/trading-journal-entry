@@ -1,4 +1,4 @@
-package com.trading.journal.entry.query.data;
+package com.trading.journal.entry.queries.data;
 
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import lombok.Getter;

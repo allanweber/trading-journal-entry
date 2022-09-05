@@ -1,47 +1,25 @@
-package com.trading.journal.entry.query;
+package com.trading.journal.entry.queries;
 
 import com.trading.journal.entry.ApplicationException;
-import com.trading.journal.entry.query.data.Filter;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import com.trading.journal.entry.queries.data.Filter;
+import com.trading.journal.entry.queries.data.FilterOperation;
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@AllArgsConstructor
-@NoArgsConstructor
-@Builder
-@Getter
-public class PageableRequest {
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
+public class QueryConverter {
+
     public static final String SPLIT_DELIMITER = "\\.";
     public static final int EXPECTED_LENGTH = 2;
 
     public static final int FIELD_INDEX = 0;
     public static final int OPERATION_INDEX = 1;
 
-    private int page;
-
-    private int size;
-
-    private String[] sort;
-
-    private String[] filter;
-
-    public Pageable pageable() {
-        Sort sortable = loadSort();
-        return PageRequest.of(page, size, sortable);
-    }
-
-    public List<Filter> getFilters() {
-        return loadFilters();
-    }
-
-    private Sort loadSort() {
+    public static Sort queryParamsToSort(String[] sort) {
         Sort sortable = Sort.by("id").ascending();
         if (sort != null && sort.length > 0) {
             if (sort.length % EXPECTED_LENGTH != 0) {
@@ -63,7 +41,7 @@ public class PageableRequest {
         return sortable;
     }
 
-    private List<Filter> loadFilters() {
+    public static List<Filter> queryParamsToFilter(String[] filter) {
         List<Filter> filterList = new ArrayList<>();
         if (filter != null && filter.length > 0) {
             if (filter.length % EXPECTED_LENGTH != 0) {
@@ -82,7 +60,7 @@ public class PageableRequest {
         return filterList;
     }
 
-    private Filter.FilterBuilder buildFilter(String filedAndOperation) {
+    private static Filter.FilterBuilder buildFilter(String filedAndOperation) {
         String[] fieldAdnOperator = filedAndOperation.trim().split(SPLIT_DELIMITER);
         if (fieldAdnOperator.length != EXPECTED_LENGTH) {
             throw new ApplicationException(String.format("Field name %s is invalid, must be FieldName.Operation", filedAndOperation));

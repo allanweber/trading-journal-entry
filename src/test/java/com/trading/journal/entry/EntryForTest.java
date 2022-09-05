@@ -1,4 +1,4 @@
-package com.trading.journal.entry.core;
+package com.trading.journal.entry;
 
 import com.trading.journal.entry.entries.EntryDirection;
 

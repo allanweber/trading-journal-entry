@@ -1,6 +1,5 @@
-package com.trading.journal.entry.query.data;
+package com.trading.journal.entry.queries.data;
 
-import com.trading.journal.entry.query.FilterOperation;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;

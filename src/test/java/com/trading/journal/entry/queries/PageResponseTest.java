@@ -1,6 +1,7 @@
-package com.trading.journal.entry.query;
+package com.trading.journal.entry.queries;
 
-import com.trading.journal.entry.query.data.PageResponse;
+import com.trading.journal.entry.queries.data.PageResponse;
+import com.trading.journal.entry.queries.data.PageableRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.Page;

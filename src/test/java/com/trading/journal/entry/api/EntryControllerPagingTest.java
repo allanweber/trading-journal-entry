@@ -7,7 +7,9 @@ import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
-import com.trading.journal.entry.query.data.PageResponse;
+import com.trading.journal.entry.entries.EntryType;
+import com.trading.journal.entry.journal.Journal;
+import com.trading.journal.entry.queries.data.PageResponse;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,6 +37,13 @@ import static org.mockito.Mockito.when;
 @WithCustomMockUser(tenancyName = "paging-tenancy")
 class EntryControllerPagingTest {
 
+    private static final String TENANCY = "paging-tenancy";
+    private static String journalId;
+
+    private static String journalCollection;
+
+    private static String entryCollection;
+
     @MockBean
     JwtTokenReader tokenReader;
 
@@ -47,35 +56,41 @@ class EntryControllerPagingTest {
     public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired MongoTemplate mongoTemplate) {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
-        mongoTemplate.save(Entry.builder().price(10.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(20.00).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(30.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(40.00).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(50.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), "paging-tenancy");
+        journalCollection = TENANCY.concat("_").concat("journals");
+        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").build(), journalCollection);
+        journalId = journal.getId();
 
-        mongoTemplate.save(Entry.builder().price(60.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 0, 21, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(70.00).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 31, 17, 22, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(80.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 16, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(90.00).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 31, 15, 24, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(100.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 23, 25, 30)).build(), "paging-tenancy");
+        entryCollection = TENANCY.concat("_").concat(journal.getName()).concat("_").concat("entries");
+        mongoTemplate.save(Entry.builder().price(10.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(20.00).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(30.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(40.00).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(50.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(110.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(120.31).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(130.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(140.59).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
-        mongoTemplate.save(Entry.builder().price(150.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), "paging-tenancy");
+        mongoTemplate.save(Entry.builder().price(60.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 0, 21, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(70.00).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 31, 17, 22, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(80.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 16, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(90.00).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 31, 15, 24, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(100.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 23, 25, 30)).build(), entryCollection);
+
+        mongoTemplate.save(Entry.builder().price(110.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(120.31).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(130.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(140.59).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(150.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
     }
 
     @AfterAll
     public static void shutDown(@Autowired MongoTemplate mongoTemplate) {
-        mongoTemplate.dropCollection("paging-tenancy");
+        mongoTemplate.dropCollection(entryCollection);
+        mongoTemplate.dropCollection(journalCollection);
     }
 
     @BeforeEach
     public void mockAccessTokenInfo() {
         when(resolveToken.resolve(any())).thenReturn("token");
         when(tokenReader.getAccessTokenInfo(anyString()))
-                .thenReturn(new AccessTokenInfo("user", 1L, "paging-tenancy", singletonList("ROLE_USER")));
+                .thenReturn(new AccessTokenInfo("user", 1L, TENANCY, singletonList("ROLE_USER")));
     }
 
     @DisplayName("Entry get 5 items without sort or filter")
@@ -85,9 +100,10 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -112,9 +128,10 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "1")
                         .queryParam("size", "5")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -139,9 +156,10 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "3")
                         .queryParam("size", "5")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -163,10 +181,11 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("sort", "symbol", "asc")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -189,10 +208,11 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("sort", "symbol", "desc")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -215,10 +235,11 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("sort", "date", "desc")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -243,10 +264,11 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "symbol.eq", "MSFT")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -269,10 +291,11 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "date.eq", "2022-08-31")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -300,10 +323,11 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "date.eq", "2022-08-31", "symbol.eq", "MSFT")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -331,10 +355,11 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "price.gt", "120.30", "price.lt", "140.60")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -360,10 +385,11 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "price.gte", "120.31", "price.lte", "140.59")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -389,10 +415,11 @@ class EntryControllerPagingTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/entry")
+                        .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "price.eq", "120.31")
-                        .build())
+                        .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()

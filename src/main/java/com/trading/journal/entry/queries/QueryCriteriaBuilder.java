@@ -1,6 +1,7 @@
-package com.trading.journal.entry.query;
+package com.trading.journal.entry.queries;
 
-import com.trading.journal.entry.query.data.Filter;
+import com.trading.journal.entry.queries.data.Filter;
+import com.trading.journal.entry.queries.data.FilterOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -11,6 +12,9 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiFunction;
 import java.util.stream.Collectors;
+
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 
 public class QueryCriteriaBuilder<T> {
 
@@ -40,7 +44,9 @@ public class QueryCriteriaBuilder<T> {
     }
 
     public Query buildQuery(List<Filter> filters) {
-        Map<Filter, Class<?>> filterAndType = filters.parallelStream()
+        Map<Filter, Class<?>> filterAndType = ofNullable(filters)
+                .orElse(emptyList())
+                .parallelStream()
                 .collect(Collectors.toMap(filter -> filter, filter -> fields.get(filter.getField())));
 
         Query query = new Query();

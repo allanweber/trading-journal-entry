@@ -1,8 +1,9 @@
 package com.trading.journal.entry.core;
 
-import com.trading.journal.entry.query.FilterOperation;
-import com.trading.journal.entry.query.QueryCriteriaBuilder;
-import com.trading.journal.entry.query.data.Filter;
+import com.trading.journal.entry.EntryForTest;
+import com.trading.journal.entry.queries.data.FilterOperation;
+import com.trading.journal.entry.queries.QueryCriteriaBuilder;
+import com.trading.journal.entry.queries.data.Filter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.mongodb.core.query.Query;

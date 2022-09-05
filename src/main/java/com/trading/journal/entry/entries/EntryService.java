@@ -1,11 +1,12 @@
 package com.trading.journal.entry.entries;
 
-import com.trading.journal.entry.query.data.PageResponse;
-import com.trading.journal.entry.query.PageableRequest;
+import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.queries.data.PageResponse;
+import com.trading.journal.entry.queries.data.PageableRequest;
 
 public interface EntryService {
 
-    PageResponse<Entry> getAll(String tenancy, PageableRequest pageableRequest);
+    PageResponse<Entry> getAll(AccessTokenInfo accessToken, String journalId, PageableRequest pageableRequest);
 
-    Entry create(String tenancy, Entry entry);
+    Entry create(AccessTokenInfo accessToken, String journalId, Entry entry);
 }
