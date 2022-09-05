@@ -99,7 +99,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
@@ -127,7 +127,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "1")
                         .queryParam("size", "5")
@@ -155,7 +155,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "3")
                         .queryParam("size", "5")
@@ -180,7 +180,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
@@ -207,7 +207,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
@@ -234,7 +234,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
@@ -263,7 +263,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
@@ -290,7 +290,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
@@ -322,7 +322,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
@@ -354,7 +354,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
@@ -384,7 +384,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
@@ -414,7 +414,7 @@ class EntryControllerPagingTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .queryParam("page", "0")
                         .queryParam("size", "5")

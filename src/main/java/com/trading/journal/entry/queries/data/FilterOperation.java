@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 public enum FilterOperation {
 
     EQUAL("eq", "Equal"),
+    NOT_EQUAL("ne", "Not equal"),
     GREATER_THAN("gt", "Greater than"),
     GREATER_THAN_OR_EQUAL_TO("gte", "Greater than or equal"),
     LESS_THAN("lt", "Less than"),

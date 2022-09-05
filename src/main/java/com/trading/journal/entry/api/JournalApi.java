@@ -14,7 +14,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 @Api(tags = "Journal Api")
-@RequestMapping("/journal")
+@RequestMapping("/journals")
 public interface JournalApi {
 
     @ApiOperation(notes = "Get all journals", value = "Get all journals")

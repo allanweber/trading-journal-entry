@@ -32,6 +32,7 @@ public class QueryCriteriaBuilder<T> {
             }
             return Criteria.where(filter.getField()).is(convertValueToType(filter, filedType));
         });
+        FILTER_CRITERIA.put(FilterOperation.NOT_EQUAL.name(), (filter, filedType) -> Criteria.where(filter.getField()).ne(convertValueToType(filter, filedType)));
         FILTER_CRITERIA.put(FilterOperation.GREATER_THAN.name(), (filter, filedType) -> Criteria.where(filter.getField()).gt(convertValueToType(filter, filedType)));
         FILTER_CRITERIA.put(FilterOperation.GREATER_THAN_OR_EQUAL_TO.name(), (filter, filedType) -> Criteria.where(filter.getField()).gte(convertValueToType(filter, filedType)));
         FILTER_CRITERIA.put(FilterOperation.LESS_THAN.name(), (filter, filedType) -> Criteria.where(filter.getField()).lt(convertValueToType(filter, filedType)));

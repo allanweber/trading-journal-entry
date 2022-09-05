@@ -3,6 +3,7 @@ package com.trading.journal.entry.queries.impl;
 import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.QueryCriteriaBuilder;
 import com.trading.journal.entry.queries.WithFilterPageableRepository;
+import com.trading.journal.entry.queries.data.Filter;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -21,6 +22,8 @@ public class MultiTenancyPageableRepositoryImpl<T, I extends Serializable> exten
 
     public static final String COLLECTION_NAME_IS_REQUIRED = "Collection Name is required!";
     public static final String PAGE_REQUEST_IS_REQUIRED = "Page request is required!";
+
+    public static final String FILTER_IS_REQUIRED = "Filters are required!";
     private final MongoEntityInformation<T, I> metadata;
     private final MongoOperations mongoOperations;
 
@@ -52,6 +55,14 @@ public class MultiTenancyPageableRepositoryImpl<T, I extends Serializable> exten
     public List<T> getAll(CollectionName collectionName) {
         Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
         return mongoOperations.findAll(metadata.getJavaType(), collectionName.collectionName(metadata));
+    }
+
+    @Override
+    public List<T> query(CollectionName collectionName, List<Filter> filters) {
+        Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
+        Assert.notNull(filters, FILTER_IS_REQUIRED);
+        Query query = queryBuilder.buildQuery(filters);
+        return mongoOperations.find(query, metadata.getJavaType(), collectionName.collectionName(metadata));
     }
 
     @Override

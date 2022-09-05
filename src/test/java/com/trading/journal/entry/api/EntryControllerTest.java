@@ -90,7 +90,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entry")
+                        .path("/entries")
                         .pathSegment("{journal-id}")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
