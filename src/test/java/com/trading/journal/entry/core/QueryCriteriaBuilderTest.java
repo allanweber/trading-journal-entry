@@ -1,8 +1,9 @@
 package com.trading.journal.entry.core;
 
-import com.trading.journal.entry.query.FilterOperation;
-import com.trading.journal.entry.query.QueryCriteriaBuilder;
-import com.trading.journal.entry.query.data.Filter;
+import com.trading.journal.entry.EntryForTest;
+import com.trading.journal.entry.queries.data.FilterOperation;
+import com.trading.journal.entry.queries.QueryCriteriaBuilder;
+import com.trading.journal.entry.queries.data.Filter;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.mongodb.core.query.Query;
@@ -52,7 +53,8 @@ class QueryCriteriaBuilderTest {
                 Filter.builder().field("symbol").operation(FilterOperation.EQUAL).value("abc").build(),
                 Filter.builder().field("price").operation(FilterOperation.LESS_THAN).value("123").build(),
                 Filter.builder().field("date").operation(FilterOperation.GREATER_THAN).value("2022-02-22").build(),
-                Filter.builder().field("date").operation(FilterOperation.LESS_THAN).value("2022-02-22").build()
+                Filter.builder().field("date").operation(FilterOperation.LESS_THAN).value("2022-02-22").build(),
+                Filter.builder().field("symbol").operation(FilterOperation.NOT_EQUAL).value("xyz").build()
         );
 
         Query query = new QueryCriteriaBuilder<>(EntryForTest.class).buildQuery(filters);
@@ -64,6 +66,9 @@ class QueryCriteriaBuilderTest {
 
         assertThat(queryString)
                 .contains("Document{{symbol=abc}}");
+
+        assertThat(queryString)
+                .contains("Document{{symbol=Document{{$ne=xyz}}}}");
 
         assertThat(queryString)
                 .contains("Document{{date=Document{{$gt=2022-02-22T00:00}}}}");

@@ -30,6 +30,11 @@
         <exclude name="FinalFieldCouldBeStatic" />
         <exclude name="UseUtilityClass" />
     </rule>
+    <rule ref="category/java/design.xml/TooManyFields">
+        <properties>
+            <property name="maxfields" value="30" />
+        </properties>
+    </rule>
     <rule ref="category/java/documentation.xml">
         <exclude name="UncommentedEmptyConstructor" />
         <exclude name="CommentContent" />

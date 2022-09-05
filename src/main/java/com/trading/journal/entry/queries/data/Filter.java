@@ -1,10 +1,6 @@
-package com.trading.journal.entry.query.data;
+package com.trading.journal.entry.queries.data;
 
-import com.trading.journal.entry.query.FilterOperation;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -13,6 +9,7 @@ import javax.validation.constraints.NotNull;
 @NoArgsConstructor
 @Builder
 @Getter
+@EqualsAndHashCode
 public class Filter {
     @NotBlank(message = "Filter name is required")
     private String field;
