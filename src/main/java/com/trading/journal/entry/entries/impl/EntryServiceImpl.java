@@ -11,8 +11,10 @@ import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.function.BiFunction;
 
 @RequiredArgsConstructor
@@ -24,10 +26,22 @@ public class EntryServiceImpl implements EntryService {
     private final JournalService journalService;
 
     @Override
-    public PageResponse<Entry> getAll(AccessTokenInfo accessToken, String journalId, PageableRequest pageRequest) {
+    public PageResponse<Entry> query(AccessTokenInfo accessToken, String journalId, PageableRequest pageRequest) {
         CollectionName collectionName = collectionName().apply(accessToken, journalId);
         Page<Entry> page = repository.findAll(collectionName, pageRequest);
         return new PageResponse<>(page);
+    }
+
+    @Override
+    public List<Entry> getAll(AccessTokenInfo accessToken, String journalId) {
+        CollectionName collectionName = collectionName().apply(accessToken, journalId);
+        PageableRequest pageableRequest = PageableRequest.builder()
+                .page(0)
+                .size(Integer.MAX_VALUE)
+                .sort(Sort.by("date").ascending())
+                .build();
+        Page<Entry> all = repository.findAll(collectionName, pageableRequest);
+        return all.stream().toList();
     }
 
     @Override

@@ -101,6 +101,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .build(journalId))
@@ -129,6 +130,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "1")
                         .queryParam("size", "5")
                         .build(journalId))
@@ -157,6 +159,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "3")
                         .queryParam("size", "5")
                         .build(journalId))
@@ -182,6 +185,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("sort", "symbol", "asc")
@@ -209,6 +213,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("sort", "symbol", "desc")
@@ -236,6 +241,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("sort", "date", "desc")
@@ -265,6 +271,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "symbol.eq", "MSFT")
@@ -292,6 +299,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "date.eq", "2022-08-31")
@@ -324,6 +332,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "date.eq", "2022-08-31", "symbol.eq", "MSFT")
@@ -356,6 +365,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "price.gt", "120.30", "price.lt", "140.60")
@@ -386,6 +396,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "price.gte", "120.31", "price.lte", "140.59")
@@ -416,6 +427,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "price.eq", "120.31")

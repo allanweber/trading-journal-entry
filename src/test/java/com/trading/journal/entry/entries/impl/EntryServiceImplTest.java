@@ -16,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import static java.util.Collections.emptyList;
@@ -46,9 +47,9 @@ class EntryServiceImplTest {
         collectionName = new CollectionName(accessToken, "my-journal");
     }
 
-    @DisplayName("Get all entries from a journal")
+    @DisplayName("Query entries from a journal")
     @Test
-    void getAll() {
+    void query() {
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder().page(1).build();
@@ -56,7 +57,26 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request)).thenReturn(page);
 
-        PageResponse<Entry> response = entryService.getAll(accessToken, journalId, request);
+        PageResponse<Entry> response = entryService.query(accessToken, journalId, request);
+        assertThat(response.getItems()).isNotEmpty();
+        assertThat(response.getTotalItems()).isPositive();
+    }
+
+    @DisplayName("Get all entries from a journal")
+    @Test
+    void all() {
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+
+        PageableRequest request = PageableRequest.builder()
+                .page(0)
+                .size(Integer.MAX_VALUE)
+                .sort(Sort.by("date").ascending())
+                .build();
+
+        Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
+        when(repository.findAll(collectionName, request)).thenReturn(page);
+
+        PageResponse<Entry> response = entryService.query(accessToken, journalId, request);
         assertThat(response.getItems()).isNotEmpty();
         assertThat(response.getTotalItems()).isPositive();
     }
