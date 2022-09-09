@@ -52,8 +52,8 @@ class QueryCriteriaBuilderTest {
         List<Filter> filters = asList(
                 Filter.builder().field("symbol").operation(FilterOperation.EQUAL).value("abc").build(),
                 Filter.builder().field("price").operation(FilterOperation.LESS_THAN).value("123").build(),
-                Filter.builder().field("date").operation(FilterOperation.GREATER_THAN).value("2022-02-22").build(),
-                Filter.builder().field("date").operation(FilterOperation.LESS_THAN).value("2022-02-22").build(),
+                Filter.builder().field("date").operation(FilterOperation.GREATER_THAN).value("2022-02-22 12:12:12").build(),
+                Filter.builder().field("date").operation(FilterOperation.LESS_THAN).value("2022-02-22 15:15:15").build(),
                 Filter.builder().field("symbol").operation(FilterOperation.NOT_EQUAL).value("xyz").build()
         );
 
@@ -71,8 +71,27 @@ class QueryCriteriaBuilderTest {
                 .contains("Document{{symbol=Document{{$ne=xyz}}}}");
 
         assertThat(queryString)
-                .contains("Document{{date=Document{{$gt=2022-02-22T00:00}}}}");
+                .contains("Document{{date=Document{{$gt=2022-02-22T12:12:12}}}}");
         assertThat(queryString)
-                .contains("Document{{date=Document{{$lt=2022-02-22T23:59:59}}}}");
+                .contains("Document{{date=Document{{$lt=2022-02-22T15:15:15}}}}");
+    }
+
+    @DisplayName("Check query built with multiple filters")
+    @Test
+    void newOperations() {
+        List<Filter> filters = asList(
+                Filter.builder().field("symbol").operation(FilterOperation.EXISTS).value("true").build(),
+                Filter.builder().field("price").operation(FilterOperation.EXISTS).value("false").build()
+        );
+
+        Query query = new QueryCriteriaBuilder<>(EntryForTest.class).buildQuery(filters);
+
+        String queryString = query.getQueryObject().get("$and").toString();
+
+        assertThat(queryString)
+                .contains("Document{{symbol=Document{{$exists=true}}}}");
+
+        assertThat(queryString)
+                .contains("Document{{price=Document{{$exists=false}}}}");
     }
 }

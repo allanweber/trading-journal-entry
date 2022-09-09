@@ -1,6 +1,8 @@
 package com.trading.journal.entry.entries.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.balance.BalanceService;
+import com.trading.journal.entry.entries.CalculateEntry;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryRepository;
 import com.trading.journal.entry.entries.EntryService;
@@ -14,6 +16,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -24,6 +27,8 @@ public class EntryServiceImpl implements EntryService {
     private final EntryRepository repository;
 
     private final JournalService journalService;
+
+    private final BalanceService balanceService;
 
     @Override
     public PageResponse<Entry> query(AccessTokenInfo accessToken, String journalId, PageableRequest pageRequest) {
@@ -45,9 +50,14 @@ public class EntryServiceImpl implements EntryService {
     }
 
     @Override
-    public Entry create(AccessTokenInfo accessToken, String journalId, Entry entry) {
+    public Entry save(AccessTokenInfo accessToken, String journalId, Entry entry) {
+        BigDecimal balance = balanceService.getCurrentBalance(accessToken, journalId, entry.getDate());
+
+        CalculateEntry calculateEntry = new CalculateEntry(entry, balance);
+        Entry calculated = calculateEntry.calculate();
+
         CollectionName collectionName = collectionName().apply(accessToken, journalId);
-        return repository.save(collectionName, entry);
+        return repository.save(collectionName, calculated);
     }
 
     private BiFunction<AccessTokenInfo, String, CollectionName> collectionName() {

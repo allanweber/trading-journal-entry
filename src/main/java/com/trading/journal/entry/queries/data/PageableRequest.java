@@ -1,9 +1,6 @@
 package com.trading.journal.entry.queries.data;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -14,6 +11,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Getter
+@EqualsAndHashCode
 public class PageableRequest {
 
     public static final String ID_COLUMN = "id";

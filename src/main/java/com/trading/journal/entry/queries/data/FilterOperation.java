@@ -13,7 +13,8 @@ public enum FilterOperation {
     GREATER_THAN("gt", "Greater than"),
     GREATER_THAN_OR_EQUAL_TO("gte", "Greater than or equal"),
     LESS_THAN("lt", "Less than"),
-    LESS_THAN_OR_EQUAL_TO("lte", "Less than or equal");
+    LESS_THAN_OR_EQUAL_TO("lte", "Less than or equal"),
+    EXISTS("exists", "Field exists");
 
     private final String operation;
 

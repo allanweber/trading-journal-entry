@@ -9,6 +9,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 
 @Document(collection = "journals")
 @NoArgsConstructor
@@ -23,6 +24,6 @@ public class Journal {
     @NotBlank(message = "Journal name is required")
     private String name;
 
-    @NotNull(message = "Balance is required")
-    private Double balance;
+    @NotNull(message = "Start balance is required")
+    private BigDecimal startBalance;
 }

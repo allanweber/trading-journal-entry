@@ -1,8 +1,11 @@
 package com.trading.journal.entry.entries.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.Entry;
+import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryRepository;
+import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
@@ -18,6 +21,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -37,6 +44,9 @@ class EntryServiceImplTest {
 
     @Mock
     JournalService journalService;
+
+    @Mock
+    BalanceService balanceService;
 
     @InjectMocks
     EntryServiceImpl entryService;
@@ -84,12 +94,44 @@ class EntryServiceImplTest {
     @DisplayName("Create a entry from a journal")
     @Test
     void create() {
+        Entry toSave = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .type(EntryType.TRADE)
+                .type(EntryType.TRADE)
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .profitPrice(BigDecimal.valueOf(240))
+                .lossPrice(BigDecimal.valueOf(180))
+                .exitPrice(BigDecimal.valueOf(240))
+                .costs(BigDecimal.valueOf(5.59))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .type(EntryType.TRADE)
+                .type(EntryType.TRADE)
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .profitPrice(BigDecimal.valueOf(240))
+                .lossPrice(BigDecimal.valueOf(180))
+                .accountRisked(BigDecimal.valueOf(0.0400).setScale(4, RoundingMode.HALF_EVEN))
+                .plannedRR(BigDecimal.valueOf(2.00).setScale(2, RoundingMode.HALF_EVEN))
+                .exitPrice(BigDecimal.valueOf(240))
+                .costs(BigDecimal.valueOf(5.59))
+                .grossResult(BigDecimal.valueOf(80.00).setScale(2, RoundingMode.HALF_EVEN))
+                .netResult(BigDecimal.valueOf(74.41))
+                .accountChange(BigDecimal.valueOf(0.0744).setScale(4, RoundingMode.HALF_EVEN))
+                .accountBalance(BigDecimal.valueOf(1074.41).setScale(2, RoundingMode.HALF_EVEN))
+                .build();
+
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(BigDecimal.valueOf(1000));
 
-        Entry toSave = Entry.builder().symbol("MSFT").build();
-        when(repository.save(collectionName, toSave)).thenReturn(Entry.builder().id("123").symbol("MSFT").build());
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
-        Entry entry = entryService.create(accessToken, journalId, toSave);
+        Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
     }
 }

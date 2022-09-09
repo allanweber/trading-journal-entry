@@ -9,7 +9,6 @@ import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
-import com.trading.journal.entry.queries.data.PageResponse;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -23,6 +22,8 @@ import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -61,7 +62,7 @@ class EntryControllerTest {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
         journalCollection = TENANCY.concat("_").concat("journals");
-        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").build(), journalCollection);
+        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(100)).build(), journalCollection);
         journalId = journal.getId();
         entryCollection = TENANCY.concat("_").concat(journal.getName()).concat("_").concat("entries");
     }
@@ -86,23 +87,23 @@ class EntryControllerTest {
     @DisplayName("Get all entries from a journal must be ordered by date")
     @Test
     void all() {
-        mongoTemplate.save(Entry.builder().price(10.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 1, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(20.00).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 5, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(30.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 10, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(40.00).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 3, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(50.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 2, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(20.00)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 5, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(30.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 10, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(40.00)).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 3, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(50.00)).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 2, 18, 23, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(60.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 6, 0, 21, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(70.00).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 4, 17, 22, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(80.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 8, 16, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(90.00).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 9, 15, 24, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(100.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 7, 23, 25, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(60.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 6, 0, 21, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(70.00)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 4, 17, 22, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(80.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 8, 16, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(90.00)).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 9, 15, 24, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(100.00)).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 7, 23, 25, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(110.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 15, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(120.31).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 14, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(130.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 13, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(140.59).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 12, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(150.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 11, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(110.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 15, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(120.31)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 14, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(130.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 13, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(140.59)).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 12, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(150.00)).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 11, 18, 23, 30)).build(), entryCollection);
 
         webTestClient
                 .get()
@@ -132,10 +133,12 @@ class EntryControllerTest {
                 .type(EntryType.TRADE)
                 .symbol("USD/EUR")
                 .direction(EntryDirection.LONG)
-                .price(1.1234)
-                .size(500.00)
-                .profitPrice(1.2345)
-                .lossPrice(1.009)
+                .price(BigDecimal.valueOf(1.1234))
+                .size(BigDecimal.valueOf(500.00))
+                .profitPrice(BigDecimal.valueOf(1.2345))
+                .lossPrice(BigDecimal.valueOf(1.009))
+                .exitPrice(BigDecimal.valueOf(1.2345))
+                .costs(BigDecimal.valueOf(2.34))
                 .build();
 
         webTestClient
@@ -158,13 +161,17 @@ class EntryControllerTest {
                     assertThat(response.getType()).isEqualTo(EntryType.TRADE);
                     assertThat(response.getSymbol()).isEqualTo("USD/EUR");
                     assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(1.1234);
-                    assertThat(response.getSize()).isEqualTo(500.00);
-                    assertThat(response.getProfitPrice()).isEqualTo(1.2345);
-                    assertThat(response.getLossPrice()).isEqualTo(1.009);
+                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
+                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
+                    assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
+                    assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
 
-                    assertThat(response.getPlannedROR()).isNull();
-                    assertThat(response.getAccountRisked()).isNull();
+                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getGrossResult()).isEqualTo(BigDecimal.valueOf(55.55).setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(53.21).setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5321).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(153.21).setScale(2, RoundingMode.HALF_EVEN));
                 });
     }
 }

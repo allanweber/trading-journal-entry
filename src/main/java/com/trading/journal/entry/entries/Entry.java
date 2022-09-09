@@ -2,15 +2,13 @@ package com.trading.journal.entry.entries;
 
 import com.allanweber.jwttoken.helper.DateHelper;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Document(collection = "entries")
@@ -18,6 +16,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Builder
+@EqualsAndHashCode
 public class Entry {
 
     @Id
@@ -38,44 +37,44 @@ public class Entry {
 
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
-    private Double price;
+    private BigDecimal price;
 
     @NotNull(message = "Position size is required")
     @Positive(message = "Position size must be positive")
-    private Double size;
+    private BigDecimal size;
 
-    private Double profitPrice;
+    private BigDecimal profitPrice;
 
-    private Double lossPrice;
+    private BigDecimal lossPrice;
 
-    private ReturnRate plannedROR;
+    @Setter
+    private BigDecimal accountRisked;
 
-    private Double exitPrice;
+    @Setter
+    private BigDecimal plannedRR;
+
+    private BigDecimal exitPrice;
+
+    @Setter
+    private BigDecimal grossResult;
+
+    private BigDecimal costs;
+
+    @Setter
+    private BigDecimal netResult;
+
+    @Setter
+    private BigDecimal accountChange;
+
+    @Setter
+    private BigDecimal accountBalance;
 
     @JsonFormat(pattern = DateHelper.DATE_FORMAT)
     private LocalDateTime exitDate;
-
-    private ReturnRate actualROR;
-
-    private Double accountRisked;
-
-    private Double grossResult;
-
-    private Double costs;
-
-    private Double netResult;
-
-    private Double accountChange;
-
-    private Double accountBalance;
-
-    private String duration;
 
     private String screenshotBefore;
 
     private String screenshotAfter;
 
     private String notes;
-
-    private Double amount;
 }

@@ -12,5 +12,5 @@ public interface EntryService {
 
     List<Entry> getAll(AccessTokenInfo accessToken, String journalId);
 
-    Entry create(AccessTokenInfo accessToken, String journalId, Entry entry);
+    Entry save(AccessTokenInfo accessToken, String journalId, Entry entry);
 }

@@ -36,9 +36,9 @@ public interface EntryApi {
     ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 
 
-    @ApiOperation(notes = "Create new entry", value = "Create new entry")
-    @ApiResponses(@ApiResponse(code = 201, message = "Entry created"))
+    @ApiOperation(notes = "Save entry", value = "Save entry, some fields are calculated")
+    @ApiResponses(@ApiResponse(code = 201, message = "Entry saved"))
     @PostMapping("{journal-id}")
     @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Entry data);
+    ResponseEntity<Entry> save(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Entry data);
 }
