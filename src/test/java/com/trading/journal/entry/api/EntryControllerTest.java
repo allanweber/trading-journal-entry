@@ -26,6 +26,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -125,9 +126,9 @@ class EntryControllerTest {
                 });
     }
 
-    @DisplayName("Create a new entry")
+    @DisplayName("Create a new Trade entry")
     @Test
-    void create() {
+    void createTrade() {
         Entry entry = Entry.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
                 .type(EntryType.TRADE)
@@ -172,6 +173,253 @@ class EntryControllerTest {
                     assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(53.21).setScale(2, RoundingMode.HALF_EVEN));
                     assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5321).setScale(4, RoundingMode.HALF_EVEN));
                     assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(153.21).setScale(2, RoundingMode.HALF_EVEN));
+                });
+    }
+
+    @DisplayName("Try to create an invalid Trade entry")
+    @Test
+    void invalidTrade() {
+        Entry entry = Entry.builder()
+                .type(EntryType.TRADE)
+                .profitPrice(BigDecimal.valueOf(1.2345))
+                .lossPrice(BigDecimal.valueOf(1.009))
+                .exitPrice(BigDecimal.valueOf(1.2345))
+                .costs(BigDecimal.valueOf(2.34))
+                .build();
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(5);
+                    assertThat(response.get("date")).isEqualTo("Date is required");
+                    assertThat(response.get("symbol")).isEqualTo("Symbol is required");
+                    assertThat(response.get("size")).isEqualTo("Position size is required");
+                    assertThat(response.get("price")).isEqualTo("Price is required");
+                    assertThat(response.get("direction")).isEqualTo("Direction is required");
+                });
+    }
+
+    @DisplayName("Create a new Withdrawal entry")
+    @Test
+    void createWithdrawal() {
+        Entry entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                .type(EntryType.WITHDRAWAL)
+                .price(BigDecimal.valueOf(50))
+                .build();
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Entry.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
+                    assertThat(response.getType()).isEqualTo(EntryType.WITHDRAWAL);
+                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(50));
+
+                    assertThat(response.getSymbol()).isNull();
+                    assertThat(response.getDirection()).isNull();
+                    assertThat(response.getSize()).isNull();
+                    assertThat(response.getProfitPrice()).isNull();
+                    assertThat(response.getLossPrice()).isNull();
+                    assertThat(response.getPlannedRR()).isNull();
+                    assertThat(response.getAccountRisked()).isNull();
+                    assertThat(response.getGrossResult()).isNull();
+
+                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(-50.00).setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(-0.5000).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(50.00).setScale(2, RoundingMode.HALF_EVEN));
+                });
+    }
+
+    @DisplayName("Try to create an invalid Withdrawal entry")
+    @Test
+    void invalidWithdrawal() {
+        Entry entry = Entry.builder()
+                .type(EntryType.WITHDRAWAL)
+                .build();
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(2);
+                    assertThat(response.get("date")).isEqualTo("Date is required");
+                    assertThat(response.get("price")).isEqualTo("Price is required");
+                });
+    }
+
+    @DisplayName("Create a new Taxes entry")
+    @Test
+    void createTaxes() {
+        Entry entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                .type(EntryType.TAXES)
+                .price(BigDecimal.valueOf(50))
+                .build();
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Entry.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
+                    assertThat(response.getType()).isEqualTo(EntryType.TAXES);
+                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(50));
+
+                    assertThat(response.getSymbol()).isNull();
+                    assertThat(response.getDirection()).isNull();
+                    assertThat(response.getSize()).isNull();
+                    assertThat(response.getProfitPrice()).isNull();
+                    assertThat(response.getLossPrice()).isNull();
+                    assertThat(response.getPlannedRR()).isNull();
+                    assertThat(response.getAccountRisked()).isNull();
+                    assertThat(response.getGrossResult()).isNull();
+
+                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(-50.00).setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(-0.5000).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(50.00).setScale(2, RoundingMode.HALF_EVEN));
+                });
+    }
+
+    @DisplayName("Try to create an invalid Taxes entry")
+    @Test
+    void invalidTaxes() {
+        Entry entry = Entry.builder()
+                .type(EntryType.TAXES)
+                .build();
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(2);
+                    assertThat(response.get("date")).isEqualTo("Date is required");
+                    assertThat(response.get("price")).isEqualTo("Price is required");
+                });
+    }
+
+    @DisplayName("Create a new Deposit entry")
+    @Test
+    void createDeposit() {
+        Entry entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                .type(EntryType.DEPOSIT)
+                .price(BigDecimal.valueOf(50))
+                .build();
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Entry.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
+                    assertThat(response.getType()).isEqualTo(EntryType.DEPOSIT);
+                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(50));
+
+                    assertThat(response.getSymbol()).isNull();
+                    assertThat(response.getDirection()).isNull();
+                    assertThat(response.getSize()).isNull();
+                    assertThat(response.getProfitPrice()).isNull();
+                    assertThat(response.getLossPrice()).isNull();
+                    assertThat(response.getPlannedRR()).isNull();
+                    assertThat(response.getAccountRisked()).isNull();
+                    assertThat(response.getGrossResult()).isNull();
+
+                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(50.00).setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5000).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(150.00).setScale(2, RoundingMode.HALF_EVEN));
+                });
+    }
+
+    @DisplayName("Try to create an invalid Deposit entry")
+    @Test
+    void invalidDeposit() {
+        Entry entry = Entry.builder()
+                .type(EntryType.DEPOSIT)
+                .build();
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(2);
+                    assertThat(response.get("date")).isEqualTo("Date is required");
+                    assertThat(response.get("price")).isEqualTo("Price is required");
                 });
     }
 }

@@ -17,6 +17,7 @@ import java.time.LocalDateTime;
 @Getter
 @Builder
 @EqualsAndHashCode
+@EntryByType
 public class Entry {
 
     @Id
@@ -29,18 +30,14 @@ public class Entry {
     @NotNull(message = "Entry type is required")
     private EntryType type;
 
-    @NotNull(message = "Symbol is required")
-    private String symbol;
-
-    @NotNull(message = "Direction is required")
-    private EntryDirection direction;
-
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
     private BigDecimal price;
 
-    @NotNull(message = "Position size is required")
-    @Positive(message = "Position size must be positive")
+    private String symbol;
+
+    private EntryDirection direction;
+
     private BigDecimal size;
 
     private BigDecimal profitPrice;
@@ -77,4 +74,17 @@ public class Entry {
     private String screenshotAfter;
 
     private String notes;
+
+    public void clearNonTrade() {
+        this.symbol = null;
+        this.direction = null;
+        this.size = null;
+        this.profitPrice = null;
+        this.lossPrice = null;
+        this.accountRisked = null;
+        this.plannedRR = null;
+        this.exitPrice = null;
+        this.grossResult = null;
+        this.costs = null;
+    }
 }

@@ -91,12 +91,11 @@ class EntryServiceImplTest {
         assertThat(response.getTotalItems()).isPositive();
     }
 
-    @DisplayName("Create a entry from a journal")
+    @DisplayName("Create a TRADE entry")
     @Test
-    void create() {
+    void createTrade() {
         Entry toSave = Entry.builder()
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .type(EntryType.TRADE)
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(200))
@@ -109,7 +108,6 @@ class EntryServiceImplTest {
 
         Entry calculated = Entry.builder()
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .type(EntryType.TRADE)
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(200))
@@ -124,6 +122,87 @@ class EntryServiceImplTest {
                 .netResult(BigDecimal.valueOf(74.41))
                 .accountChange(BigDecimal.valueOf(0.0744).setScale(4, RoundingMode.HALF_EVEN))
                 .accountBalance(BigDecimal.valueOf(1074.41).setScale(2, RoundingMode.HALF_EVEN))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(BigDecimal.valueOf(1000));
+
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+
+        Entry entry = entryService.save(accessToken, journalId, toSave);
+        assertThat(entry).isNotNull();
+    }
+
+    @DisplayName("Create a WITHDRAWAL entry")
+    @Test
+    void createWITHDRAWAL() {
+        Entry toSave = Entry.builder()
+                .type(EntryType.WITHDRAWAL)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .type(EntryType.WITHDRAWAL)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .netResult(BigDecimal.valueOf(-234.56))
+                .accountChange(BigDecimal.valueOf(-0.2346).setScale(4, RoundingMode.HALF_EVEN))
+                .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(BigDecimal.valueOf(1000));
+
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+
+        Entry entry = entryService.save(accessToken, journalId, toSave);
+        assertThat(entry).isNotNull();
+    }
+
+    @DisplayName("Create a TAXES entry")
+    @Test
+    void createTAXES() {
+        Entry toSave = Entry.builder()
+                .type(EntryType.TAXES)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .type(EntryType.TAXES)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .netResult(BigDecimal.valueOf(-234.56))
+                .accountChange(BigDecimal.valueOf(-0.2346).setScale(4, RoundingMode.HALF_EVEN))
+                .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(BigDecimal.valueOf(1000));
+
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+
+        Entry entry = entryService.save(accessToken, journalId, toSave);
+        assertThat(entry).isNotNull();
+    }
+
+    @DisplayName("Create a TAXES entry")
+    @Test
+    void createDEPOSIT() {
+        Entry toSave = Entry.builder()
+                .type(EntryType.DEPOSIT)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .type(EntryType.DEPOSIT)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .netResult(BigDecimal.valueOf(234.56))
+                .accountChange(BigDecimal.valueOf(0.2346).setScale(4, RoundingMode.HALF_EVEN))
+                .accountBalance(BigDecimal.valueOf(1234.56).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());

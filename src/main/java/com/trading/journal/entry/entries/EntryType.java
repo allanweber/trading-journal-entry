@@ -11,8 +11,6 @@ public enum EntryType {
     WITHDRAWAL("Withdrawal"),
     DEPOSIT("Deposit"),
     TAXES("Taxes");
-//    SCALE_IN("Scale In"),
-//    SCALE_OUT("Scale Out");
 
     private final String label;
 }

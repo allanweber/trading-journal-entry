@@ -52,6 +52,7 @@
         <exclude name="BeanMembersShouldSerialize" />
         <exclude name="InvalidLogMessageFormat" />
         <exclude name="AvoidAccessibilityAlteration"/>
+        <exclude name="NullAssignment"/>
     </rule>
     <rule ref="category/java/multithreading.xml" />
     <rule ref="category/java/performance.xml">

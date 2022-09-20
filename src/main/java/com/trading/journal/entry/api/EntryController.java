@@ -42,7 +42,7 @@ public class EntryController implements EntryApi {
     }
 
     @Override
-    public ResponseEntity<Entry> save(AccessTokenInfo accessTokenInfo, String journalId, Entry entry) {
+    public ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, String journalId, Entry entry) {
         Entry created = entryService.save(accessTokenInfo, journalId, entry);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
         return created(uri).body(created);

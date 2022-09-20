@@ -16,10 +16,6 @@ public class CalculateEntry {
     private final BigDecimal balance;
 
     public Entry calculate() {
-
-        //TEST OTHER TYPES
-//        * When type is WITHDRAWAL, DEPOSIT, TAXES - clear all other values and keep only Date, Type, Price - use another endpoint to add those
-
         BigDecimal grossResult;
         if (EntryType.TRADE.equals(entry.getType())) {
             BigDecimal accountRisked = accountRisked();
@@ -31,7 +27,11 @@ public class CalculateEntry {
             grossResult = grossResult();
             entry.setGrossResult(grossResult);
         } else {
+            entry.clearNonTrade();
             grossResult = entry.getPrice();
+            if (shouldNegative(grossResult)) {
+                grossResult = grossResult.multiply(BigDecimal.valueOf(-1));
+            }
         }
 
         BigDecimal netResult = netResult(grossResult);
@@ -149,5 +149,9 @@ public class CalculateEntry {
             accountBalance = balance.add(netResult);
         }
         return accountBalance;
+    }
+
+    private boolean shouldNegative(BigDecimal grossResult) {
+        return grossResult.compareTo(BigDecimal.ZERO) > 0 && (EntryType.WITHDRAWAL.equals(entry.getType()) || EntryType.TAXES.equals(entry.getType()));
     }
 }
