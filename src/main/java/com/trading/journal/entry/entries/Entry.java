@@ -44,18 +44,32 @@ public class Entry {
 
     private BigDecimal lossPrice;
 
+    private BigDecimal costs;
+
+    private BigDecimal exitPrice;
+
+    @JsonFormat(pattern = DateHelper.DATE_FORMAT)
+    private LocalDateTime exitDate;
+
+    private String screenshotBefore;
+
+    private String screenshotAfter;
+
+    private String notes;
+
+    /**
+     * Calculated fields
+     * Begin
+     */
+
     @Setter
     private BigDecimal accountRisked;
 
     @Setter
     private BigDecimal plannedRR;
 
-    private BigDecimal exitPrice;
-
     @Setter
     private BigDecimal grossResult;
-
-    private BigDecimal costs;
 
     @Setter
     private BigDecimal netResult;
@@ -66,14 +80,10 @@ public class Entry {
     @Setter
     private BigDecimal accountBalance;
 
-    @JsonFormat(pattern = DateHelper.DATE_FORMAT)
-    private LocalDateTime exitDate;
-
-    private String screenshotBefore;
-
-    private String screenshotAfter;
-
-    private String notes;
+    /**
+     * Calculated fields
+     * End
+     */
 
     public void clearNonTrade() {
         this.symbol = null;

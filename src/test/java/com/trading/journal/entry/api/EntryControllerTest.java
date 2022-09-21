@@ -27,6 +27,7 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -136,12 +137,9 @@ class EntryControllerTest {
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(1.1234))
                 .size(BigDecimal.valueOf(500.00))
-                .profitPrice(BigDecimal.valueOf(1.2345))
-                .lossPrice(BigDecimal.valueOf(1.009))
-                .exitPrice(BigDecimal.valueOf(1.2345))
-                .costs(BigDecimal.valueOf(2.34))
                 .build();
 
+        AtomicReference<String> entryId = new AtomicReference<>();
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
@@ -158,6 +156,51 @@ class EntryControllerTest {
                 .expectBody(Entry.class)
                 .value(response -> {
                     assertThat(response.getId()).isNotNull();
+                    entryId.set(response.getId());
+                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
+                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
+                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
+                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
+                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
+                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
+                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
+
+                    assertThat(response.getProfitPrice()).isNull();
+                    assertThat(response.getLossPrice()).isNull();
+                    assertThat(response.getGrossResult()).isNull();
+                    assertThat(response.getNetResult()).isNull();
+                    assertThat(response.getAccountChange()).isNull();
+                    assertThat(response.getAccountBalance()).isNull();
+                });
+
+        Entry updateEntry = Entry.builder()
+                .id(entryId.get())
+                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                .type(EntryType.TRADE)
+                .symbol("USD/EUR")
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(1.1234))
+                .size(BigDecimal.valueOf(500.00))
+                .profitPrice(BigDecimal.valueOf(1.2345))
+                .lossPrice(BigDecimal.valueOf(1.009))
+                .exitPrice(BigDecimal.valueOf(1.2345))
+                .costs(BigDecimal.valueOf(2.34))
+                .build();
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(updateEntry)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Entry.class)
+                .value(response -> {
+                    assertThat(response.getId()).isEqualTo(entryId.get());
                     assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
                     assertThat(response.getType()).isEqualTo(EntryType.TRADE);
                     assertThat(response.getSymbol()).isEqualTo("USD/EUR");
@@ -174,6 +217,9 @@ class EntryControllerTest {
                     assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5321).setScale(4, RoundingMode.HALF_EVEN));
                     assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(153.21).setScale(2, RoundingMode.HALF_EVEN));
                 });
+
+        List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
+        assertThat(all).hasSize(1);
     }
 
     @DisplayName("Try to create an invalid Trade entry")

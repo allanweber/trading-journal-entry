@@ -36,18 +36,10 @@ public interface EntryApi {
     ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 
     @ApiOperation(notes = "Save entry", value = "Save entry, some fields are calculated")
-    @ApiResponses(@ApiResponse(code = 201, message = "Entry saved"))
+    @ApiResponses({
+            @ApiResponse(code = 201, message = "Entry created"),
+            @ApiResponse(code = 200, message = "Entry updated")
+    })
     @PostMapping("{journal-id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Entry data);
-
-    @ApiOperation(notes = "Update entry", value = "Save entry, some fields are calculated")
-    @ApiResponses(@ApiResponse(code = 201, message = "Entry updated"))
-    @PutMapping("{journal-id}/{entry-id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<Entry> update(
-            AccessTokenInfo accessTokenInfo,
-            @PathVariable(name = "journal-id") String journalId,
-            @PathVariable(name = "entry-id") String entryId,
-            @RequestBody @Valid Entry data);
+    ResponseEntity<Entry> save(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Entry data);
 }

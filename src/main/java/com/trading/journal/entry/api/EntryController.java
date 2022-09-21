@@ -13,6 +13,7 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.List;
+import java.util.Objects;
 
 import static org.springframework.http.ResponseEntity.created;
 import static org.springframework.http.ResponseEntity.ok;
@@ -42,9 +43,16 @@ public class EntryController implements EntryApi {
     }
 
     @Override
-    public ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, String journalId, Entry entry) {
+    public ResponseEntity<Entry> save(AccessTokenInfo accessTokenInfo, String journalId, Entry entry) {
+        boolean isNewEntry = Objects.isNull(entry.getId());
         Entry created = entryService.save(accessTokenInfo, journalId, entry);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
-        return created(uri).body(created);
+        ResponseEntity<Entry> body;
+        if (isNewEntry) {
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
+            body = created(uri).body(created);
+        } else {
+            body = ok(created);
+        }
+        return body;
     }
 }
