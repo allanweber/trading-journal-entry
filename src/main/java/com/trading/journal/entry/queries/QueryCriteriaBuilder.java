@@ -18,7 +18,7 @@ import static java.util.Optional.ofNullable;
 
 public class QueryCriteriaBuilder<T> {
 
-    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+    public static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final Map<String, Class<?>> fields;
 
     private static final Map<String, BiFunction<Filter, Class<?>, Criteria>> FILTER_CRITERIA = new ConcurrentHashMap<>();
@@ -37,6 +37,7 @@ public class QueryCriteriaBuilder<T> {
         FILTER_CRITERIA.put(FilterOperation.GREATER_THAN_OR_EQUAL_TO.name(), (filter, filedType) -> Criteria.where(filter.getField()).gte(convertValueToType(filter, filedType)));
         FILTER_CRITERIA.put(FilterOperation.LESS_THAN.name(), (filter, filedType) -> Criteria.where(filter.getField()).lt(convertValueToType(filter, filedType)));
         FILTER_CRITERIA.put(FilterOperation.LESS_THAN_OR_EQUAL_TO.name(), (filter, filedType) -> Criteria.where(filter.getField()).lte(convertValueToType(filter, filedType)));
+        FILTER_CRITERIA.put(FilterOperation.EXISTS.name(), (filter, filedType) -> Criteria.where(filter.getField()).exists(Boolean.parseBoolean(filter.getValue())));
     }
 
     public QueryCriteriaBuilder(Class<T> clazz) {
@@ -77,13 +78,7 @@ public class QueryCriteriaBuilder<T> {
         } else if (fieldTypeName.contains("bigdecimal")) {
             value = new BigDecimal(filter.getValue());
         } else if (fieldTypeName.contains("localdate")) {
-            value = switch (filter.getOperation()) {
-                case GREATER_THAN, GREATER_THAN_OR_EQUAL_TO ->
-                        LocalDateTime.parse(filter.getValue().concat(" 00:00:00"), DATE_FORMATTER);
-                case LESS_THAN, LESS_THAN_OR_EQUAL_TO ->
-                        LocalDateTime.parse(filter.getValue().concat(" 23:59:59"), DATE_FORMATTER);
-                default -> LocalDateTime.parse(filter.getValue(), DATE_FORMATTER);
-            };
+            value = LocalDateTime.parse(filter.getValue(), DATE_FORMATTER);
         } else {
             value = filter.getValue();
         }

@@ -20,6 +20,7 @@ import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 
@@ -58,7 +59,7 @@ class JournalControllerTest {
     }
 
     @AfterEach
-    public void shutDown() {
+    public void afterEach() {
         mongoTemplate.dropCollection(journalCollection);
     }
 
@@ -118,7 +119,7 @@ class JournalControllerTest {
                         .path("/journals")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(Journal.builder().name("journal-1").build())
+                .bodyValue(Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(100.00)).build())
                 .exchange()
                 .expectStatus()
                 .isCreated()
@@ -144,7 +145,7 @@ class JournalControllerTest {
                         .path("/journals")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(Journal.builder().name("journal-1").build())
+                .bodyValue(Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(100.00)).build())
                 .exchange()
                 .expectStatus()
                 .isEqualTo(HttpStatus.CONFLICT)
@@ -164,7 +165,7 @@ class JournalControllerTest {
                         .path("/journals")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(Journal.builder().name("journal-11").build())
+                .bodyValue(Journal.builder().name("journal-11").startBalance(BigDecimal.valueOf(100.00)).build())
                 .exchange()
                 .expectStatus()
                 .isCreated()
@@ -174,6 +175,27 @@ class JournalControllerTest {
                 .value(response -> {
                     assertThat(response.getId()).isNotNull();
                     assertThat(response.getName()).isEqualTo("journal-11");
+                });
+    }
+
+    @DisplayName("Create with invalid fields return error")
+    @Test
+    void invalidFields() {
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(Journal.builder().build())
+                .exchange()
+                .expectStatus()
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> {
+                    assertThat(response.get("startBalance")).isEqualTo("Start balance is required");
+                    assertThat(response.get("name")).isEqualTo("Journal name is required");
                 });
     }
 }

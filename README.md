@@ -1,4 +1,4 @@
-# Trading Journal Entries 
+# Trading Journal Entries
 
 ## Swagger
 

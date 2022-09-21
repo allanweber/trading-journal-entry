@@ -10,9 +10,7 @@ public enum EntryType {
     TRADE("Trade"),
     WITHDRAWAL("Withdrawal"),
     DEPOSIT("Deposit"),
-    TAXES("Taxes"),
-    SCALE_IN("Scale In"),
-    SCALE_OUT("Scale Out");
+    TAXES("Taxes");
 
     private final String label;
 }

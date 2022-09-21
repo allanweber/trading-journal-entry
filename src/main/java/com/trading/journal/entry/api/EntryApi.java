@@ -9,6 +9,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @Api(tags = "Entries Api")
 @RequestMapping("/entries")
@@ -16,11 +17,11 @@ public interface EntryApi {
 
     String DESCRIPTION = "Available filters:eq (Equal), gt(Greater than), gte(Greater than or equal), lt(Less than), lte(Less than or equal). eg. 'FieldName.Operation', 'Value'";
 
-    @ApiOperation(notes = "Get all entries", value = "Get all entries")
+    @ApiOperation(notes = "Query entries from a journal", value = "Query entries from a journal")
     @ApiResponses(@ApiResponse(code = 200, message = "Entries retrieved"))
-    @GetMapping("{journal-id}")
+    @GetMapping("{journal-id}/query")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<PageResponse<Entry>> getAll(
+    ResponseEntity<PageResponse<Entry>> query(
             AccessTokenInfo accessTokenInfo,
             @PathVariable(name = "journal-id") String journalId,
             @RequestParam(value = "page", defaultValue = "0", required = false) Integer page,
@@ -28,9 +29,17 @@ public interface EntryApi {
             @ApiParam(name = "sort", value = "eg. \"id,asc\", \"name,desc\"") @RequestParam(value = "sort", required = false) String[] sort,
             @ApiParam(name = "filter", value = DESCRIPTION) @RequestParam(value = "filter", required = false) String[] filter);
 
-    @ApiOperation(notes = "Create new entry", value = "Create new entry")
-    @ApiResponses(@ApiResponse(code = 201, message = "Entry created"))
+    @ApiOperation(notes = "Retrieve all entries from a journal", value = "Retrieve all entries from a journal sorted by date")
+    @ApiResponses(@ApiResponse(code = 200, message = "Entries retrieved"))
+    @GetMapping("{journal-id}")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
+
+    @ApiOperation(notes = "Save entry", value = "Save entry, some fields are calculated")
+    @ApiResponses({
+            @ApiResponse(code = 201, message = "Entry created"),
+            @ApiResponse(code = 200, message = "Entry updated")
+    })
     @PostMapping("{journal-id}")
-    @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Entry data);
+    ResponseEntity<Entry> save(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Entry data);
 }

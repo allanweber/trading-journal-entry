@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.List;
+import java.util.Objects;
 
 import static org.springframework.http.ResponseEntity.created;
 import static org.springframework.http.ResponseEntity.ok;
@@ -23,21 +25,34 @@ public class EntryController implements EntryApi {
     private final EntryService entryService;
 
     @Override
-    public ResponseEntity<PageResponse<Entry>> getAll(AccessTokenInfo accessTokenInfo, String journalId, Integer page, Integer size, String[] sort, String[] filter) {
+    public ResponseEntity<PageResponse<Entry>> query(AccessTokenInfo accessTokenInfo, String journalId, Integer page, Integer size, String[] sort, String[] filter) {
         PageableRequest pageableRequest = PageableRequest.builder()
                 .page(page)
                 .size(size)
                 .sort(QueryConverter.queryParamsToSort(sort))
                 .filters(QueryConverter.queryParamsToFilter(filter))
                 .build();
-        PageResponse<Entry> pageResponse = entryService.getAll(accessTokenInfo, journalId, pageableRequest);
+        PageResponse<Entry> pageResponse = entryService.query(accessTokenInfo, journalId, pageableRequest);
         return ok(pageResponse);
     }
 
     @Override
-    public ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, String journalId, Entry entry) {
-        Entry created = entryService.create(accessTokenInfo, journalId, entry);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
-        return created(uri).body(created);
+    public ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, String journalId) {
+        List<Entry> entries = entryService.getAll(accessTokenInfo, journalId);
+        return ok(entries);
+    }
+
+    @Override
+    public ResponseEntity<Entry> save(AccessTokenInfo accessTokenInfo, String journalId, Entry entry) {
+        boolean isNewEntry = Objects.isNull(entry.getId());
+        Entry created = entryService.save(accessTokenInfo, journalId, entry);
+        ResponseEntity<Entry> body;
+        if (isNewEntry) {
+            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
+            body = created(uri).body(created);
+        } else {
+            body = ok(created);
+        }
+        return body;
     }
 }

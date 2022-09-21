@@ -2,15 +2,13 @@ package com.trading.journal.entry.entries;
 
 import com.allanweber.jwttoken.helper.DateHelper;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Document(collection = "entries")
@@ -18,6 +16,8 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Getter
 @Builder
+@EqualsAndHashCode
+@EntryByType
 public class Entry {
 
     @Id
@@ -30,46 +30,26 @@ public class Entry {
     @NotNull(message = "Entry type is required")
     private EntryType type;
 
-    @NotNull(message = "Symbol is required")
-    private String symbol;
-
-    @NotNull(message = "Direction is required")
-    private EntryDirection direction;
-
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
-    private Double price;
+    private BigDecimal price;
 
-    @NotNull(message = "Position size is required")
-    @Positive(message = "Position size must be positive")
-    private Double size;
+    private String symbol;
 
-    private Double profitPrice;
+    private EntryDirection direction;
 
-    private Double lossPrice;
+    private BigDecimal size;
 
-    private ReturnRate plannedROR;
+    private BigDecimal profitPrice;
 
-    private Double exitPrice;
+    private BigDecimal lossPrice;
+
+    private BigDecimal costs;
+
+    private BigDecimal exitPrice;
 
     @JsonFormat(pattern = DateHelper.DATE_FORMAT)
     private LocalDateTime exitDate;
-
-    private ReturnRate actualROR;
-
-    private Double accountRisked;
-
-    private Double grossResult;
-
-    private Double costs;
-
-    private Double netResult;
-
-    private Double accountChange;
-
-    private Double accountBalance;
-
-    private String duration;
 
     private String screenshotBefore;
 
@@ -77,5 +57,44 @@ public class Entry {
 
     private String notes;
 
-    private Double amount;
+    /**
+     * Calculated fields
+     * Begin
+     */
+
+    @Setter
+    private BigDecimal accountRisked;
+
+    @Setter
+    private BigDecimal plannedRR;
+
+    @Setter
+    private BigDecimal grossResult;
+
+    @Setter
+    private BigDecimal netResult;
+
+    @Setter
+    private BigDecimal accountChange;
+
+    @Setter
+    private BigDecimal accountBalance;
+
+    /**
+     * Calculated fields
+     * End
+     */
+
+    public void clearNonTrade() {
+        this.symbol = null;
+        this.direction = null;
+        this.size = null;
+        this.profitPrice = null;
+        this.lossPrice = null;
+        this.accountRisked = null;
+        this.plannedRR = null;
+        this.exitPrice = null;
+        this.grossResult = null;
+        this.costs = null;
+    }
 }

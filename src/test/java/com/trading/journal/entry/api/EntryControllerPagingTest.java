@@ -7,7 +7,6 @@ import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
-import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.queries.data.PageResponse;
 import org.junit.jupiter.api.*;
@@ -23,6 +22,7 @@ import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static java.util.Collections.singletonList;
@@ -61,23 +61,23 @@ class EntryControllerPagingTest {
         journalId = journal.getId();
 
         entryCollection = TENANCY.concat("_").concat(journal.getName()).concat("_").concat("entries");
-        mongoTemplate.save(Entry.builder().price(10.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(20.00).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(30.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(40.00).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(50.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(20.00)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(30.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(40.00)).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(50.00)).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(60.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 0, 21, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(70.00).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 31, 17, 22, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(80.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 16, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(90.00).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 31, 15, 24, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(100.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 23, 25, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(60.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 0, 21, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(70.00)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 31, 17, 22, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(80.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 16, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(90.00)).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 31, 15, 24, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(100.00)).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 31, 23, 25, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(110.00).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(120.31).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(130.00).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(140.59).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(150.00).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(110.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(120.31)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(130.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(140.59)).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(150.00)).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 1, 18, 23, 30)).build(), entryCollection);
     }
 
     @AfterAll
@@ -101,6 +101,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .build(journalId))
@@ -116,7 +117,7 @@ class EntryControllerPagingTest {
                     assertThat(response.getTotalPages()).isEqualTo(3);
                     assertThat(response.getTotalItems()).isEqualTo(15L);
                     assertThat(response.getItems()).extracting(Entry::getPrice)
-                            .extracting(Double::intValue)
+                            .extracting(BigDecimal::intValue)
                             .containsExactlyInAnyOrder(10, 20, 30, 40, 50);
                 });
     }
@@ -129,6 +130,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "1")
                         .queryParam("size", "5")
                         .build(journalId))
@@ -144,7 +146,7 @@ class EntryControllerPagingTest {
                     assertThat(response.getTotalPages()).isEqualTo(3);
                     assertThat(response.getTotalItems()).isEqualTo(15L);
                     assertThat(response.getItems()).extracting(Entry::getPrice)
-                            .extracting(Double::intValue)
+                            .extracting(BigDecimal::intValue)
                             .containsExactlyInAnyOrder(60, 70, 80, 90, 100);
                 });
     }
@@ -157,6 +159,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "3")
                         .queryParam("size", "5")
                         .build(journalId))
@@ -182,6 +185,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("sort", "symbol", "asc")
@@ -209,6 +213,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("sort", "symbol", "desc")
@@ -236,6 +241,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("sort", "date", "desc")
@@ -252,7 +258,7 @@ class EntryControllerPagingTest {
                     assertThat(response.getTotalPages()).isEqualTo(3);
                     assertThat(response.getTotalItems()).isEqualTo(15L);
                     assertThat(response.getItems()).extracting(Entry::getPrice)
-                            .extracting(Double::intValue)
+                            .extracting(BigDecimal::intValue)
                             .containsExactlyInAnyOrder(110, 120, 130, 140, 150);
                 });
     }
@@ -265,6 +271,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "symbol.eq", "MSFT")
@@ -292,6 +299,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "date.eq", "2022-08-31")
@@ -311,7 +319,7 @@ class EntryControllerPagingTest {
                             .extracting(LocalDateTime::getDayOfMonth)
                             .containsOnly(31);
                     assertThat(response.getItems()).extracting(Entry::getPrice)
-                            .extracting(Double::intValue)
+                            .extracting(BigDecimal::intValue)
                             .containsExactlyInAnyOrder(60, 70, 80, 90, 100);
                 });
     }
@@ -324,6 +332,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "date.eq", "2022-08-31", "symbol.eq", "MSFT")
@@ -343,7 +352,7 @@ class EntryControllerPagingTest {
                             .extracting(LocalDateTime::getDayOfMonth)
                             .containsOnly(31);
                     assertThat(response.getItems()).extracting(Entry::getPrice)
-                            .extracting(Double::intValue)
+                            .extracting(BigDecimal::intValue)
                             .containsOnly(60);
                 });
     }
@@ -356,6 +365,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "price.gt", "120.30", "price.lt", "140.60")
@@ -374,7 +384,7 @@ class EntryControllerPagingTest {
                     assertThat(response.getItems()).extracting(Entry::getSymbol)
                             .containsExactlyInAnyOrder("AAPL", "NVDA", "TSLA");
                     assertThat(response.getItems()).extracting(Entry::getPrice)
-                            .containsOnly(120.31, 130.00, 140.59);
+                            .containsOnly(BigDecimal.valueOf(120.31), BigDecimal.valueOf(130.00), BigDecimal.valueOf(140.59));
                 });
     }
 
@@ -386,6 +396,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "price.gte", "120.31", "price.lte", "140.59")
@@ -404,7 +415,7 @@ class EntryControllerPagingTest {
                     assertThat(response.getItems()).extracting(Entry::getSymbol)
                             .containsExactlyInAnyOrder("AAPL", "NVDA", "TSLA");
                     assertThat(response.getItems()).extracting(Entry::getPrice)
-                            .containsOnly(120.31, 130.00, 140.59);
+                            .containsOnly(BigDecimal.valueOf(120.31), BigDecimal.valueOf(130.00), BigDecimal.valueOf(140.59));
                 });
     }
 
@@ -416,6 +427,7 @@ class EntryControllerPagingTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/entries")
                         .pathSegment("{journal-id}")
+                        .pathSegment("/query")
                         .queryParam("page", "0")
                         .queryParam("size", "5")
                         .queryParam("filter", "price.eq", "120.31")
@@ -434,7 +446,95 @@ class EntryControllerPagingTest {
                     assertThat(response.getItems()).extracting(Entry::getSymbol)
                             .containsOnly("AAPL");
                     assertThat(response.getItems()).extracting(Entry::getPrice)
-                            .containsOnly(120.31);
+                            .containsOnly(BigDecimal.valueOf(120.31));
+                });
+    }
+
+    @DisplayName("Entry get 15 items without sort filtering by exists price and not exists costs")
+    @Test
+    void noSortFilterExists() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("/query")
+                        .queryParam("page", "0")
+                        .queryParam("size", "15")
+                        .queryParam("filter", "price.exists", "true")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(15);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("/query")
+                        .queryParam("page", "0")
+                        .queryParam("size", "15")
+                        .queryParam("filter", "costs.exists", "false")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(15);
+                });
+    }
+
+    @DisplayName("Entry get 0 item without sort filtering by exists netResult and not exists price")
+    @Test
+    void noSortFilterExistsNetResult() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("/query")
+                        .queryParam("page", "0")
+                        .queryParam("size", "15")
+                        .queryParam("filter", "netResult.exists", "true")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(0);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("/query")
+                        .queryParam("page", "0")
+                        .queryParam("size", "15")
+                        .queryParam("filter", "price.exists", "false")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(0);
                 });
     }
 }
