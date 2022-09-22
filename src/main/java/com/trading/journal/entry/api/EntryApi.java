@@ -19,7 +19,7 @@ public interface EntryApi {
 
     @ApiOperation(notes = "Query entries from a journal", value = "Query entries from a journal")
     @ApiResponses(@ApiResponse(code = 200, message = "Entries retrieved"))
-    @GetMapping("{journal-id}/query")
+    @GetMapping("/{journal-id}/query")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<PageResponse<Entry>> query(
             AccessTokenInfo accessTokenInfo,
@@ -31,7 +31,7 @@ public interface EntryApi {
 
     @ApiOperation(notes = "Retrieve all entries from a journal", value = "Retrieve all entries from a journal sorted by date")
     @ApiResponses(@ApiResponse(code = 200, message = "Entries retrieved"))
-    @GetMapping("{journal-id}")
+    @GetMapping("/{journal-id}")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 
@@ -40,6 +40,12 @@ public interface EntryApi {
             @ApiResponse(code = 201, message = "Entry created"),
             @ApiResponse(code = 200, message = "Entry updated")
     })
-    @PostMapping("{journal-id}")
+    @PostMapping("/{journal-id}")
     ResponseEntity<Entry> save(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Entry data);
+
+    @ApiOperation(notes = "Delete entry", value = "Delete entry")
+    @ApiResponses(@ApiResponse(code = 200, message = "Entry deleted"))
+    @DeleteMapping("/{journal-id}/{entry-id}")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,  @PathVariable(name = "entry-id") String entryId);
 }

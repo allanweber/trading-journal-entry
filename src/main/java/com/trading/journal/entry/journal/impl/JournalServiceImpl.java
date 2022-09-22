@@ -9,10 +9,12 @@ import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.data.Filter;
 import com.trading.journal.entry.queries.data.FilterOperation;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.function.BiFunction;
 
 import static java.util.Arrays.asList;
 
@@ -21,6 +23,8 @@ import static java.util.Arrays.asList;
 public class JournalServiceImpl implements JournalService {
 
     private final JournalRepository journalRepository;
+
+    private final MongoOperations mongoOperations;
 
     @Override
     public List<Journal> getAll(AccessTokenInfo accessToken) {
@@ -35,7 +39,7 @@ public class JournalServiceImpl implements JournalService {
 
     @Override
     public Journal save(AccessTokenInfo accessToken, Journal journal) {
-        if(hasSameName(accessToken, journal)){
+        if (hasSameName(accessToken, journal)) {
             throw new ApplicationException(HttpStatus.CONFLICT, "There is already another journal with the same name");
         }
         return journalRepository.save(new CollectionName(accessToken), journal);
@@ -44,6 +48,7 @@ public class JournalServiceImpl implements JournalService {
     @Override
     public long delete(AccessTokenInfo accessToken, String journalId) {
         Journal journal = get(accessToken, journalId);
+        mongoOperations.dropCollection(entriesCollectionName().apply(accessToken, journal));
         return journalRepository.delete(new CollectionName(accessToken), journal);
     }
 
@@ -54,5 +59,15 @@ public class JournalServiceImpl implements JournalService {
         );
         List<Journal> query = journalRepository.query(new CollectionName(accessToken), filters);
         return !query.isEmpty();
+    }
+
+    private BiFunction<AccessTokenInfo, Journal, String> entriesCollectionName() {
+        return (accessToken, journal) -> {
+            return accessToken.tenancyName()
+                    .concat(CollectionName.SEPARATOR)
+                    .concat(journal.getName())
+                    .concat(CollectionName.SEPARATOR)
+                    .concat("entries");
+        };
     }
 }

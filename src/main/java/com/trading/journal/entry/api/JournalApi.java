@@ -25,7 +25,7 @@ public interface JournalApi {
 
     @ApiOperation(notes = "Get a journal", value = "Get a journal")
     @ApiResponses(@ApiResponse(code = 200, message = "Journal retrieved"))
-    @GetMapping("{journal-id}")
+    @GetMapping("/{journal-id}")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Journal> get(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 
@@ -34,4 +34,10 @@ public interface JournalApi {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     ResponseEntity<Journal> create(AccessTokenInfo accessTokenInfo, @RequestBody @Valid Journal data);
+
+    @ApiOperation(notes = "Delete a journal", value = "Delete a journal")
+    @ApiResponses(@ApiResponse(code = 200, message = "Journal deleted"))
+    @DeleteMapping("/{journal-id}")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<Journal> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 }
