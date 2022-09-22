@@ -1,6 +1,7 @@
 package com.trading.journal.entry.entries.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.CalculateEntry;
 import com.trading.journal.entry.entries.Entry;
@@ -14,6 +15,7 @@ import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -58,6 +60,18 @@ public class EntryServiceImpl implements EntryService {
 
         CollectionName collectionName = collectionName().apply(accessToken, journalId);
         return repository.save(collectionName, calculated);
+    }
+
+    @Override
+    public void delete(AccessTokenInfo accessToken, String journalId, String entryId) {
+        CollectionName collectionName = collectionName().apply(accessToken, journalId);
+        Entry entry = get(collectionName, entryId);
+        repository.delete(collectionName, entry);
+    }
+
+    private Entry get(CollectionName collectionName, String entryId) {
+        return repository.getById(collectionName, entryId)
+                .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Entry not found"));
     }
 
     private BiFunction<AccessTokenInfo, String, CollectionName> collectionName() {

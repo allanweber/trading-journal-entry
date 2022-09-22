@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -35,6 +36,9 @@ class JournalServiceImplTest {
 
     @Mock
     JournalRepository journalRepository;
+
+    @Mock
+    MongoOperations mongoOperations;
 
     @InjectMocks
     JournalServiceImpl journalService;
@@ -103,11 +107,13 @@ class JournalServiceImplTest {
     @DisplayName("Delete a journal")
     @Test
     void delete() {
-        Journal to_delete = Journal.builder().id("123").name("to save").build();
+        Journal to_delete = Journal.builder().id("123").name("to_delete").build();
         when(journalRepository.getById(collectionName, "123")).thenReturn(Optional.of(to_delete));
         when(journalRepository.delete(collectionName, to_delete)).thenReturn(1L);
         long delete = journalService.delete(accessToken, "123");
         assertThat(delete).isPositive();
+
+        verify(mongoOperations).dropCollection("TENANCY_to_delete_entries");
     }
 
     @DisplayName("Delete a journal does not exist")
@@ -119,5 +125,7 @@ class JournalServiceImplTest {
 
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Journal not found");
+
+        verify(mongoOperations, never()).dropCollection(anyString());
     }
 }

@@ -1,6 +1,7 @@
 package com.trading.journal.entry.entries.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
@@ -20,16 +21,22 @@ import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.util.Optional;
+import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.when;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class EntryServiceImplTest {
@@ -212,5 +219,38 @@ class EntryServiceImplTest {
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
+    }
+
+    @DisplayName("Delete a entry")
+    @Test
+    void delete() {
+        String entryId = UUID.randomUUID().toString();
+        Entry entry = Entry.builder()
+                .type(EntryType.DEPOSIT)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+
+        entryService.delete(accessToken, journalId, entryId);
+
+        verify(repository).delete(collectionName, entry);
+    }
+
+    @DisplayName("Delete a entry not found return an exception")
+    @Test
+    void deleteNotFound() {
+        String entryId = UUID.randomUUID().toString();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(collectionName, entryId)).thenReturn(Optional.empty());
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.delete(accessToken, journalId, entryId));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getStatusText()).isEqualTo("Entry not found");
+
+        verify(repository, never()).delete(any(),any());
     }
 }

@@ -468,4 +468,50 @@ class EntryControllerTest {
                     assertThat(response.get("price")).isEqualTo("Price is required");
                 });
     }
+
+    @DisplayName("Create a new entry and delete it")
+    @Test
+    void deleteEntry() {
+        Entry entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                .type(EntryType.DEPOSIT)
+                .price(BigDecimal.valueOf(50))
+                .build();
+
+        AtomicReference<String> entryId = new AtomicReference<>();
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Entry.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    entryId.set(response.getId());
+                });
+
+        assertThat(mongoTemplate.findAll(Entry.class, entryCollection)).hasSize(1);
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("{entry-id}")
+                        .build(journalId, entryId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        assertThat(mongoTemplate.findAll(Entry.class, entryCollection)).isEmpty();
+    }
 }

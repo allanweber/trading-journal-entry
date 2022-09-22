@@ -55,4 +55,10 @@ public class EntryController implements EntryApi {
         }
         return body;
     }
+
+    @Override
+    public ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, String journalId, String entryId) {
+        entryService.delete(accessTokenInfo, journalId, entryId);
+        return ok().build();
+    }
 }

@@ -53,6 +53,7 @@
         <exclude name="InvalidLogMessageFormat" />
         <exclude name="AvoidAccessibilityAlteration"/>
         <exclude name="NullAssignment"/>
+        <exclude name="AvoidDuplicateLiterals"/>
     </rule>
     <rule ref="category/java/multithreading.xml" />
     <rule ref="category/java/performance.xml">

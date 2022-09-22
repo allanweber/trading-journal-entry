@@ -5,6 +5,9 @@ import com.allanweber.jwttoken.service.JwtResolveToken;
 import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
+import com.trading.journal.entry.entries.Entry;
+import com.trading.journal.entry.entries.EntryDirection;
+import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,8 +24,10 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -197,5 +202,74 @@ class JournalControllerTest {
                     assertThat(response.get("startBalance")).isEqualTo("Start balance is required");
                     assertThat(response.get("name")).isEqualTo("Journal name is required");
                 });
+    }
+
+    @DisplayName("Create a journal and delete it, should drop entries collection for this journal")
+    @Test
+    void delete() {
+        AtomicReference<String> journalId = new AtomicReference<>();
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(100.00)).build())
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Journal.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    assertThat(response.getName()).isEqualTo("journal-1");
+                    journalId.set(response.getId());
+                });
+
+        assertThat(mongoTemplate.findAll(Journal.class, journalCollection)).isNotEmpty();
+
+        Entry entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                .type(EntryType.TRADE)
+                .symbol("USD/EUR")
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(1.1234))
+                .size(BigDecimal.valueOf(500.00))
+                .build();
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Entry.class)
+                .value(response -> assertThat(response.getId()).isNotNull());
+
+
+        String entryCollection = TENANCY.concat("_").concat("journal-1").concat("_").concat("entries");
+        assertThat(mongoTemplate.collectionExists(entryCollection)).isTrue();
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .pathSegment("{journal-id}")
+                        .build(journalId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        assertThat(mongoTemplate.findAll(Journal.class, journalCollection)).isEmpty();
+        assertThat(mongoTemplate.collectionExists(entryCollection)).isFalse();
     }
 }

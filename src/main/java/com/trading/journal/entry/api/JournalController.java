@@ -38,4 +38,10 @@ public class JournalController implements JournalApi {
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
         return created(uri).body(created);
     }
+
+    @Override
+    public ResponseEntity<Journal> delete(AccessTokenInfo accessTokenInfo, String journalId) {
+        journalService.delete(accessTokenInfo, journalId);
+        return ok().build();
+    }
 }

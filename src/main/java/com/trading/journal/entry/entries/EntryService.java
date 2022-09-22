@@ -13,4 +13,6 @@ public interface EntryService {
     List<Entry> getAll(AccessTokenInfo accessToken, String journalId);
 
     Entry save(AccessTokenInfo accessToken, String journalId, Entry entry);
+
+    void delete(AccessTokenInfo accessToken, String journalId, String entryId);
 }
