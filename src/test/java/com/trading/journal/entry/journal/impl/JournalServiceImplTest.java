@@ -113,7 +113,7 @@ class JournalServiceImplTest {
         long delete = journalService.delete(accessToken, "123");
         assertThat(delete).isPositive();
 
-        verify(mongoOperations).dropCollection("TENANCY_to_delete_entries");
+        verify(mongoOperations).dropCollection("Tenancy_to_delete_entries");
     }
 
     @DisplayName("Delete a journal does not exist")

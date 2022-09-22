@@ -2,6 +2,7 @@ package com.trading.journal.entry.queries;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import lombok.EqualsAndHashCode;
+import org.apache.commons.text.CaseUtils;
 import org.springframework.data.mongodb.repository.query.MongoEntityInformation;
 import org.springframework.util.StringUtils;
 
@@ -23,10 +24,22 @@ public class CollectionName {
     }
 
     public String collectionName(MongoEntityInformation<?, ?> metadata) {
-        StringBuilder builder = new StringBuilder().append(accessToken.tenancyName()).append(SEPARATOR);
-        if (StringUtils.hasText(middleName)) {
-            builder.append(middleName.replaceAll("\\s+","")).append(SEPARATOR);
-        }
+        StringBuilder builder = buildWithTenancy();
         return builder.append(metadata.getCollectionName()).toString();
+    }
+
+    public String collectionName(String collectionName) {
+        StringBuilder builder = buildWithTenancy();
+        return builder.append(collectionName).toString();
+    }
+
+    private StringBuilder buildWithTenancy() {
+        String tenancyName = CaseUtils.toCamelCase(accessToken.tenancyName(), true, ' ', '-');
+        tenancyName = tenancyName.replace(" ", SEPARATOR);
+        StringBuilder builder = new StringBuilder().append(tenancyName).append(SEPARATOR);
+        if (StringUtils.hasText(middleName)) {
+            builder.append(middleName.replaceAll("\\s+", "")).append(SEPARATOR);
+        }
+        return builder;
     }
 }

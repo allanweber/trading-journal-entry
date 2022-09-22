@@ -14,7 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.function.BiFunction;
 
 import static java.util.Arrays.asList;
 
@@ -48,7 +47,8 @@ public class JournalServiceImpl implements JournalService {
     @Override
     public long delete(AccessTokenInfo accessToken, String journalId) {
         Journal journal = get(accessToken, journalId);
-        mongoOperations.dropCollection(entriesCollectionName().apply(accessToken, journal));
+        String entryCollectionName = new CollectionName(accessToken, journal.getName()).collectionName("entries");
+        mongoOperations.dropCollection(entryCollectionName);
         return journalRepository.delete(new CollectionName(accessToken), journal);
     }
 
@@ -59,15 +59,5 @@ public class JournalServiceImpl implements JournalService {
         );
         List<Journal> query = journalRepository.query(new CollectionName(accessToken), filters);
         return !query.isEmpty();
-    }
-
-    private BiFunction<AccessTokenInfo, Journal, String> entriesCollectionName() {
-        return (accessToken, journal) -> {
-            return accessToken.tenancyName()
-                    .concat(CollectionName.SEPARATOR)
-                    .concat(journal.getName())
-                    .concat(CollectionName.SEPARATOR)
-                    .concat("entries");
-        };
     }
 }
