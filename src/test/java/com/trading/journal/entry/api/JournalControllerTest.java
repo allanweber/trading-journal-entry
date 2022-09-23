@@ -41,8 +41,6 @@ import static org.mockito.Mockito.when;
 @WithCustomMockUser(tenancyName = "paging-tenancy")
 class JournalControllerTest {
 
-    private static final String TENANCY = "paging-tenancy";
-
     private static String journalCollection;
 
     @MockBean
@@ -60,7 +58,7 @@ class JournalControllerTest {
     public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired MongoTemplate mongoTemplate) {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
-        journalCollection = TENANCY.concat("_").concat("journals");
+        journalCollection = "PagingTenancy_journals";
     }
 
     @AfterEach
@@ -72,7 +70,7 @@ class JournalControllerTest {
     public void mockAccessTokenInfo() {
         when(resolveToken.resolve(any())).thenReturn("token");
         when(tokenReader.getAccessTokenInfo(anyString()))
-                .thenReturn(new AccessTokenInfo("user", 1L, TENANCY, singletonList("ROLE_USER")));
+                .thenReturn(new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER")));
     }
 
     @DisplayName("Get all journals")
@@ -255,7 +253,7 @@ class JournalControllerTest {
                 .value(response -> assertThat(response.getId()).isNotNull());
 
 
-        String entryCollection = TENANCY.concat("_").concat("journal-1").concat("_").concat("entries");
+        String entryCollection = "PagingTenancy_journal-1_entries";
         assertThat(mongoTemplate.collectionExists(entryCollection)).isTrue();
 
         webTestClient

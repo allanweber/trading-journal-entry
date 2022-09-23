@@ -37,7 +37,6 @@ import static org.mockito.Mockito.when;
 @WithCustomMockUser(tenancyName = "paging-tenancy")
 class EntryControllerPagingTest {
 
-    private static final String TENANCY = "paging-tenancy";
     private static String journalId;
 
     private static String journalCollection;
@@ -56,11 +55,11 @@ class EntryControllerPagingTest {
     public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired MongoTemplate mongoTemplate) {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
-        journalCollection = TENANCY.concat("_").concat("journals");
+        journalCollection = "PagingTenancy_journals";
         Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").build(), journalCollection);
         journalId = journal.getId();
 
-        entryCollection = TENANCY.concat("_").concat(journal.getName()).concat("_").concat("entries");
+        entryCollection = "PagingTenancy_JOURNAL-1_entries";
         mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(20.00)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(30.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 29, 18, 23, 30)).build(), entryCollection);
@@ -90,7 +89,7 @@ class EntryControllerPagingTest {
     public void mockAccessTokenInfo() {
         when(resolveToken.resolve(any())).thenReturn("token");
         when(tokenReader.getAccessTokenInfo(anyString()))
-                .thenReturn(new AccessTokenInfo("user", 1L, TENANCY, singletonList("ROLE_USER")));
+                .thenReturn(new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER")));
     }
 
     @DisplayName("Entry get 5 items without sort or filter")

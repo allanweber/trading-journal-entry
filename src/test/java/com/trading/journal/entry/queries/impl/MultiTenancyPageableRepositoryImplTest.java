@@ -44,7 +44,7 @@ class MultiTenancyPageableRepositoryImplTest {
     @BeforeAll
     static void setUp() {
         collectionName = new CollectionName(new AccessTokenInfo("subject", 1L, "TENANCY", emptyList()), "my-journal");
-        collection = "TENANCY_my-journal_entries";
+        collection = "Tenancy_my-journal_entries";
     }
 
     @BeforeEach

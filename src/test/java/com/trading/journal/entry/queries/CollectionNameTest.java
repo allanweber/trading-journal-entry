@@ -22,7 +22,7 @@ class CollectionNameTest {
 
         CollectionName collectionName = new CollectionName(accessToken);
 
-        assertThat(collectionName.collectionName(entityInformation)).isEqualTo("TENANCY_collection");
+        assertThat(collectionName.collectionName(entityInformation)).isEqualTo("Tenancy_collection");
     }
 
     @DisplayName("Built name with tenancy name, middle name and entity name")
@@ -35,7 +35,7 @@ class CollectionNameTest {
 
         CollectionName collectionName = new CollectionName(accessToken, "middle.name");
 
-        assertThat(collectionName.collectionName(entityInformation)).isEqualTo("TENANCY_middle.name_collection");
+        assertThat(collectionName.collectionName(entityInformation)).isEqualTo("Tenancy_middle.name_collection");
     }
 
     @DisplayName("Built name with tenancy name, middle name with spaces and entity name")
@@ -48,6 +48,6 @@ class CollectionNameTest {
 
         CollectionName collectionName = new CollectionName(accessToken, " middle . na me ");
 
-        assertThat(collectionName.collectionName(entityInformation)).isEqualTo("TENANCY_middle.name_collection");
+        assertThat(collectionName.collectionName(entityInformation)).isEqualTo("Tenancy_middle.name_collection");
     }
 }

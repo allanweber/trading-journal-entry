@@ -41,7 +41,6 @@ import static org.mockito.Mockito.when;
 @WithCustomMockUser(tenancyName = "paging-tenancy")
 class EntryControllerTest {
 
-    private static final String TENANCY = "paging-tenancy";
     private static String journalId;
 
     private static String journalCollection;
@@ -63,10 +62,10 @@ class EntryControllerTest {
     public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired MongoTemplate mongoTemplate) {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
-        journalCollection = TENANCY.concat("_").concat("journals");
+        journalCollection = "PagingTenancy_journals";
         Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(100)).build(), journalCollection);
         journalId = journal.getId();
-        entryCollection = TENANCY.concat("_").concat(journal.getName()).concat("_").concat("entries");
+        entryCollection = "PagingTenancy_JOURNAL-1_entries";
     }
 
     @AfterAll
@@ -83,7 +82,7 @@ class EntryControllerTest {
     public void mockAccessTokenInfo() {
         when(resolveToken.resolve(any())).thenReturn("token");
         when(tokenReader.getAccessTokenInfo(anyString()))
-                .thenReturn(new AccessTokenInfo("user", 1L, TENANCY, singletonList("ROLE_USER")));
+                .thenReturn(new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER")));
     }
 
     @DisplayName("Get all entries from a journal must be ordered by date")
