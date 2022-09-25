@@ -5,6 +5,7 @@ import com.allanweber.jwttoken.service.JwtResolveToken;
 import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
+import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
@@ -42,6 +43,7 @@ import static org.mockito.Mockito.when;
 class JournalControllerTest {
 
     private static String journalCollection;
+    private static String entryCollection;
 
     @MockBean
     JwtTokenReader tokenReader;
@@ -57,13 +59,14 @@ class JournalControllerTest {
     @BeforeAll
     public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired MongoTemplate mongoTemplate) {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
-
         journalCollection = "PagingTenancy_journals";
+        entryCollection = "PagingTenancy_journal-1_entries";
     }
 
     @AfterEach
     public void afterEach() {
         mongoTemplate.dropCollection(journalCollection);
+        mongoTemplate.dropCollection(entryCollection);
     }
 
     @BeforeEach
@@ -269,5 +272,114 @@ class JournalControllerTest {
 
         assertThat(mongoTemplate.findAll(Journal.class, journalCollection)).isEmpty();
         assertThat(mongoTemplate.collectionExists(entryCollection)).isFalse();
+    }
+
+    @DisplayName("Get journal balance for a journal not found")
+    @Test
+    void getBalanceNotFound() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .pathSegment("{journal-id}/balance")
+                        .build(1))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error")).isEqualTo("Journal not found"));
+    }
+
+    @DisplayName("Get journal balance for a journal with no entries return Zero")
+    @Test
+    void getBalanceNoEntries() {
+        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.ZERO).build(), journalCollection);
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .pathSegment("{journal-id}/balance")
+                        .build(journal.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Balance.class)
+                .value(response -> assertThat(response.getAccountBalance()).isZero());
+    }
+
+    @DisplayName("Get positive balance")
+    @Test
+    void getPositiveBalance() {
+        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.ZERO).build(), journalCollection);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(10)).netResult(BigDecimal.valueOf(123.45)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(8)).netResult(BigDecimal.valueOf(345.67)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(7)).netResult(BigDecimal.valueOf(456.78)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(6)).netResult(BigDecimal.valueOf(-567.89)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(5)).netResult(BigDecimal.valueOf(678.91)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
+
+        //Add some in the future, but won't be considered
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusMinutes(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusMinutes(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .pathSegment("{journal-id}/balance")
+                        .build(journal.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Balance.class)
+                .value(response -> assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(1816.81)));
+    }
+
+    @DisplayName("Get negative balance")
+    @Test
+    void getNegativeBalance() {
+        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.ZERO).build(), journalCollection);
+
+        LocalDateTime now = LocalDateTime.now();
+
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(10)).netResult(BigDecimal.valueOf(123.45)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(8)).netResult(BigDecimal.valueOf(345.67)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(7)).netResult(BigDecimal.valueOf(456.78)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(6)).netResult(BigDecimal.valueOf(-567.89)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(5)).netResult(BigDecimal.valueOf(-678.91)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(3)).netResult(BigDecimal.valueOf(-891.23)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
+
+        //Add some in the future, but won't be considered
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusMinutes(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusMinutes(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .pathSegment("{journal-id}/balance")
+                        .build(journal.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Balance.class)
+                .value(response -> assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(-1323.47)));
     }
 }

@@ -2,6 +2,7 @@ package com.trading.journal.entry.entries.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
+import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.CalculateEntry;
 import com.trading.journal.entry.entries.Entry;
@@ -18,7 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.function.BiFunction;
 
@@ -53,9 +53,9 @@ public class EntryServiceImpl implements EntryService {
 
     @Override
     public Entry save(AccessTokenInfo accessToken, String journalId, Entry entry) {
-        BigDecimal balance = balanceService.getCurrentBalance(accessToken, journalId, entry.getDate());
+        Balance balance = balanceService.getCurrentBalance(accessToken, journalId, entry.getDate());
 
-        CalculateEntry calculateEntry = new CalculateEntry(entry, balance);
+        CalculateEntry calculateEntry = new CalculateEntry(entry, balance.getAccountBalance());
         Entry calculated = calculateEntry.calculate();
 
         CollectionName collectionName = collectionName().apply(accessToken, journalId);

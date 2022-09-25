@@ -2,6 +2,7 @@ package com.trading.journal.entry.entries.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
+import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
@@ -132,7 +133,7 @@ class EntryServiceImplTest {
                 .build();
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(BigDecimal.valueOf(1000));
+        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
@@ -159,7 +160,7 @@ class EntryServiceImplTest {
                 .build();
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(BigDecimal.valueOf(1000));
+        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
@@ -186,7 +187,7 @@ class EntryServiceImplTest {
                 .build();
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(BigDecimal.valueOf(1000));
+        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
@@ -213,7 +214,7 @@ class EntryServiceImplTest {
                 .build();
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(BigDecimal.valueOf(1000));
+        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
