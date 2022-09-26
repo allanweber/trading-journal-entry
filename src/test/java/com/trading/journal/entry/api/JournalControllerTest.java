@@ -25,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
@@ -270,8 +271,40 @@ class JournalControllerTest {
                 .expectStatus()
                 .isOk();
 
-        assertThat(mongoTemplate.findAll(Journal.class, journalCollection)).isEmpty();
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(100.00)).build())
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Journal.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    assertThat(response.getName()).isEqualTo("journal-1");
+                    journalId.set(response.getId());
+                });
+
+        assertThat(mongoTemplate.collectionExists(journalCollection)).isTrue();
         assertThat(mongoTemplate.collectionExists(entryCollection)).isFalse();
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .pathSegment("{journal-id}")
+                        .build(journalId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        assertThat(mongoTemplate.collectionExists(journalCollection)).isFalse();
     }
 
     @DisplayName("Get journal balance for a journal not found")
@@ -319,19 +352,19 @@ class JournalControllerTest {
         LocalDateTime now = LocalDateTime.now();
 
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(10)).netResult(BigDecimal.valueOf(123.45)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(234.56)).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(8)).netResult(BigDecimal.valueOf(345.67)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(7)).netResult(BigDecimal.valueOf(456.78)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(456.78)).date(now.minusDays(7)).netResult(BigDecimal.valueOf(456.78)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(6)).netResult(BigDecimal.valueOf(-567.89)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(5)).netResult(BigDecimal.valueOf(678.91)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(789.12)).date(now.minusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
 
         //Add some in the future, but won't be considered
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusMinutes(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusMinutes(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(-912.34)).date(now.plusMinutes(1)).netResult(BigDecimal.valueOf(-912.34)).build(), entryCollection);
 
         webTestClient
                 .get()
@@ -344,7 +377,13 @@ class JournalControllerTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(Balance.class)
-                .value(response -> assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(1816.81)));
+                .value(response -> {
+                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(1816.81));
+                    assertThat(response.getClosedPositions()).isEqualTo(BigDecimal.valueOf(2383.71));
+                    assertThat(response.getDeposits()).isEqualTo(BigDecimal.valueOf(456.78));
+                    assertThat(response.getTaxes()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.valueOf(1023.68));
+                });
     }
 
     @DisplayName("Get negative balance")
@@ -355,19 +394,19 @@ class JournalControllerTest {
         LocalDateTime now = LocalDateTime.now();
 
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(10)).netResult(BigDecimal.valueOf(123.45)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(8)).netResult(BigDecimal.valueOf(345.67)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TAXES).price(BigDecimal.valueOf(234.56)).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(345.67)).date(now.minusDays(8)).netResult(BigDecimal.valueOf(345.67)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(7)).netResult(BigDecimal.valueOf(456.78)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(6)).netResult(BigDecimal.valueOf(-567.89)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(5)).netResult(BigDecimal.valueOf(-678.91)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(678.91)).date(now.minusDays(5)).netResult(BigDecimal.valueOf(-678.91)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(3)).netResult(BigDecimal.valueOf(-891.23)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(891.23)).date(now.minusDays(3)).netResult(BigDecimal.valueOf(-891.23)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(912.34)).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
 
         //Add some in the future, but won't be considered
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusMinutes(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusMinutes(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(-912.34)).date(now.plusMinutes(1)).netResult(BigDecimal.valueOf(-912.34)).build(), entryCollection);
 
         webTestClient
                 .get()
@@ -380,6 +419,13 @@ class JournalControllerTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(Balance.class)
-                .value(response -> assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(-1323.47)));
+                .value(response -> {
+                            assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(-1323.47));
+                            assertThat(response.getClosedPositions()).isEqualTo(BigDecimal.valueOf(-776.78));
+                            assertThat(response.getDeposits()).isEqualTo(BigDecimal.valueOf(1258.01));
+                            assertThat(response.getTaxes()).isEqualTo(BigDecimal.valueOf(234.56));
+                            assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.valueOf(1570.14));
+                        }
+                );
     }
 }

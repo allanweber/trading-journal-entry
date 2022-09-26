@@ -49,7 +49,12 @@ public class JournalServiceImpl implements JournalService {
         Journal journal = get(accessToken, journalId);
         String entryCollectionName = new CollectionName(accessToken, journal.getName()).collectionName("entries");
         mongoOperations.dropCollection(entryCollectionName);
-        return journalRepository.delete(new CollectionName(accessToken), journal);
+        CollectionName journalCollection = new CollectionName(accessToken);
+        long deleted = journalRepository.delete(journalCollection, journal);
+        if (!journalRepository.hasItems(journalCollection)) {
+            journalRepository.drop(journalCollection);
+        }
+        return deleted;
     }
 
     private boolean hasSameName(AccessTokenInfo accessToken, Journal journal) {

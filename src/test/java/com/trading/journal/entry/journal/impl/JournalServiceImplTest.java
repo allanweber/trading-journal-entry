@@ -104,16 +104,34 @@ class JournalServiceImplTest {
         verify(journalRepository, never()).save(any(), any());
     }
 
-    @DisplayName("Delete a journal")
+    @DisplayName("Delete a journal and do not drop collection because there is more items in it")
     @Test
     void delete() {
         Journal to_delete = Journal.builder().id("123").name("to_delete").build();
         when(journalRepository.getById(collectionName, "123")).thenReturn(Optional.of(to_delete));
         when(journalRepository.delete(collectionName, to_delete)).thenReturn(1L);
+        when(journalRepository.hasItems(collectionName)).thenReturn(true);
+
         long delete = journalService.delete(accessToken, "123");
         assertThat(delete).isPositive();
 
         verify(mongoOperations).dropCollection("Tenancy_to_delete_entries");
+        verify(journalRepository, never()).drop(collectionName);
+    }
+
+    @DisplayName("Delete a journal and drop collection because there is no more items in it")
+    @Test
+    void deleteAndDrop() {
+        Journal to_delete = Journal.builder().id("123").name("to_delete").build();
+        when(journalRepository.getById(collectionName, "123")).thenReturn(Optional.of(to_delete));
+        when(journalRepository.delete(collectionName, to_delete)).thenReturn(1L);
+        when(journalRepository.hasItems(collectionName)).thenReturn(false);
+
+        long delete = journalService.delete(accessToken, "123");
+        assertThat(delete).isPositive();
+
+        verify(mongoOperations).dropCollection("Tenancy_to_delete_entries");
+        verify(journalRepository).drop(collectionName);
     }
 
     @DisplayName("Delete a journal does not exist")
@@ -127,5 +145,8 @@ class JournalServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("Journal not found");
 
         verify(mongoOperations, never()).dropCollection(anyString());
+        verify(journalRepository, never()).delete(any(), any());
+        verify(journalRepository, never()).hasItems(any());
+        verify(journalRepository, never()).drop(any());
     }
 }

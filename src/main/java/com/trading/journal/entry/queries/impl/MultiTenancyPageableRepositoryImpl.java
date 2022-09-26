@@ -83,4 +83,16 @@ public class MultiTenancyPageableRepositoryImpl<T, I extends Serializable> exten
         Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
         return mongoOperations.remove(data, collectionName.collectionName(metadata)).getDeletedCount();
     }
+
+    @Override
+    public boolean hasItems(CollectionName collectionName) {
+        Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
+        return mongoOperations.count(new Query(), metadata.getJavaType(), collectionName.collectionName(metadata)) > 0;
+    }
+
+    @Override
+    public void drop(CollectionName collectionName) {
+        Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
+        mongoOperations.dropCollection(collectionName.collectionName(metadata));
+    }
 }
