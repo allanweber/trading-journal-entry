@@ -9,7 +9,6 @@ import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.QueryCriteriaBuilder;
 import com.trading.journal.entry.queries.data.Filter;
 import com.trading.journal.entry.queries.data.FilterOperation;
 import com.trading.journal.entry.queries.data.PageableRequest;
@@ -19,9 +18,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Objects;
 
 import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
@@ -30,35 +27,29 @@ import static java.util.Optional.ofNullable;
 @Service
 public class BalanceServiceImpl implements BalanceService {
 
-    private static final String DATE = "date";
-
     private final EntryRepository entryRepository;
 
     private final JournalService journalService;
 
     @Override
     public Balance getCurrentBalance(AccessTokenInfo accessToken, String journalId) {
-        return calculateBalance(accessToken, journalId, LocalDateTime.now());
+        return calculateBalance(accessToken, journalId);
     }
 
-    @Override
-    public Balance getCurrentBalance(AccessTokenInfo accessToken, String journalId, LocalDateTime date) {
-        return calculateBalance(accessToken, journalId, date);
-    }
-
-    private Balance calculateBalance(AccessTokenInfo accessToken, String journalId, LocalDateTime date) {
+    private Balance calculateBalance(AccessTokenInfo accessToken, String journalId) {
         Journal journal = journalService.get(accessToken, journalId);
         CollectionName collectionName = new CollectionName(accessToken, journal.getName());
 
         PageableRequest pageableRequest = PageableRequest.builder()
                 .page(0)
                 .size(Integer.MAX_VALUE)
-                .sort(Sort.by(DATE).ascending())
-                .filters(singletonList(Filter.builder().field(DATE).operation(FilterOperation.LESS_THAN_OR_EQUAL_TO).value(date.format(QueryCriteriaBuilder.DATE_FORMATTER)).build()))
+                .sort(Sort.by("date").ascending())
+                .filters(singletonList(
+                        Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("true").build()
+                ))
                 .build();
 
-        List<Entry> entries = entryRepository.findAll(collectionName, pageableRequest).get()
-                .filter(entry -> Objects.nonNull(entry.getNetResult())).toList();
+        List<Entry> entries = entryRepository.findAll(collectionName, pageableRequest).get().toList();
 
         BigDecimal closedPositions = BigDecimal.ZERO;
         BigDecimal deposits = BigDecimal.ZERO;

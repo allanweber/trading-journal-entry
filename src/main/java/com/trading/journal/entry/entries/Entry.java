@@ -10,6 +10,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Document(collection = "entries")
 @NoArgsConstructor
@@ -84,6 +85,10 @@ public class Entry {
      * Calculated fields
      * End
      */
+
+    public boolean isFinished() {
+        return Objects.nonNull(netResult);
+    }
 
     public void clearNonTrade() {
         this.symbol = null;

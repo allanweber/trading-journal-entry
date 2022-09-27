@@ -2,6 +2,7 @@ package com.trading.journal.entry.journal.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
+import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalRepository;
 import com.trading.journal.entry.journal.JournalService;
@@ -13,6 +14,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.Arrays.asList;
@@ -55,6 +57,21 @@ public class JournalServiceImpl implements JournalService {
             journalRepository.drop(journalCollection);
         }
         return deleted;
+    }
+
+    @Override
+    public void updateBalance(AccessTokenInfo accessToken, String journalId, Balance balance) {
+        Journal journal = get(accessToken, journalId);
+
+        Journal toSave = Journal.builder()
+                .id(journal.getId())
+                .name(journal.getName())
+                .startBalance(journal.getStartBalance())
+                .currentBalance(balance)
+                .lastBalance(LocalDateTime.now())
+                .build();
+
+        journalRepository.save(new CollectionName(accessToken), toSave);
     }
 
     private boolean hasSameName(AccessTokenInfo accessToken, Journal journal) {

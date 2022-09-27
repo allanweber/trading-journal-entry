@@ -69,11 +69,8 @@ public class CalculateEntry {
     }
 
     /**
-     * Risk:
-     * accountRisked / accountRisked
-     * Reward:
      * Long: (((Profit - Price) * Size) / ((Price - Loss) * Size)
-     * Long: (((Price - Profit) * Size) / ((Loss - Price))* Size)
+     * Short: (((Price - Profit) * Size) / ((Loss - Price)) * Size)
      */
     private BigDecimal calculatePlannedRR() {
         BigDecimal profit = ofNullable(entry.getProfitPrice()).orElse(BigDecimal.ZERO);

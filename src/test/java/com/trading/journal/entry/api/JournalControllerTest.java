@@ -361,10 +361,10 @@ class JournalControllerTest {
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
 
-        //Add some in the future, but won't be considered
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(-912.34)).date(now.plusMinutes(1)).netResult(BigDecimal.valueOf(-912.34)).build(), entryCollection);
+        //Add some open trades but won't be considered
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).price(BigDecimal.valueOf(-789.12)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(-912.34)).date(now.plusMinutes(1)).build(), entryCollection);
 
         webTestClient
                 .get()
@@ -403,10 +403,10 @@ class JournalControllerTest {
         mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(891.23)).date(now.minusDays(3)).netResult(BigDecimal.valueOf(-891.23)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(912.34)).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
 
-        //Add some in the future, but won't be considered
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(-912.34)).date(now.plusMinutes(1)).netResult(BigDecimal.valueOf(-912.34)).build(), entryCollection);
+        //Add some open trades but won't be considered
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).price(BigDecimal.valueOf(-789.12)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(-912.34)).date(now.plusMinutes(1)).build(), entryCollection);
 
         webTestClient
                 .get()

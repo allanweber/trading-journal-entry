@@ -33,7 +33,6 @@ import java.util.UUID;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -133,9 +132,10 @@ class EntryServiceImplTest {
                 .build();
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
@@ -160,9 +160,10 @@ class EntryServiceImplTest {
                 .build();
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
@@ -187,9 +188,10 @@ class EntryServiceImplTest {
                 .build();
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
@@ -214,9 +216,10 @@ class EntryServiceImplTest {
                 .build();
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId, toSave.getDate())).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
@@ -252,6 +255,6 @@ class EntryServiceImplTest {
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Entry not found");
 
-        verify(repository, never()).delete(any(),any());
+        verify(repository, never()).delete(any(), any());
     }
 }

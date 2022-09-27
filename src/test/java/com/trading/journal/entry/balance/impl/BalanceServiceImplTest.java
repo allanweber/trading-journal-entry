@@ -69,7 +69,9 @@ class BalanceServiceImplTest {
                 .page(0)
                 .size(Integer.MAX_VALUE)
                 .sort(Sort.by("date").ascending())
-                .filters(singletonList(Filter.builder().field("date").operation(FilterOperation.LESS_THAN_OR_EQUAL_TO).value(date.format(QueryCriteriaBuilder.DATE_FORMATTER)).build()))
+                .filters(singletonList(
+                        Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("true").build()
+                ))
                 .build();
 
         List<Entry> entries = asList(
@@ -84,7 +86,7 @@ class BalanceServiceImplTest {
         Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
         when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
 
-        Balance balance = balanceService.getCurrentBalance(accessToken, journalId, date);
+        Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(139.96));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(37.39));
@@ -106,7 +108,9 @@ class BalanceServiceImplTest {
                 .page(0)
                 .size(Integer.MAX_VALUE)
                 .sort(Sort.by("date").ascending())
-                .filters(singletonList(Filter.builder().field("date").operation(FilterOperation.LESS_THAN_OR_EQUAL_TO).value(date.format(QueryCriteriaBuilder.DATE_FORMATTER)).build()))
+                .filters(singletonList(
+                        Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("true").build()
+                ))
                 .build();
 
         List<Entry> entries = asList(
@@ -121,7 +125,7 @@ class BalanceServiceImplTest {
         Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
         when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
 
-        Balance balance = balanceService.getCurrentBalance(accessToken, journalId, date);
+        Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(-44.14));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(-7.95));
@@ -143,7 +147,9 @@ class BalanceServiceImplTest {
                 .page(0)
                 .size(Integer.MAX_VALUE)
                 .sort(Sort.by("date").ascending())
-                .filters(singletonList(Filter.builder().field("date").operation(FilterOperation.LESS_THAN_OR_EQUAL_TO).value(date.format(QueryCriteriaBuilder.DATE_FORMATTER)).build()))
+                .filters(singletonList(
+                        Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("true").build()
+                ))
                 .build();
 
         List<Entry> entries = asList(
@@ -160,7 +166,7 @@ class BalanceServiceImplTest {
         Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
         when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
 
-        Balance balance = balanceService.getCurrentBalance(accessToken, journalId, date);
+        Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(0.01));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(142.45));

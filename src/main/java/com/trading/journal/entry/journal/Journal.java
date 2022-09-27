@@ -1,5 +1,6 @@
 package com.trading.journal.entry.journal;
 
+import com.trading.journal.entry.balance.Balance;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -10,6 +11,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Document(collection = "journals")
 @NoArgsConstructor
@@ -26,4 +28,8 @@ public class Journal {
 
     @NotNull(message = "Start balance is required")
     private BigDecimal startBalance;
+
+    private Balance currentBalance;
+
+    private LocalDateTime lastBalance;
 }
