@@ -6,8 +6,10 @@ import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.balance.Balance;
+import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
+import com.trading.journal.entry.entries.EntryService;
 import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
@@ -43,6 +45,7 @@ import static org.mockito.Mockito.when;
 @WithCustomMockUser(tenancyName = "paging-tenancy")
 class JournalControllerTest {
 
+    public static final AccessTokenInfo TOKEN_INFO = new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER"));
     private static String journalCollection;
     private static String entryCollection;
 
@@ -55,10 +58,13 @@ class JournalControllerTest {
     @Autowired
     MongoTemplate mongoTemplate;
 
+    @Autowired
+    BalanceService balanceService;
+
     private static WebTestClient webTestClient;
 
     @BeforeAll
-    public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired MongoTemplate mongoTemplate) {
+    public static void setUp(@Autowired WebApplicationContext applicationContext) {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
         journalCollection = "PagingTenancy_journals";
         entryCollection = "PagingTenancy_journal-1_entries";
@@ -74,7 +80,7 @@ class JournalControllerTest {
     public void mockAccessTokenInfo() {
         when(resolveToken.resolve(any())).thenReturn("token");
         when(tokenReader.getAccessTokenInfo(anyString()))
-                .thenReturn(new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER")));
+                .thenReturn(TOKEN_INFO);
     }
 
     @DisplayName("Get all journals")
@@ -101,7 +107,7 @@ class JournalControllerTest {
     @DisplayName("Get a journal")
     @Test
     void get() {
-        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").build(), journalCollection);
+        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(150.32)).build(), journalCollection);
 
         webTestClient
                 .get()
@@ -126,16 +132,22 @@ class JournalControllerTest {
                         .path("/journals")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(100.00)).build())
+                .bodyValue(Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(150.32)).build())
                 .exchange()
                 .expectStatus()
                 .isCreated()
                 .expectHeader()
                 .exists("Location")
                 .expectBody(Journal.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    assertThat(response.getName()).isEqualTo("journal-1");
+                .value(journal -> {
+                    assertThat(journal.getId()).isNotNull();
+                    assertThat(journal.getName()).isEqualTo("journal-1");
+                    assertThat(journal.getCurrentBalance().getAccountBalance()).isEqualTo(BigDecimal.valueOf(150.32));
+                    assertThat(journal.getCurrentBalance().getTaxes()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(journal.getCurrentBalance().getWithdrawals()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(journal.getCurrentBalance().getDeposits()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(journal.getCurrentBalance().getClosedPositions()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(journal.getLastBalance()).isBetween(LocalDateTime.now().minusSeconds(5), LocalDateTime.now().plusSeconds(5));
                 });
     }
 
@@ -328,7 +340,17 @@ class JournalControllerTest {
     @DisplayName("Get journal balance for a journal with no entries return Zero")
     @Test
     void getBalanceNoEntries() {
-        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.ZERO).build(), journalCollection);
+        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.ZERO)
+                .currentBalance(
+                        Balance.builder()
+                                .accountBalance(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .build()
+                )
+                .build(), journalCollection);
 
         webTestClient
                 .get()
@@ -347,7 +369,17 @@ class JournalControllerTest {
     @DisplayName("Get positive balance")
     @Test
     void getPositiveBalance() {
-        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.ZERO).build(), journalCollection);
+        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.ZERO)
+                .currentBalance(
+                        Balance.builder()
+                                .accountBalance(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .build()
+                )
+                .build(), journalCollection);
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -365,6 +397,8 @@ class JournalControllerTest {
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).price(BigDecimal.valueOf(-789.12)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(-912.34)).date(now.plusMinutes(1)).build(), entryCollection);
+
+        balanceService.calculateCurrentBalance(TOKEN_INFO, journal.getId());
 
         webTestClient
                 .get()
@@ -389,7 +423,17 @@ class JournalControllerTest {
     @DisplayName("Get negative balance")
     @Test
     void getNegativeBalance() {
-        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.ZERO).build(), journalCollection);
+        Journal journal = mongoTemplate.save(Journal.builder().name("journal-1").startBalance(BigDecimal.ZERO)
+                .currentBalance(
+                        Balance.builder()
+                                .accountBalance(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .build()
+                )
+                .build(), journalCollection);
 
         LocalDateTime now = LocalDateTime.now();
 
@@ -407,6 +451,8 @@ class JournalControllerTest {
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).price(BigDecimal.valueOf(-789.12)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).build(), entryCollection);
         mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(-912.34)).date(now.plusMinutes(1)).build(), entryCollection);
+
+        balanceService.calculateCurrentBalance(TOKEN_INFO, journal.getId());
 
         webTestClient
                 .get()

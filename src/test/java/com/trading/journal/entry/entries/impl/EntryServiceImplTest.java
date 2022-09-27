@@ -98,9 +98,9 @@ class EntryServiceImplTest {
         assertThat(response.getTotalItems()).isPositive();
     }
 
-    @DisplayName("Create a TRADE entry")
+    @DisplayName("Save a TRADE entry")
     @Test
-    void createTrade() {
+    void saveTrade() {
         Entry toSave = Entry.builder()
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .type(EntryType.TRADE)
@@ -139,6 +139,8 @@ class EntryServiceImplTest {
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
+
+        verify(balanceService).calculateCurrentBalance(any(), anyString());
     }
 
     @DisplayName("Create a WITHDRAWAL entry")
@@ -167,6 +169,8 @@ class EntryServiceImplTest {
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
+
+        verify(balanceService).calculateCurrentBalance(any(), anyString());
     }
 
     @DisplayName("Create a TAXES entry")
@@ -195,9 +199,11 @@ class EntryServiceImplTest {
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
+
+        verify(balanceService).calculateCurrentBalance(any(), anyString());
     }
 
-    @DisplayName("Create a TAXES entry")
+    @DisplayName("Create a DEPOSIT entry")
     @Test
     void createDEPOSIT() {
         Entry toSave = Entry.builder()
@@ -223,6 +229,8 @@ class EntryServiceImplTest {
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
+
+        verify(balanceService).calculateCurrentBalance(any(), anyString());
     }
 
     @DisplayName("Delete a entry")
@@ -232,6 +240,7 @@ class EntryServiceImplTest {
         Entry entry = Entry.builder()
                 .type(EntryType.DEPOSIT)
                 .price(BigDecimal.valueOf(234.56))
+                .netResult(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
@@ -241,6 +250,8 @@ class EntryServiceImplTest {
         entryService.delete(accessToken, journalId, entryId);
 
         verify(repository).delete(collectionName, entry);
+
+        verify(balanceService).calculateCurrentBalance(any(), anyString());
     }
 
     @DisplayName("Delete a entry not found return an exception")
@@ -256,5 +267,62 @@ class EntryServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("Entry not found");
 
         verify(repository, never()).delete(any(), any());
+    }
+
+    @DisplayName("Delete a not finished entry, do not balance other entries")
+    @Test
+    void deleteNotFinished() {
+        String entryId = UUID.randomUUID().toString();
+        Entry entry = Entry.builder()
+                .type(EntryType.TRADE)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+
+        entryService.delete(accessToken, journalId, entryId);
+
+        verify(repository).delete(collectionName, entry);
+
+        verify(balanceService, never()).calculateCurrentBalance(any(), anyString());
+    }
+
+    @DisplayName("Save a not finished entry, do not balance other entries")
+    @Test
+    void saveNotFinished() {
+        Entry toSave = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .type(EntryType.TRADE)
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .profitPrice(BigDecimal.valueOf(240))
+                .lossPrice(BigDecimal.valueOf(180))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .type(EntryType.TRADE)
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .profitPrice(BigDecimal.valueOf(240))
+                .lossPrice(BigDecimal.valueOf(180))
+                .accountRisked(BigDecimal.valueOf(0.0400).setScale(4, RoundingMode.HALF_EVEN))
+                .plannedRR(BigDecimal.valueOf(2.00).setScale(2, RoundingMode.HALF_EVEN))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
+
+        Entry entry = entryService.save(accessToken, journalId, toSave);
+        assertThat(entry).isNotNull();
+
+        verify(balanceService, never()).calculateCurrentBalance(any(), anyString());
     }
 }

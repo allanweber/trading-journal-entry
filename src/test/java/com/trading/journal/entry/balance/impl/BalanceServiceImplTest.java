@@ -8,7 +8,6 @@ import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.QueryCriteriaBuilder;
 import com.trading.journal.entry.queries.data.Filter;
 import com.trading.journal.entry.queries.data.FilterOperation;
 import com.trading.journal.entry.queries.data.PageableRequest;
@@ -59,7 +58,6 @@ class BalanceServiceImplTest {
     @DisplayName("Start balance positive and many entries with different net results return a positive balance")
     @Test
     void balancePositive() {
-        LocalDateTime date = LocalDateTime.now();
         String journalId = "123456";
         BigDecimal startBalance = BigDecimal.valueOf(100);
 
@@ -86,7 +84,7 @@ class BalanceServiceImplTest {
         Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
         when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
 
-        Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
+        Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(139.96));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(37.39));
@@ -98,7 +96,6 @@ class BalanceServiceImplTest {
     @DisplayName("Start balance positive and many entries with different net results return a negative balance")
     @Test
     void balanceNegative() {
-        LocalDateTime date = LocalDateTime.now();
         String journalId = "123456";
         BigDecimal startBalance = BigDecimal.valueOf(100);
 
@@ -125,7 +122,7 @@ class BalanceServiceImplTest {
         Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
         when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
 
-        Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
+        Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(-44.14));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(-7.95));
@@ -137,7 +134,6 @@ class BalanceServiceImplTest {
     @DisplayName("Start balance negative and many entries with different net results return a positive balance")
     @Test
     void balancePositiveWithStartBalanceNegative() {
-        LocalDateTime date = LocalDateTime.now();
         String journalId = "123456";
         BigDecimal startBalance = BigDecimal.valueOf(-100);
 
@@ -166,7 +162,7 @@ class BalanceServiceImplTest {
         Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
         when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
 
-        Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
+        Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(0.01));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(142.45));
@@ -175,4 +171,29 @@ class BalanceServiceImplTest {
         assertThat(balance.getWithdrawals()).isEqualTo(BigDecimal.valueOf(101.00).setScale(2, RoundingMode.HALF_EVEN));
     }
 
+    @DisplayName("Get current balance from journal")
+    @Test
+    void getCurrentBalance() {
+        String journalId = "123456";
+        BigDecimal startBalance = BigDecimal.valueOf(-100);
+
+        Balance balance = Balance.builder()
+                .accountBalance(BigDecimal.valueOf(100))
+                .taxes(BigDecimal.valueOf(100))
+                .withdrawals(BigDecimal.valueOf(100))
+                .deposits(BigDecimal.valueOf(100))
+                .closedPositions(BigDecimal.valueOf(100))
+                .build();
+
+        Journal journal = Journal.builder()
+                .name("journal")
+                .startBalance(startBalance)
+                .lastBalance(LocalDateTime.now())
+                .currentBalance(balance)
+                .build();
+        when(journalService.get(accessToken, journalId)).thenReturn(journal);
+
+        Balance currentBalance = balanceService.getCurrentBalance(accessToken, journalId);
+        assertThat(currentBalance).isEqualTo(balance);
+    }
 }

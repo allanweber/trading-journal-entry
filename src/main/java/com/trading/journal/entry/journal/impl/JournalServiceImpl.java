@@ -14,8 +14,11 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 
@@ -43,7 +46,28 @@ public class JournalServiceImpl implements JournalService {
         if (hasSameName(accessToken, journal)) {
             throw new ApplicationException(HttpStatus.CONFLICT, "There is already another journal with the same name");
         }
-        return journalRepository.save(new CollectionName(accessToken), journal);
+        Journal saved;
+        if (Objects.isNull(journal.getCurrentBalance())) {
+            Journal journalWithBalance = Journal.builder()
+                    .id(journal.getId())
+                    .name(journal.getName())
+                    .startBalance(journal.getStartBalance())
+                    .lastBalance(LocalDateTime.now())
+                    .currentBalance(
+                            Balance.builder()
+                                    .accountBalance(journal.getStartBalance().setScale(2, RoundingMode.HALF_EVEN))
+                                    .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                    .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                    .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                    .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                    .build()
+                    )
+                    .build();
+            saved = journalRepository.save(new CollectionName(accessToken), journalWithBalance);
+        } else {
+            saved = journalRepository.save(new CollectionName(accessToken), journal);
+        }
+        return saved;
     }
 
     @Override

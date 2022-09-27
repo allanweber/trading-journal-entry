@@ -19,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -82,7 +83,18 @@ class JournalServiceImplTest {
     @DisplayName("Save a journal")
     @Test
     void save() {
-        Journal to_save = Journal.builder().name("to save").build();
+        Journal to_save = Journal.builder().name("to save").startBalance(BigDecimal.ZERO)
+                .currentBalance(
+                        Balance.builder()
+                                .accountBalance(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .build()
+                )
+                .build();
+
         when(journalRepository.save(collectionName, to_save)).thenReturn(Journal.builder().build());
         Journal journal = journalService.save(accessToken, to_save);
         assertThat(journal).isNotNull();

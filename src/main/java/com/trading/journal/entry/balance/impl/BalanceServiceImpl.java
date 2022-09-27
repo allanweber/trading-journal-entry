@@ -32,8 +32,14 @@ public class BalanceServiceImpl implements BalanceService {
     private final JournalService journalService;
 
     @Override
-    public Balance getCurrentBalance(AccessTokenInfo accessToken, String journalId) {
+    public Balance calculateCurrentBalance(AccessTokenInfo accessToken, String journalId) {
         return calculateBalance(accessToken, journalId);
+    }
+
+    @Override
+    public Balance getCurrentBalance(AccessTokenInfo accessToken, String journalId) {
+        Journal journal = journalService.get(accessToken, journalId);
+        return journal.getCurrentBalance();
     }
 
     private Balance calculateBalance(AccessTokenInfo accessToken, String journalId) {
@@ -73,12 +79,16 @@ public class BalanceServiceImpl implements BalanceService {
 
         BigDecimal accountBalance = journal.getStartBalance().add(closedPositions).add(deposits).subtract(withdrawals).subtract(taxes);
 
-        return Balance.builder()
+        Balance balance = Balance.builder()
                 .accountBalance(accountBalance.setScale(2, RoundingMode.HALF_EVEN))
                 .closedPositions(closedPositions.setScale(2, RoundingMode.HALF_EVEN))
                 .deposits(deposits.setScale(2, RoundingMode.HALF_EVEN))
                 .withdrawals(withdrawals.setScale(2, RoundingMode.HALF_EVEN))
                 .taxes(taxes.setScale(2, RoundingMode.HALF_EVEN))
                 .build();
+
+        journalService.updateBalance(accessToken, journalId, balance);
+
+        return balance;
     }
 }

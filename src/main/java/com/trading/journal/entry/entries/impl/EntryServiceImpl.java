@@ -59,23 +59,25 @@ public class EntryServiceImpl implements EntryService {
         Entry calculated = calculateEntry.calculate();
 
         CollectionName collectionName = collectionName().apply(accessToken, journalId);
-        return repository.save(collectionName, calculated);
-//        if (saved.isFinished()) {
-//            balanceEntries(accessToken, journalId, entry, collectionName);
-//        }
+        Entry saved = repository.save(collectionName, calculated);
+        if (saved.isFinished()) {
+            balanceEntries(accessToken, journalId);
+        }
+        return saved;
     }
 
     @Override
     public void delete(AccessTokenInfo accessToken, String journalId, String entryId) {
         CollectionName collectionName = collectionName().apply(accessToken, journalId);
         Entry entry = get(collectionName, entryId);
-//        if (entry.isFinished()) {
-//            balanceEntries(accessToken, journalId, entry, collectionName);
-//        }
+        if (entry.isFinished()) {
+            balanceEntries(accessToken, journalId);
+        }
         repository.delete(collectionName, entry);
     }
 
-//    private void balanceEntries(AccessTokenInfo accessToken, String journalId, Entry changedEntry, CollectionName collectionName) {
+    private void balanceEntries(AccessTokenInfo accessToken, String journalId) {
+        balanceService.calculateCurrentBalance(accessToken, journalId);
 //        PageableRequest pageableRequest = PageableRequest.builder()
 //                .page(0)
 //                .size(Integer.MAX_VALUE)
@@ -93,7 +95,7 @@ public class EntryServiceImpl implements EntryService {
 //            Entry calculated = calculateEntry.calculate();
 //            repository.save(calculated);
 //        });
-//    }
+    }
 
     private Entry get(CollectionName collectionName, String entryId) {
         return repository.getById(collectionName, entryId)

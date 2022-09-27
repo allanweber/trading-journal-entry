@@ -34,7 +34,7 @@ public interface JournalApi {
     @ApiResponses(@ApiResponse(code = 201, message = "Journal created"))
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<Journal> create(AccessTokenInfo accessTokenInfo, @RequestBody @Valid Journal data);
+    ResponseEntity<Journal> save(AccessTokenInfo accessTokenInfo, @RequestBody @Valid Journal data);
 
     @ApiOperation(notes = "Delete a journal", value = "Delete a journal")
     @ApiResponses(@ApiResponse(code = 200, message = "Journal deleted"))

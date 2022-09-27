@@ -37,7 +37,7 @@ public class JournalController implements JournalApi {
     }
 
     @Override
-    public ResponseEntity<Journal> create(AccessTokenInfo accessTokenInfo, Journal data) {
+    public ResponseEntity<Journal> save(AccessTokenInfo accessTokenInfo, Journal data) {
         Journal created = journalService.save(accessTokenInfo, data);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
         return created(uri).body(created);

@@ -61,7 +61,17 @@ class BalanceIntegratedTest {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
         journalCollection = "PagingTenancy_journals";
-        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(10000)).build(), journalCollection);
+        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(10000))
+                .currentBalance(
+                        Balance.builder()
+                                .accountBalance(BigDecimal.valueOf(10000).setScale(2, RoundingMode.HALF_EVEN))
+                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .build()
+                )
+                .build(), journalCollection);
         journalId = journal.getId();
         entryCollection = "PagingTenancy_JOURNAL-1_entries";
     }
