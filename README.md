@@ -1,5 +1,12 @@
 # Trading Journal Entries
 
+## PENDING
+
+* Add graph type with default minutes, renko and etc
+* Add graph measure how many minutes or ticks and etc
+* Calculate actual RR when trade finishes
+* Calculate actual account risked when trade finishes
+
 ## Swagger
 
 [http://localhost:8081/swagger-ui/index.htm](http://localhost:8081/swagger-ui/index.html)

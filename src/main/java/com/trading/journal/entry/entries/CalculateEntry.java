@@ -15,14 +15,24 @@ public class CalculateEntry {
 
     private final BigDecimal balance;
 
+    @SuppressWarnings("PMD.EmptyIfStmt")
     public Entry calculate() {
         BigDecimal grossResult;
         if (EntryType.TRADE.equals(entry.getType())) {
-            BigDecimal accountRisked = accountRisked();
-            entry.setAccountRisked(accountRisked);
 
-            BigDecimal plannedROR = calculatePlannedRR();
-            entry.setPlannedRR(plannedROR);
+            if (Objects.isNull(entry.getExitPrice()) || Objects.isNull(entry.getAccountRisked())) {
+                BigDecimal accountRisked = accountRisked();
+                entry.setAccountRisked(accountRisked);
+            } else {
+                //TODO: calculate actual RR and risk
+            }
+
+            if (Objects.isNull(entry.getExitPrice()) || Objects.isNull(entry.getPlannedRR())) {
+                BigDecimal plannedROR = calculatePlannedRR();
+                entry.setPlannedRR(plannedROR);
+            } else {
+                //TODO: calculate actual RR and risk
+            }
 
             grossResult = grossResult();
             entry.setGrossResult(grossResult);

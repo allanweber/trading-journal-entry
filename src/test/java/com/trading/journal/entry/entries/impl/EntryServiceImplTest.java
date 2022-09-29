@@ -143,6 +143,49 @@ class EntryServiceImplTest {
         verify(balanceService).calculateCurrentBalance(any(), anyString());
     }
 
+    @DisplayName("Save a TRADE entry and other entries need balance")
+    @Test
+    void saveTradeBalancing() {
+        Entry toSave = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .type(EntryType.TRADE)
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(10))
+                .profitPrice(BigDecimal.valueOf(240))
+                .lossPrice(BigDecimal.valueOf(180))
+                .exitPrice(BigDecimal.valueOf(240))
+                .costs(BigDecimal.valueOf(5.59))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .type(EntryType.TRADE)
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(10))
+                .profitPrice(BigDecimal.valueOf(240))
+                .lossPrice(BigDecimal.valueOf(180))
+                .accountRisked(BigDecimal.valueOf(0.2000).setScale(4, RoundingMode.HALF_EVEN))
+                .plannedRR(BigDecimal.valueOf(2.00).setScale(2, RoundingMode.HALF_EVEN))
+                .exitPrice(BigDecimal.valueOf(240))
+                .costs(BigDecimal.valueOf(5.59))
+                .grossResult(BigDecimal.valueOf(400.00).setScale(2, RoundingMode.HALF_EVEN))
+                .netResult(BigDecimal.valueOf(394.41))
+                .accountChange(BigDecimal.valueOf(0.3944).setScale(4, RoundingMode.HALF_EVEN))
+                .accountBalance(BigDecimal.valueOf(1394.41).setScale(2, RoundingMode.HALF_EVEN))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+
+        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1394.41)).build());
+
+        Entry entry = entryService.save(accessToken, journalId, toSave);
+        assertThat(entry).isNotNull();
+    }
+
     @DisplayName("Create a WITHDRAWAL entry")
     @Test
     void createWITHDRAWAL() {
@@ -163,14 +206,43 @@ class EntryServiceImplTest {
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
         when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
-
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
+
+
         when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
         Entry entry = entryService.save(accessToken, journalId, toSave);
         assertThat(entry).isNotNull();
 
         verify(balanceService).calculateCurrentBalance(any(), anyString());
+    }
+
+    @DisplayName("Create a WITHDRAWAL entry and other entries need balance")
+    @Test
+    void createWITHDRAWALBalancing() {
+        Entry toSave = Entry.builder()
+                .type(EntryType.WITHDRAWAL)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .type(EntryType.WITHDRAWAL)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .netResult(BigDecimal.valueOf(-234.56))
+                .accountChange(BigDecimal.valueOf(-0.2346).setScale(4, RoundingMode.HALF_EVEN))
+                .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+
+        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
+
+        Entry entry = entryService.save(accessToken, journalId, toSave);
+        assertThat(entry).isNotNull();
     }
 
     @DisplayName("Create a TAXES entry")
@@ -203,6 +275,34 @@ class EntryServiceImplTest {
         verify(balanceService).calculateCurrentBalance(any(), anyString());
     }
 
+    @DisplayName("Create a TAXES entry and other entries need balance")
+    @Test
+    void createTAXESBalancing() {
+        Entry toSave = Entry.builder()
+                .type(EntryType.TAXES)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .type(EntryType.TAXES)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .netResult(BigDecimal.valueOf(-234.56))
+                .accountChange(BigDecimal.valueOf(-0.2346).setScale(4, RoundingMode.HALF_EVEN))
+                .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+
+        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
+
+        Entry entry = entryService.save(accessToken, journalId, toSave);
+        assertThat(entry).isNotNull();
+    }
+
     @DisplayName("Create a DEPOSIT entry")
     @Test
     void createDEPOSIT() {
@@ -233,6 +333,34 @@ class EntryServiceImplTest {
         verify(balanceService).calculateCurrentBalance(any(), anyString());
     }
 
+    @DisplayName("Create a DEPOSIT entry and other entries need balance")
+    @Test
+    void createDEPOSITBalancing() {
+        Entry toSave = Entry.builder()
+                .type(EntryType.DEPOSIT)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .type(EntryType.DEPOSIT)
+                .price(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .netResult(BigDecimal.valueOf(234.56))
+                .accountChange(BigDecimal.valueOf(0.2346).setScale(4, RoundingMode.HALF_EVEN))
+                .accountBalance(BigDecimal.valueOf(1234.56).setScale(2, RoundingMode.HALF_EVEN))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+
+        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1234.56)).build());
+
+        Entry entry = entryService.save(accessToken, journalId, toSave);
+        assertThat(entry).isNotNull();
+    }
+
     @DisplayName("Delete a entry")
     @Test
     void delete() {
@@ -246,12 +374,34 @@ class EntryServiceImplTest {
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+        when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
         entryService.delete(accessToken, journalId, entryId);
 
         verify(repository).delete(collectionName, entry);
 
         verify(balanceService).calculateCurrentBalance(any(), anyString());
+    }
+
+    @DisplayName("Delete a entry and other entries need balance")
+    @Test
+    void deleteBalancing() {
+        String entryId = UUID.randomUUID().toString();
+        Entry entry = Entry.builder()
+                .type(EntryType.DEPOSIT)
+                .price(BigDecimal.valueOf(234.56))
+                .netResult(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+
+        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
+
+        entryService.delete(accessToken, journalId, entryId);
+
+        verify(repository).delete(collectionName, entry);
     }
 
     @DisplayName("Delete a entry not found return an exception")

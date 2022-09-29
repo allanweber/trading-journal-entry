@@ -58,43 +58,22 @@ public class EntryServiceImpl implements EntryService {
         CalculateEntry calculateEntry = new CalculateEntry(entry, balance.getAccountBalance());
         Entry calculated = calculateEntry.calculate();
 
-        CollectionName collectionName = collectionName().apply(accessToken, journalId);
-        Entry saved = repository.save(collectionName, calculated);
+        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
+        Entry saved = repository.save(entriesCollection, calculated);
         if (saved.isFinished()) {
-            balanceEntries(accessToken, journalId);
+            balanceService.calculateCurrentBalance(accessToken, journalId);
         }
         return saved;
     }
 
     @Override
     public void delete(AccessTokenInfo accessToken, String journalId, String entryId) {
-        CollectionName collectionName = collectionName().apply(accessToken, journalId);
-        Entry entry = get(collectionName, entryId);
+        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
+        Entry entry = get(entriesCollection, entryId);
+        repository.delete(entriesCollection, entry);
         if (entry.isFinished()) {
-            balanceEntries(accessToken, journalId);
+            balanceService.calculateCurrentBalance(accessToken, journalId);
         }
-        repository.delete(collectionName, entry);
-    }
-
-    private void balanceEntries(AccessTokenInfo accessToken, String journalId) {
-        balanceService.calculateCurrentBalance(accessToken, journalId);
-//        PageableRequest pageableRequest = PageableRequest.builder()
-//                .page(0)
-//                .size(Integer.MAX_VALUE)
-//                .sort(Sort.by("date").ascending())
-//                .filters(singletonList(
-//                        Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("true").build()
-//                ))
-//                .build();
-//
-//        List<Entry> entries = repository.findAll(collectionName, pageableRequest).get().toList();
-//        Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
-//
-//        entries.forEach(entry -> {
-//            CalculateEntry calculateEntry = new CalculateEntry(entry, balance.getAccountBalance());
-//            Entry calculated = calculateEntry.calculate();
-//            repository.save(calculated);
-//        });
     }
 
     private Entry get(CollectionName collectionName, String entryId) {

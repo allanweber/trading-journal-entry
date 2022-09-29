@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -61,6 +62,25 @@ class CalculateEntryPlannedRORTest {
         balance = BigDecimal.valueOf(345.67);
         calculated = new CalculateEntry(entry, balance).calculate();
         assertThat(calculated.getPlannedRR()).isEqualTo(BigDecimal.valueOf(1.24).setScale(2, RoundingMode.HALF_EVEN));
+    }
+
+    @DisplayName("Fishing trade calc planned RR because it is null")
+    @Test
+    void plannedRORNoCalcAgain() {
+        Entry entry = Entry.builder()
+                .direction(EntryDirection.LONG)
+                .type(EntryType.TRADE)
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .profitPrice(BigDecimal.valueOf(240))
+                .lossPrice(BigDecimal.valueOf(180))
+                .exitPrice(BigDecimal.valueOf(240))
+                .exitDate(LocalDateTime.now())
+                .build();
+
+        BigDecimal balance = BigDecimal.valueOf(1000);
+        Entry calculated = new CalculateEntry(entry, balance).calculate();
+        assertThat(calculated.getPlannedRR()).isEqualTo(BigDecimal.valueOf(2.00).setScale(2, RoundingMode.HALF_EVEN));
     }
 
     @DisplayName("Do not calculate planned with profit and loss are null")
