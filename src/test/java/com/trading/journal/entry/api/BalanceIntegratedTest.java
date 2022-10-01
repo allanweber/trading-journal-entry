@@ -892,7 +892,6 @@ class BalanceIntegratedTest {
                     List<Entry> deposits = response.stream().filter(entry -> EntryType.DEPOSIT.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(deposits).hasSize(1);
                 });
-
     }
 
     private static Entry.EntryBuilder rebuildEntryWithId(Entry originalEntry, String id) {

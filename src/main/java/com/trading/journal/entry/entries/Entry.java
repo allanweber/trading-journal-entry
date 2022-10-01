@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.NumberFormat;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
@@ -33,20 +34,26 @@ public class Entry {
 
     @NotNull(message = "Price is required")
     @Positive(message = "Price must be positive")
+    @NumberFormat(pattern = "#0.00")
     private BigDecimal price;
 
     private String symbol;
 
     private EntryDirection direction;
 
+    @NumberFormat(pattern = "#0.00")
     private BigDecimal size;
 
+    @NumberFormat(pattern = "#0.00")
     private BigDecimal profitPrice;
 
+    @NumberFormat(pattern = "#0.00")
     private BigDecimal lossPrice;
 
+    @NumberFormat(pattern = "#0.00")
     private BigDecimal costs;
 
+    @NumberFormat(pattern = "#0.00")
     private BigDecimal exitPrice;
 
     @JsonFormat(pattern = DateHelper.DATE_FORMAT)
@@ -63,21 +70,27 @@ public class Entry {
      * Begin
      */
 
+    @NumberFormat(pattern = "#0.0000")
     @Setter
     private BigDecimal accountRisked;
 
+    @NumberFormat(pattern = "#0.00")
     @Setter
     private BigDecimal plannedRR;
 
+    @NumberFormat(pattern = "#0.00")
     @Setter
     private BigDecimal grossResult;
 
+    @NumberFormat(pattern = "#0.00")
     @Setter
     private BigDecimal netResult;
 
+    @NumberFormat(pattern = "#0.0000")
     @Setter
     private BigDecimal accountChange;
 
+    @NumberFormat(pattern = "#0.00")
     @Setter
     private BigDecimal accountBalance;
 

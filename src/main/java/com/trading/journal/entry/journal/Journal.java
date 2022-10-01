@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.NumberFormat;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -27,6 +28,7 @@ public class Journal {
     private String name;
 
     @NotNull(message = "Start balance is required")
+    @NumberFormat(pattern = "#0.00")
     private BigDecimal startBalance;
 
     private Balance currentBalance;
