@@ -1,5 +1,7 @@
 package com.trading.journal.entry.journal;
 
+import com.allanweber.jwttoken.helper.DateHelper;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.trading.journal.entry.balance.Balance;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -33,5 +35,6 @@ public class Journal {
 
     private Balance currentBalance;
 
+    @JsonFormat(pattern = DateHelper.DATE_FORMAT)
     private LocalDateTime lastBalance;
 }
