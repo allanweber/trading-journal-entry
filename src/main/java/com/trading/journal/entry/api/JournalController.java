@@ -1,6 +1,8 @@
 package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.balance.Balance;
+import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,8 @@ public class JournalController implements JournalApi {
 
     private final JournalService journalService;
 
+    private final BalanceService balanceService;
+
     @Override
     public ResponseEntity<List<Journal>> getAll(AccessTokenInfo accessTokenInfo) {
         List<Journal> journals = journalService.getAll(accessTokenInfo);
@@ -33,7 +37,7 @@ public class JournalController implements JournalApi {
     }
 
     @Override
-    public ResponseEntity<Journal> create(AccessTokenInfo accessTokenInfo, Journal data) {
+    public ResponseEntity<Journal> save(AccessTokenInfo accessTokenInfo, Journal data) {
         Journal created = journalService.save(accessTokenInfo, data);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
         return created(uri).body(created);
@@ -43,5 +47,11 @@ public class JournalController implements JournalApi {
     public ResponseEntity<Journal> delete(AccessTokenInfo accessTokenInfo, String journalId) {
         journalService.delete(accessTokenInfo, journalId);
         return ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Balance> balance(AccessTokenInfo accessTokenInfo, String journalId) {
+        Balance balance = balanceService.getCurrentBalance(accessTokenInfo, journalId);
+        return ok(balance);
     }
 }

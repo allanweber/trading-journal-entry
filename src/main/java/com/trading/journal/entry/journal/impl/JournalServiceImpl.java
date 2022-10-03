@@ -2,6 +2,7 @@ package com.trading.journal.entry.journal.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
+import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalRepository;
 import com.trading.journal.entry.journal.JournalService;
@@ -13,7 +14,11 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 
 import static java.util.Arrays.asList;
 
@@ -41,7 +46,28 @@ public class JournalServiceImpl implements JournalService {
         if (hasSameName(accessToken, journal)) {
             throw new ApplicationException(HttpStatus.CONFLICT, "There is already another journal with the same name");
         }
-        return journalRepository.save(new CollectionName(accessToken), journal);
+        Journal saved;
+        if (Objects.isNull(journal.getCurrentBalance())) {
+            Journal journalWithBalance = Journal.builder()
+                    .id(journal.getId())
+                    .name(journal.getName())
+                    .startBalance(journal.getStartBalance())
+                    .lastBalance(LocalDateTime.now())
+                    .currentBalance(
+                            Balance.builder()
+                                    .accountBalance(journal.getStartBalance().setScale(2, RoundingMode.HALF_EVEN))
+                                    .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                    .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                    .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                    .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                    .build()
+                    )
+                    .build();
+            saved = journalRepository.save(new CollectionName(accessToken), journalWithBalance);
+        } else {
+            saved = journalRepository.save(new CollectionName(accessToken), journal);
+        }
+        return saved;
     }
 
     @Override
@@ -49,7 +75,27 @@ public class JournalServiceImpl implements JournalService {
         Journal journal = get(accessToken, journalId);
         String entryCollectionName = new CollectionName(accessToken, journal.getName()).collectionName("entries");
         mongoOperations.dropCollection(entryCollectionName);
-        return journalRepository.delete(new CollectionName(accessToken), journal);
+        CollectionName journalCollection = new CollectionName(accessToken);
+        long deleted = journalRepository.delete(journalCollection, journal);
+        if (!journalRepository.hasItems(journalCollection)) {
+            journalRepository.drop(journalCollection);
+        }
+        return deleted;
+    }
+
+    @Override
+    public void updateBalance(AccessTokenInfo accessToken, String journalId, Balance balance) {
+        Journal journal = get(accessToken, journalId);
+
+        Journal toSave = Journal.builder()
+                .id(journal.getId())
+                .name(journal.getName())
+                .startBalance(journal.getStartBalance())
+                .currentBalance(balance)
+                .lastBalance(LocalDateTime.now())
+                .build();
+
+        journalRepository.save(new CollectionName(accessToken), toSave);
     }
 
     private boolean hasSameName(AccessTokenInfo accessToken, Journal journal) {

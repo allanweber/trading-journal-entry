@@ -5,6 +5,7 @@ import com.allanweber.jwttoken.service.JwtResolveToken;
 import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
+import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
@@ -63,9 +64,24 @@ class EntryControllerTest {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
         journalCollection = "PagingTenancy_journals";
-        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(100)).build(), journalCollection);
-        journalId = journal.getId();
         entryCollection = "PagingTenancy_JOURNAL-1_entries";
+    }
+
+    @BeforeEach
+    public void cleanJournal() {
+        mongoTemplate.dropCollection(journalCollection);
+        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(100))
+                .currentBalance(
+                        Balance.builder()
+                                .accountBalance(BigDecimal.valueOf(100).setScale(2, RoundingMode.HALF_EVEN))
+                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                                .build()
+                )
+                .build(), journalCollection);
+        journalId = journal.getId();
     }
 
     @AfterAll

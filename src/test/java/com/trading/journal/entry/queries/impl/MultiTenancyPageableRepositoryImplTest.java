@@ -24,6 +24,7 @@ import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -101,5 +102,30 @@ class MultiTenancyPageableRepositoryImplTest {
 
         long count = repository.delete(collectionName, delete);
         assertThat(count).isPositive();
+    }
+
+    @DisplayName("Has items")
+    @Test
+    void hasItems() {
+        when(mongoOperations.count(any(), eq(EntryForTest.class), eq(collection))).thenReturn(1L);
+
+        boolean hasItems = repository.hasItems(collectionName);
+        assertThat(hasItems).isTrue();
+    }
+
+    @DisplayName("Has no items")
+    @Test
+    void hasNoItems() {
+        when(mongoOperations.count(any(), eq(EntryForTest.class), eq(collection))).thenReturn(0L);
+
+        boolean hasItems = repository.hasItems(collectionName);
+        assertThat(hasItems).isFalse();
+    }
+
+    @DisplayName("Drop collection")
+    @Test
+    void drop() {
+        repository.drop(collectionName);
+        verify(mongoOperations).dropCollection(collection);
     }
 }

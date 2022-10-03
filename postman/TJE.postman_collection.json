@@ -36,6 +36,15 @@
 								],
 								"type": "text/javascript"
 							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"pm.collectionVariables.clear();"
+								],
+								"type": "text/javascript"
+							}
 						}
 					],
 					"request": {
@@ -463,6 +472,67 @@
 						}
 					},
 					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(15000.00);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
 				}
 			]
 		},
@@ -478,11 +548,17 @@
 								"exec": [
 									"var moment = require('moment');\r",
 									"\r",
-									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-symbol\", randomSymbol());\r",
-									"pm.collectionVariables.set(\"entry-direction\", randoDirection());\r",
-									"pm.collectionVariables.set(\"entry-price\",_.random(10, 1999, true).toFixed(2));\r",
-									"pm.collectionVariables.set(\"entry-size\",_.random(1, 10, true).toFixed(2));\r",
+									"const entry = \"entry1-\";\r",
+									"\r",
+									"const direction = randoDirection();\r",
+									"const entryPrice = parseFloat( _.random(10, 1999, true).toFixed(2));\r",
+									"const entrySize = parseFloat(_.random(1, 10, true).toFixed(2));\r",
+									"\r",
+									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"pm.collectionVariables.set(entry + \"symbol\", randomSymbol());\r",
+									"pm.collectionVariables.set(entry + \"direction\", direction);\r",
+									"pm.collectionVariables.set(entry + \"price\", entryPrice);\r",
+									"pm.collectionVariables.set(entry + \"size\", entrySize);\r",
 									"\r",
 									"function randomSymbol() {\r",
 									"\tvar textArray = [\r",
@@ -520,13 +596,10 @@
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
 									"\r",
-									"\tpm.collectionVariables.set(\"entry-id\", response.id);\r",
+									"\tpm.collectionVariables.set(\"entry1-id\", response.id);\r",
 									"\r",
-									"\tpm.collectionVariables.set(\"edit-date\", response.date);\r",
-									"\tpm.collectionVariables.set(\"edit-symbol\", response.symbol);\r",
-									"\tpm.collectionVariables.set(\"edit-direction\", response.direction);\r",
-									"\tpm.collectionVariables.set(\"edit-price\", response.price);\r",
-									"\tpm.collectionVariables.set(\"edit-size\", response.size);\r",
+									"\tpm.collectionVariables.set(\"entry1-price\", response.price);\r",
+									"\tpm.collectionVariables.set(\"entry1-size\", response.size);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -544,7 +617,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry-symbol}}\",\r\n\t\"direction\": \"{{entry-direction}}\",\r\n\t\"price\": {{entry-price}},\r\n\t\"size\": {{entry-size}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -573,11 +646,33 @@
 								"exec": [
 									"var moment = require('moment');\r",
 									"\r",
-									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-symbol\", randomSymbol());\r",
-									"pm.collectionVariables.set(\"entry-direction\", randoDirection());\r",
-									"pm.collectionVariables.set(\"entry-price\",_.random(10, 1999, true).toFixed(2));\r",
-									"pm.collectionVariables.set(\"entry-size\",_.random(1, 10, true).toFixed(2));\r",
+									"const entry = \"entry2-\";\r",
+									"\r",
+									"const direction = randoDirection();\r",
+									"const entryPrice = parseFloat( _.random(10, 1999, true).toFixed(2));\r",
+									"const entrySize = parseFloat(_.random(1, 10, true).toFixed(2));\r",
+									"\r",
+									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"pm.collectionVariables.set(entry + \"symbol\", randomSymbol());\r",
+									"pm.collectionVariables.set(entry + \"direction\", direction);\r",
+									"pm.collectionVariables.set(entry + \"price\", entryPrice);\r",
+									"pm.collectionVariables.set(entry + \"size\", entrySize);\r",
+									"\r",
+									"var profitPrice = 0.00;\r",
+									"var lossPrice = 0.00;\r",
+									"if(direction == 'LONG') {\r",
+									"\tprofitPrice = (entryPrice * 1.25).toFixed(2);\r",
+									"\tlossPrice = (entryPrice * 0.85).toFixed(2);\r",
+									"} else {\r",
+									"\tprofitPrice = (entryPrice * 0.85).toFixed(2);\r",
+									"\tlossPrice = (entryPrice * 1.25).toFixed(2);\r",
+									"}\r",
+									"\r",
+									"const costs = (entryPrice * 0.001).toFixed(2);\r",
+									"\r",
+									"pm.collectionVariables.set(entry + \"profitPrice\", profitPrice);\r",
+									"pm.collectionVariables.set(entry + \"lossPrice\",  lossPrice);\r",
+									"pm.collectionVariables.set(entry + \"costs\", costs);\r",
 									"\r",
 									"function randomSymbol() {\r",
 									"\tvar textArray = [\r",
@@ -614,6 +709,14 @@
 									"    const response = pm.response.json();\r",
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"entry2-id\", response.id);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"entry2-price\", response.price);\r",
+									"\tpm.collectionVariables.set(\"entry2-size\", response.size);\r",
+									"\tpm.collectionVariables.set(\"entry2-profitPrice\", response.profitPrice);\r",
+									"\tpm.collectionVariables.set(\"entry2-lossPrice\", response.lossPrice);\r",
+									"\tpm.collectionVariables.set(\"entry2-costs\", response.costs);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -631,7 +734,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry-symbol}}\",\r\n\t\"direction\": \"{{entry-direction}}\",\r\n\t\"price\": {{entry-price}},\r\n\t\"size\": {{entry-size}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry2-symbol}}\",\r\n\t\"direction\": \"{{entry2-direction}}\",\r\n\t\"price\": {{entry2-price}},\r\n\t\"size\": {{entry2-size}},\r\n\t\"profitPrice\": {{entry2-profitPrice}},\r\n\t\"lossPrice\": {{entry2-lossPrice}},\r\n\t\"costs\": {{entry2-costs}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -660,11 +763,33 @@
 								"exec": [
 									"var moment = require('moment');\r",
 									"\r",
-									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-symbol\", randomSymbol());\r",
-									"pm.collectionVariables.set(\"entry-direction\", randoDirection());\r",
-									"pm.collectionVariables.set(\"entry-price\",_.random(10, 1999, true).toFixed(2));\r",
-									"pm.collectionVariables.set(\"entry-size\",_.random(1, 10, true).toFixed(2));\r",
+									"const entry = \"entry3-\";\r",
+									"\r",
+									"const direction = randoDirection();\r",
+									"const entryPrice = parseFloat( _.random(10, 1999, true).toFixed(2));\r",
+									"const entrySize = parseFloat(_.random(1, 10, true).toFixed(2));\r",
+									"\r",
+									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"pm.collectionVariables.set(entry + \"symbol\", randomSymbol());\r",
+									"pm.collectionVariables.set(entry + \"direction\", direction);\r",
+									"pm.collectionVariables.set(entry + \"price\", entryPrice);\r",
+									"pm.collectionVariables.set(entry + \"size\", entrySize);\r",
+									"\r",
+									"var profitPrice = 0.00;\r",
+									"var lossPrice = 0.00;\r",
+									"if(direction == 'LONG') {\r",
+									"\tprofitPrice = (entryPrice * 1.25).toFixed(2);\r",
+									"\tlossPrice = (entryPrice * 0.85).toFixed(2);\r",
+									"} else {\r",
+									"\tprofitPrice = (entryPrice * 0.85).toFixed(2);\r",
+									"\tlossPrice = (entryPrice * 1.25).toFixed(2);\r",
+									"}\r",
+									"\r",
+									"const costs = (entryPrice * 0.001).toFixed(2);\r",
+									"\r",
+									"pm.collectionVariables.set(entry + \"profitPrice\", profitPrice);\r",
+									"pm.collectionVariables.set(entry + \"lossPrice\",  lossPrice);\r",
+									"pm.collectionVariables.set(entry + \"costs\", costs);\r",
 									"\r",
 									"function randomSymbol() {\r",
 									"\tvar textArray = [\r",
@@ -701,6 +826,14 @@
 									"    const response = pm.response.json();\r",
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"entry3-id\", response.id);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"entry3-price\", response.price);\r",
+									"\tpm.collectionVariables.set(\"entry3-size\", response.size);\r",
+									"\tpm.collectionVariables.set(\"entry3-profitPrice\", response.profitPrice);\r",
+									"\tpm.collectionVariables.set(\"entry3-lossPrice\", response.lossPrice);\r",
+									"\tpm.collectionVariables.set(\"entry3-costs\", response.costs);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -718,7 +851,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry-symbol}}\",\r\n\t\"direction\": \"{{entry-direction}}\",\r\n\t\"price\": {{entry-price}},\r\n\t\"size\": {{entry-size}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry3-symbol}}\",\r\n\t\"direction\": \"{{entry3-direction}}\",\r\n\t\"price\": {{entry3-price}},\r\n\t\"size\": {{entry3-size}},\r\n\t\"profitPrice\": {{entry3-profitPrice}},\r\n\t\"lossPrice\": {{entry3-lossPrice}},\r\n\t\"costs\": {{entry3-costs}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -747,8 +880,9 @@
 								"exec": [
 									"var moment = require('moment');\r",
 									"\r",
+									"const entryPrice = parseFloat( _.random(10, 1999, true)).toFixed(2);\r",
 									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-price\",_.random(10, 1999, true).toFixed(2));"
+									"pm.collectionVariables.set(\"entry-price\", entryPrice);"
 								],
 								"type": "text/javascript"
 							}
@@ -765,6 +899,12 @@
 									"    const response = pm.response.json();\r",
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tconst accountBalance = response.netResult;\r",
+									"\tconst deposits = response.price;\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance);\r",
+									"\tpm.collectionVariables.set(\"deposits\", deposits);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -811,8 +951,9 @@
 								"exec": [
 									"var moment = require('moment');\r",
 									"\r",
+									"const entryPrice = parseFloat( _.random(10, 1999, true)).toFixed(2);\r",
 									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-price\",_.random(10, 1999, true).toFixed(2));"
+									"pm.collectionVariables.set(\"entry-price\", entryPrice);"
 								],
 								"type": "text/javascript"
 							}
@@ -829,6 +970,12 @@
 									"    const response = pm.response.json();\r",
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) + parseFloat(response.netResult);\r",
+									"\tconst taxes = response.price;\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance);\r",
+									"\tpm.collectionVariables.set(\"taxes\", taxes);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -875,8 +1022,9 @@
 								"exec": [
 									"var moment = require('moment');\r",
 									"\r",
+									"const entryPrice = parseFloat( _.random(10, 1999, true)).toFixed(2);\r",
 									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-price\",_.random(10, 1999, true).toFixed(2));"
+									"pm.collectionVariables.set(\"entry-price\", entryPrice);"
 								],
 								"type": "text/javascript"
 							}
@@ -893,6 +1041,12 @@
 									"    const response = pm.response.json();\r",
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) + parseFloat(response.netResult);\r",
+									"\tconst withdrawals = response.price;\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance);\r",
+									"\tpm.collectionVariables.set(\"withdrawals\", withdrawals);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -937,33 +1091,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"var moment = require('moment');\r",
-									"\r",
-									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-symbol\", randomSymbol());\r",
-									"pm.collectionVariables.set(\"entry-direction\", randoDirection());\r",
-									"pm.collectionVariables.set(\"entry-price\",_.random(10, 1999, true).toFixed(2));\r",
-									"pm.collectionVariables.set(\"entry-size\",_.random(10, 100, true).toFixed(2));\r",
-									"\r",
-									"function randomSymbol() {\r",
-									"\tvar textArray = [\r",
-									"    'AAPL',\r",
-									"    'MSFT',\r",
-									"\t'AMZN',\r",
-									"\t'TSLA',\r",
-									"\t'GOOGL',\r",
-									"\t'NVDA',\r",
-									"\t'META'\r",
-									"\t];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}\r",
-									"\r",
-									"function randoDirection() {\r",
-									"\tvar textArray = ['LONG', 'SHORT'];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -1015,25 +1143,27 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"const direction = pm.collectionVariables.get(\"edit-direction\");\r",
+									"const direction = pm.collectionVariables.get(\"entry1-direction\");\r",
 									"\r",
-									"const entryPrice = parseFloat(pm.collectionVariables.get(\"edit-price\")).toFixed(2);\r",
+									"const entry = \"entry1-\";\r",
 									"\r",
-									"var profitPrice;\r",
-									"var lossPrice;\r",
+									"const entryPrice = parseFloat(pm.collectionVariables.get(entry + \"price\"));\r",
+									"\r",
+									"var profitPrice = 0.00;\r",
+									"var lossPrice = 0.00;\r",
 									"if(direction == 'LONG') {\r",
-									"\tprofitPrice = parseFloat(entryPrice) + parseFloat(Math.round(entryPrice * 0.2).toFixed(2));\r",
-									"\tlossPrice = entryPrice - Math.round(entryPrice * 0.1).toFixed(2);\r",
+									"\tprofitPrice = (entryPrice * 1.25).toFixed(2);\r",
+									"\tlossPrice = (entryPrice * 0.85).toFixed(2);\r",
 									"} else {\r",
-									"\tprofitPrice = entryPrice - Math.round(entryPrice * 0.15).toFixed(2);\r",
-									"\tlossPrice = entryPrice + parseFloat(Math.round(entryPrice * 0.1).toFixed(2));\r",
+									"\tprofitPrice = (entryPrice * 0.85).toFixed(2);\r",
+									"\tlossPrice = (entryPrice * 1.25).toFixed(2);\r",
 									"}\r",
 									"\r",
-									"const costs = Math.round(entryPrice * 0.01).toFixed(2);\r",
+									"const costs = (entryPrice * 0.001).toFixed(2);\r",
 									"\r",
-									"pm.collectionVariables.set(\"profitPrice\", profitPrice);\r",
-									"pm.collectionVariables.set(\"lossPrice\", lossPrice);\r",
-									"pm.collectionVariables.set(\"costs\", costs);"
+									"pm.collectionVariables.set(entry + \"profitPrice\", profitPrice);\r",
+									"pm.collectionVariables.set(entry + \"lossPrice\",  lossPrice);\r",
+									"pm.collectionVariables.set(entry + \"costs\", costs);"
 								],
 								"type": "text/javascript"
 							}
@@ -1049,7 +1179,13 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry-id\"));\r",
+									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry1-id\"));\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"entry1-price\", response.price);\r",
+									"\tpm.collectionVariables.set(\"entry1-size\", response.size);\r",
+									"\tpm.collectionVariables.set(\"entry1-profitPrice\", response.profitPrice);\r",
+									"\tpm.collectionVariables.set(\"entry1-lossPrice\", response.lossPrice);\r",
+									"\tpm.collectionVariables.set(\"entry1-costs\", response.costs);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1067,7 +1203,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry-id}}\",\r\n\t\"date\": \"{{edit-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{edit-symbol}}\",\r\n\t\"direction\": \"{{edit-direction}}\",\r\n\t\"price\": {{edit-price}},\r\n\t\"size\": {{edit-size}},\r\n\t\"profitPrice\": {{profitPrice}},\r\n\t\"lossPrice\": {{lossPrice}},\r\n\t\"costs\": {{costs}}\r\n}",
+							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"profitPrice\": {{entry1-profitPrice}},\r\n\t\"lossPrice\": {{entry1-lossPrice}},\r\n\t\"costs\": {{entry1-costs}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1094,33 +1230,7 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									"var moment = require('moment');\r",
-									"\r",
-									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-symbol\", randomSymbol());\r",
-									"pm.collectionVariables.set(\"entry-direction\", randoDirection());\r",
-									"pm.collectionVariables.set(\"entry-price\",_.random(10, 1999, true).toFixed(2));\r",
-									"pm.collectionVariables.set(\"entry-size\",_.random(10, 100, true).toFixed(2));\r",
-									"\r",
-									"function randomSymbol() {\r",
-									"\tvar textArray = [\r",
-									"    'AAPL',\r",
-									"    'MSFT',\r",
-									"\t'AMZN',\r",
-									"\t'TSLA',\r",
-									"\t'GOOGL',\r",
-									"\t'NVDA',\r",
-									"\t'META'\r",
-									"\t];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}\r",
-									"\r",
-									"function randoDirection() {\r",
-									"\tvar textArray = ['LONG', 'SHORT'];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}"
+									""
 								],
 								"type": "text/javascript"
 							}
@@ -1173,12 +1283,12 @@
 							"script": {
 								"exec": [
 									"var moment = require('moment');\r",
-									"pm.collectionVariables.set(\"exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"pm.collectionVariables.set(\"entry1-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
 									"\r",
-									"const profitPrice = parseFloat(pm.collectionVariables.get(\"profitPrice\")).toFixed(2);\r",
-									"const exitPrice = profitPrice - Math.round(profitPrice * 0.01).toFixed(2);\r",
+									"const profitPrice = parseFloat(pm.collectionVariables.get(\"entry1-profitPrice\"));\r",
+									"const exitPrice = profitPrice;\r",
 									"\r",
-									"pm.collectionVariables.set(\"exitPrice\", exitPrice);"
+									"pm.collectionVariables.set(\"entry1-exitPrice\", exitPrice);"
 								],
 								"type": "text/javascript"
 							}
@@ -1194,7 +1304,15 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry-id\"));\r",
+									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry1-id\"));\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"entry1-netResult\", parseFloat(response.netResult));\r",
+									"\r",
+									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) +  parseFloat(response.netResult);\r",
+									"\tconst closedPositions = parseFloat(response.netResult);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance.toFixed(2));\r",
+									"\tpm.collectionVariables.set(\"closedPositions\", closedPositions.toFixed(2));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1212,7 +1330,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry-id}}\",\r\n\t\"date\": \"{{edit-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{edit-symbol}}\",\r\n\t\"direction\": \"{{edit-direction}}\",\r\n\t\"price\": {{edit-price}},\r\n\t\"size\": {{edit-size}},\r\n\t\"profitPrice\": {{profitPrice}},\r\n\t\"lossPrice\": {{lossPrice}},\r\n\t\"costs\": {{costs}},\r\n\t\"exitPrice\": {{exitPrice}},\r\n\t\"exitDate\": \"{{exitDate}}\"\r\n}",
+							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"profitPrice\": {{entry1-profitPrice}},\r\n\t\"lossPrice\": {{entry1-lossPrice}},\r\n\t\"costs\": {{entry1-costs}},\r\n\t\"exitPrice\": {{entry1-exitPrice}},\r\n\t\"exitDate\": \"{{entry1-exitDate}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1231,12 +1349,407 @@
 						}
 					},
 					"response": []
-				}
-			]
-		},
-		{
-			"name": "Clean Test",
-			"item": [
+				},
+				{
+					"name": "Exit Trade Entry 2 Losing",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"pm.collectionVariables.set(\"entry2-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"\r",
+									"const lossPrice = pm.collectionVariables.get(\"entry2-lossPrice\");\r",
+									"const exitPrice = lossPrice;\r",
+									"\r",
+									"pm.collectionVariables.set(\"entry2-exitPrice\", exitPrice);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry2-id\"));\r",
+									"\r",
+									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) + parseFloat(response.netResult);\r",
+									"\tconst closedPositions = parseFloat(pm.collectionVariables.get(\"closedPositions\")) + parseFloat(response.netResult);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance.toFixed(2));\r",
+									"\tpm.collectionVariables.set(\"closedPositions\", closedPositions.toFixed(2));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"id\": \"{{entry2-id}}\",\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry2-symbol}}\",\r\n\t\"direction\": \"{{entry2-direction}}\",\r\n\t\"price\": {{entry2-price}},\r\n\t\"size\": {{entry2-size}},\r\n\t\"profitPrice\": {{entry2-profitPrice}},\r\n\t\"lossPrice\": {{entry2-lossPrice}},\r\n\t\"costs\": {{entry2-costs}},\r\n\t\"exitPrice\": {{entry2-exitPrice}},\r\n\t\"exitDate\": \"{{entry2-exitDate}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Exit Trade Entry 3 Winning",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"pm.collectionVariables.set(\"entry3-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"\r",
+									"const profitPrice = parseFloat(pm.collectionVariables.get(\"entry3-profitPrice\"));\r",
+									"const exitPrice = profitPrice;\r",
+									"\r",
+									"pm.collectionVariables.set(\"entry3-exitPrice\", exitPrice);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry3-id\"));\r",
+									"\r",
+									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) + parseFloat(response.netResult);\r",
+									"\tconst closedPositions = parseFloat(pm.collectionVariables.get(\"closedPositions\")) + parseFloat(response.netResult);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance.toFixed(2));\r",
+									"\tpm.collectionVariables.set(\"closedPositions\", closedPositions.toFixed(2));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"id\": \"{{entry3-id}}\",\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry3-symbol}}\",\r\n\t\"direction\": \"{{entry3-direction}}\",\r\n\t\"price\": {{entry3-price}},\r\n\t\"size\": {{entry3-size}},\r\n\t\"profitPrice\": {{entry3-profitPrice}},\r\n\t\"lossPrice\": {{entry3-lossPrice}},\r\n\t\"costs\": {{entry3-costs}},\r\n\t\"exitPrice\": {{entry3-exitPrice}},\r\n\t\"exitDate\": \"{{entry3-exitDate}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\"));\r",
+									"\tconst closedPositions = parseFloat(pm.collectionVariables.get(\"closedPositions\"));\r",
+									"\tconst deposits = parseFloat(pm.collectionVariables.get(\"deposits\"));\r",
+									"\tconst taxes = parseFloat(pm.collectionVariables.get(\"taxes\"));\r",
+									"\tconst withdrawals = parseFloat(pm.collectionVariables.get(\"withdrawals\"));\r",
+									"\r",
+									"\tconst balance = parseFloat(response.startBalance) + parseFloat(accountBalance);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(balance);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(closedPositions);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(deposits);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(taxes);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(withdrawals);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Entry 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"pm.collectionVariables.set(\"entry1-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"\r",
+									"const profitPrice = parseFloat(pm.collectionVariables.get(\"entry1-profitPrice\")).toFixed(2);\r",
+									"const exitPrice = profitPrice;\r",
+									"\r",
+									"pm.collectionVariables.set(\"entry1-exitPrice\", exitPrice);"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"\r",
+									"\tconst entryNetResult = parseFloat(pm.collectionVariables.get(\"entry1-netResult\"));\r",
+									"\r",
+									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) - parseFloat(entryNetResult);\r",
+									"\tconst closedPositions = parseFloat(pm.collectionVariables.get(\"closedPositions\")) - parseFloat(entryNetResult);\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance.toFixed(2));\r",
+									"\tpm.collectionVariables.set(\"closedPositions\", closedPositions.toFixed(2));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}/{{entry1-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}",
+								"{{entry1-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Entries",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(5);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\"));\r",
+									"\tconst closedPositions = parseFloat(pm.collectionVariables.get(\"closedPositions\"));\r",
+									"\tconst deposits = parseFloat(pm.collectionVariables.get(\"deposits\"));\r",
+									"\tconst taxes = parseFloat(pm.collectionVariables.get(\"taxes\"));\r",
+									"\tconst withdrawals = parseFloat(pm.collectionVariables.get(\"withdrawals\"));\r",
+									"\r",
+									"\tconst balance = parseFloat(response.startBalance) + parseFloat(accountBalance);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(balance);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(closedPositions);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(deposits);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(taxes);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(withdrawals);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
 				{
 					"name": "Delete Journal",
 					"event": [
@@ -1283,7 +1796,12 @@
 						}
 					},
 					"response": []
-				},
+				}
+			]
+		},
+		{
+			"name": "Clean Test",
+			"item": [
 				{
 					"name": "Get  Tenancy by User email",
 					"event": [
@@ -1495,46 +2013,6 @@
 	],
 	"variable": [
 		{
-			"key": "access-token",
-			"value": ""
-		},
-		{
-			"key": "refresh-token",
-			"value": ""
-		},
-		{
-			"key": "entry-date",
-			"value": ""
-		},
-		{
-			"key": "entry-symbol",
-			"value": ""
-		},
-		{
-			"key": "entry-direction",
-			"value": ""
-		},
-		{
-			"key": "user-price",
-			"value": ""
-		},
-		{
-			"key": "entry-price",
-			"value": ""
-		},
-		{
-			"key": "journal-id",
-			"value": ""
-		},
-		{
-			"key": "entry-size",
-			"value": ""
-		},
-		{
-			"key": "entry-id",
-			"value": ""
-		},
-		{
 			"key": "access-token-admin",
 			"value": ""
 		},
@@ -1567,43 +2045,179 @@
 			"value": ""
 		},
 		{
-			"key": "edit-date",
+			"key": "access-token",
 			"value": ""
 		},
 		{
-			"key": "edit-symbol",
+			"key": "refresh-token",
 			"value": ""
 		},
 		{
-			"key": "edit-direction",
+			"key": "journal-id",
 			"value": ""
 		},
 		{
-			"key": "edit-price",
+			"key": "entry1-date",
 			"value": ""
 		},
 		{
-			"key": "edit-size",
+			"key": "entry1-symbol",
 			"value": ""
 		},
 		{
-			"key": "profitPrice",
+			"key": "entry1-direction",
 			"value": ""
 		},
 		{
-			"key": "lossPrice",
+			"key": "entry1-price",
 			"value": ""
 		},
 		{
-			"key": "costs",
+			"key": "entry1-size",
 			"value": ""
 		},
 		{
-			"key": "exitDate",
+			"key": "entry1-id",
 			"value": ""
 		},
 		{
-			"key": "exitPrice",
+			"key": "entry2-date",
+			"value": ""
+		},
+		{
+			"key": "entry2-symbol",
+			"value": ""
+		},
+		{
+			"key": "entry2-direction",
+			"value": ""
+		},
+		{
+			"key": "entry2-price",
+			"value": ""
+		},
+		{
+			"key": "entry2-size",
+			"value": ""
+		},
+		{
+			"key": "entry2-profitPrice",
+			"value": ""
+		},
+		{
+			"key": "entry2-lossPrice",
+			"value": ""
+		},
+		{
+			"key": "entry2-costs",
+			"value": ""
+		},
+		{
+			"key": "entry2-id",
+			"value": ""
+		},
+		{
+			"key": "entry3-date",
+			"value": ""
+		},
+		{
+			"key": "entry3-symbol",
+			"value": ""
+		},
+		{
+			"key": "entry3-direction",
+			"value": ""
+		},
+		{
+			"key": "entry3-price",
+			"value": ""
+		},
+		{
+			"key": "entry3-size",
+			"value": ""
+		},
+		{
+			"key": "entry3-profitPrice",
+			"value": ""
+		},
+		{
+			"key": "entry3-lossPrice",
+			"value": ""
+		},
+		{
+			"key": "entry3-costs",
+			"value": ""
+		},
+		{
+			"key": "entry3-id",
+			"value": ""
+		},
+		{
+			"key": "entry-date",
+			"value": ""
+		},
+		{
+			"key": "entry-price",
+			"value": ""
+		},
+		{
+			"key": "accountBalance",
+			"value": ""
+		},
+		{
+			"key": "deposits",
+			"value": ""
+		},
+		{
+			"key": "taxes",
+			"value": ""
+		},
+		{
+			"key": "withdrawals",
+			"value": ""
+		},
+		{
+			"key": "entry1-profitPrice",
+			"value": ""
+		},
+		{
+			"key": "entry1-lossPrice",
+			"value": ""
+		},
+		{
+			"key": "entry1-costs",
+			"value": ""
+		},
+		{
+			"key": "entry1-exitDate",
+			"value": ""
+		},
+		{
+			"key": "entry1-exitPrice",
+			"value": ""
+		},
+		{
+			"key": "entry1-netResult",
+			"value": ""
+		},
+		{
+			"key": "closedPositions",
+			"value": ""
+		},
+		{
+			"key": "entry2-exitDate",
+			"value": ""
+		},
+		{
+			"key": "entry2-exitPrice",
+			"value": ""
+		},
+		{
+			"key": "entry3-exitDate",
+			"value": ""
+		},
+		{
+			"key": "entry3-exitPrice",
 			"value": ""
 		},
 		{

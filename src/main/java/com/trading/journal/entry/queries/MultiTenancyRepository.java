@@ -20,4 +20,8 @@ public interface MultiTenancyRepository<T, I extends Serializable> extends Mongo
     T save(CollectionName collectionName, T data);
 
     long delete(CollectionName collectionName, T data);
+
+    boolean hasItems(CollectionName collectionName);
+
+    void drop(CollectionName collectionName);
 }

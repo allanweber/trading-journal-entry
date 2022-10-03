@@ -1,15 +1,20 @@
 package com.trading.journal.entry.journal;
 
+import com.allanweber.jwttoken.helper.DateHelper;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.trading.journal.entry.balance.Balance;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.format.annotation.NumberFormat;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Document(collection = "journals")
 @NoArgsConstructor
@@ -25,5 +30,11 @@ public class Journal {
     private String name;
 
     @NotNull(message = "Start balance is required")
+    @NumberFormat(pattern = "#0.00")
     private BigDecimal startBalance;
+
+    private Balance currentBalance;
+
+    @JsonFormat(pattern = DateHelper.DATE_FORMAT)
+    private LocalDateTime lastBalance;
 }
