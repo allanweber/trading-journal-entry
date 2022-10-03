@@ -7,10 +7,7 @@ import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.balance.BalanceService;
-import com.trading.journal.entry.entries.Entry;
-import com.trading.journal.entry.entries.EntryDirection;
-import com.trading.journal.entry.entries.EntryService;
-import com.trading.journal.entry.entries.EntryType;
+import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -250,6 +247,8 @@ class JournalControllerTest {
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(1.1234))
                 .size(BigDecimal.valueOf(500.00))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure(1)
                 .build();
 
         webTestClient

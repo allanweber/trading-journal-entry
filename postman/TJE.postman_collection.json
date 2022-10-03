@@ -559,6 +559,8 @@
 									"pm.collectionVariables.set(entry + \"direction\", direction);\r",
 									"pm.collectionVariables.set(entry + \"price\", entryPrice);\r",
 									"pm.collectionVariables.set(entry + \"size\", entrySize);\r",
+									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
+									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
 									"\r",
 									"function randomSymbol() {\r",
 									"\tvar textArray = [\r",
@@ -576,6 +578,12 @@
 									"\r",
 									"function randoDirection() {\r",
 									"\tvar textArray = ['LONG', 'SHORT'];\r",
+									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
+									"\treturn  textArray[randomNumber];\r",
+									"}\r",
+									"\r",
+									"function randoGraph() {\r",
+									"\tvar textArray = ['CANDLESTICK','RENKO','KAGI','LINE'];\r",
 									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
 									"\treturn  textArray[randomNumber];\r",
 									"}"
@@ -617,7 +625,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -657,6 +665,8 @@
 									"pm.collectionVariables.set(entry + \"direction\", direction);\r",
 									"pm.collectionVariables.set(entry + \"price\", entryPrice);\r",
 									"pm.collectionVariables.set(entry + \"size\", entrySize);\r",
+									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
+									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
 									"\r",
 									"var profitPrice = 0.00;\r",
 									"var lossPrice = 0.00;\r",
@@ -690,6 +700,12 @@
 									"\r",
 									"function randoDirection() {\r",
 									"\tvar textArray = ['LONG', 'SHORT'];\r",
+									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
+									"\treturn  textArray[randomNumber];\r",
+									"}\r",
+									"\r",
+									"function randoGraph() {\r",
+									"\tvar textArray = ['CANDLESTICK','RENKO','KAGI','LINE'];\r",
 									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
 									"\treturn  textArray[randomNumber];\r",
 									"}"
@@ -734,7 +750,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry2-symbol}}\",\r\n\t\"direction\": \"{{entry2-direction}}\",\r\n\t\"price\": {{entry2-price}},\r\n\t\"size\": {{entry2-size}},\r\n\t\"profitPrice\": {{entry2-profitPrice}},\r\n\t\"lossPrice\": {{entry2-lossPrice}},\r\n\t\"costs\": {{entry2-costs}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry2-symbol}}\",\r\n\t\"direction\": \"{{entry2-direction}}\",\r\n\t\"price\": {{entry2-price}},\r\n\t\"size\": {{entry2-size}},\r\n\t\"profitPrice\": {{entry2-profitPrice}},\r\n\t\"lossPrice\": {{entry2-lossPrice}},\r\n\t\"costs\": {{entry2-costs}},\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -774,6 +790,8 @@
 									"pm.collectionVariables.set(entry + \"direction\", direction);\r",
 									"pm.collectionVariables.set(entry + \"price\", entryPrice);\r",
 									"pm.collectionVariables.set(entry + \"size\", entrySize);\r",
+									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
+									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
 									"\r",
 									"var profitPrice = 0.00;\r",
 									"var lossPrice = 0.00;\r",
@@ -807,6 +825,12 @@
 									"\r",
 									"function randoDirection() {\r",
 									"\tvar textArray = ['LONG', 'SHORT'];\r",
+									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
+									"\treturn  textArray[randomNumber];\r",
+									"}\r",
+									"\r",
+									"function randoGraph() {\r",
+									"\tvar textArray = ['CANDLESTICK','RENKO','KAGI','LINE'];\r",
 									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
 									"\treturn  textArray[randomNumber];\r",
 									"}"
@@ -851,7 +875,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry3-symbol}}\",\r\n\t\"direction\": \"{{entry3-direction}}\",\r\n\t\"price\": {{entry3-price}},\r\n\t\"size\": {{entry3-size}},\r\n\t\"profitPrice\": {{entry3-profitPrice}},\r\n\t\"lossPrice\": {{entry3-lossPrice}},\r\n\t\"costs\": {{entry3-costs}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry3-symbol}}\",\r\n\t\"direction\": \"{{entry3-direction}}\",\r\n\t\"price\": {{entry3-price}},\r\n\t\"size\": {{entry3-size}},\r\n\t\"profitPrice\": {{entry3-profitPrice}},\r\n\t\"lossPrice\": {{entry3-lossPrice}},\r\n\t\"costs\": {{entry3-costs}},\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1203,7 +1227,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"profitPrice\": {{entry1-profitPrice}},\r\n\t\"lossPrice\": {{entry1-lossPrice}},\r\n\t\"costs\": {{entry1-costs}}\r\n}",
+							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"profitPrice\": {{entry1-profitPrice}},\r\n\t\"lossPrice\": {{entry1-lossPrice}},\r\n\t\"costs\": {{entry1-costs}},\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1330,7 +1354,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"profitPrice\": {{entry1-profitPrice}},\r\n\t\"lossPrice\": {{entry1-lossPrice}},\r\n\t\"costs\": {{entry1-costs}},\r\n\t\"exitPrice\": {{entry1-exitPrice}},\r\n\t\"exitDate\": \"{{entry1-exitDate}}\"\r\n}",
+							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"profitPrice\": {{entry1-profitPrice}},\r\n\t\"lossPrice\": {{entry1-lossPrice}},\r\n\t\"costs\": {{entry1-costs}},\r\n\t\"exitPrice\": {{entry1-exitPrice}},\r\n\t\"exitDate\": \"{{entry1-exitDate}}\",\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1403,7 +1427,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry2-id}}\",\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry2-symbol}}\",\r\n\t\"direction\": \"{{entry2-direction}}\",\r\n\t\"price\": {{entry2-price}},\r\n\t\"size\": {{entry2-size}},\r\n\t\"profitPrice\": {{entry2-profitPrice}},\r\n\t\"lossPrice\": {{entry2-lossPrice}},\r\n\t\"costs\": {{entry2-costs}},\r\n\t\"exitPrice\": {{entry2-exitPrice}},\r\n\t\"exitDate\": \"{{entry2-exitDate}}\"\r\n}",
+							"raw": "{\r\n\t\"id\": \"{{entry2-id}}\",\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry2-symbol}}\",\r\n\t\"direction\": \"{{entry2-direction}}\",\r\n\t\"price\": {{entry2-price}},\r\n\t\"size\": {{entry2-size}},\r\n\t\"profitPrice\": {{entry2-profitPrice}},\r\n\t\"lossPrice\": {{entry2-lossPrice}},\r\n\t\"costs\": {{entry2-costs}},\r\n\t\"exitPrice\": {{entry2-exitPrice}},\r\n\t\"exitDate\": \"{{entry2-exitDate}}\",\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1476,7 +1500,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry3-id}}\",\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry3-symbol}}\",\r\n\t\"direction\": \"{{entry3-direction}}\",\r\n\t\"price\": {{entry3-price}},\r\n\t\"size\": {{entry3-size}},\r\n\t\"profitPrice\": {{entry3-profitPrice}},\r\n\t\"lossPrice\": {{entry3-lossPrice}},\r\n\t\"costs\": {{entry3-costs}},\r\n\t\"exitPrice\": {{entry3-exitPrice}},\r\n\t\"exitDate\": \"{{entry3-exitDate}}\"\r\n}",
+							"raw": "{\r\n\t\"id\": \"{{entry3-id}}\",\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry3-symbol}}\",\r\n\t\"direction\": \"{{entry3-direction}}\",\r\n\t\"price\": {{entry3-price}},\r\n\t\"size\": {{entry3-size}},\r\n\t\"profitPrice\": {{entry3-profitPrice}},\r\n\t\"lossPrice\": {{entry3-lossPrice}},\r\n\t\"costs\": {{entry3-costs}},\r\n\t\"exitPrice\": {{entry3-exitPrice}},\r\n\t\"exitDate\": \"{{entry3-exitDate}}\",\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -2197,10 +2221,6 @@
 			"value": ""
 		},
 		{
-			"key": "entry1-netResult",
-			"value": ""
-		},
-		{
 			"key": "closedPositions",
 			"value": ""
 		},
@@ -2226,6 +2246,34 @@
 		},
 		{
 			"key": "user-id",
+			"value": ""
+		},
+		{
+			"key": "entry1-graph",
+			"value": ""
+		},
+		{
+			"key": "entry2-graph",
+			"value": ""
+		},
+		{
+			"key": "entry3-graph",
+			"value": ""
+		},
+		{
+			"key": "entry1-netResult",
+			"value": ""
+		},
+		{
+			"key": "entry1-measure",
+			"value": ""
+		},
+		{
+			"key": "entry2-measure",
+			"value": ""
+		},
+		{
+			"key": "entry3-measure",
 			"value": ""
 		}
 	]
