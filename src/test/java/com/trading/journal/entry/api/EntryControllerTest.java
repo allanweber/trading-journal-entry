@@ -9,6 +9,7 @@ import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
+import com.trading.journal.entry.entries.GraphType;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -152,6 +153,8 @@ class EntryControllerTest {
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(1.1234))
                 .size(BigDecimal.valueOf(500.00))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure(1)
                 .build();
 
         AtomicReference<String> entryId = new AtomicReference<>();
@@ -201,6 +204,8 @@ class EntryControllerTest {
                 .lossPrice(BigDecimal.valueOf(1.009))
                 .exitPrice(BigDecimal.valueOf(1.2345))
                 .costs(BigDecimal.valueOf(2.34))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure(1)
                 .build();
         webTestClient
                 .post()
@@ -262,12 +267,14 @@ class EntryControllerTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(5);
+                    assertThat(response).hasSize(7);
                     assertThat(response.get("date")).isEqualTo("Date is required");
                     assertThat(response.get("symbol")).isEqualTo("Symbol is required");
                     assertThat(response.get("size")).isEqualTo("Position size is required");
                     assertThat(response.get("price")).isEqualTo("Price is required");
                     assertThat(response.get("direction")).isEqualTo("Direction is required");
+                    assertThat(response.get("graphType")).isEqualTo("Graph Type is required");
+                    assertThat(response.get("graphMeasure")).isEqualTo("Graph Measure is required");
                 });
     }
 

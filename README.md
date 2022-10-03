@@ -2,10 +2,9 @@
 
 ## PENDING
 
-* Add graph type with default minutes, renko and etc
-* Add graph measure how many minutes or ticks and etc
 * Calculate actual RR when trade finishes
 * Calculate actual account risked when trade finishes
+* Create Strategy Entity: Graph, measure, Profit and Loss percentage, apply it to entry 
 
 ## Swagger
 

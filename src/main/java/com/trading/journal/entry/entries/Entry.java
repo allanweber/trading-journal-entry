@@ -37,11 +37,17 @@ public class Entry {
     @NumberFormat(pattern = "#0.00")
     private BigDecimal price;
 
+    private GraphType graphType;
+
+    @Positive(message = "Graph Measure must be positive")
+    private Integer graphMeasure;
+
     private String symbol;
 
     private EntryDirection direction;
 
     @NumberFormat(pattern = "#0.00")
+    @Positive(message = "Position size must be positive")
     private BigDecimal size;
 
     @NumberFormat(pattern = "#0.00")

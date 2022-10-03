@@ -9,6 +9,7 @@ import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
+import com.trading.journal.entry.entries.GraphType;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,6 +110,8 @@ class BalanceIntegratedTest {
                 .size(BigDecimal.valueOf(15))
                 .profitPrice(BigDecimal.valueOf(200.00))
                 .lossPrice(BigDecimal.valueOf(80.00))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure(1)
                 .build();
         webTestClient
                 .post()
@@ -145,6 +148,8 @@ class BalanceIntegratedTest {
                 .size(BigDecimal.valueOf(20))
                 .profitPrice(BigDecimal.valueOf(400.00))
                 .lossPrice(BigDecimal.valueOf(150.00))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure(1)
                 .build();
         webTestClient
                 .post()
@@ -181,6 +186,8 @@ class BalanceIntegratedTest {
                 .size(BigDecimal.valueOf(20))
                 .profitPrice(BigDecimal.valueOf(150.00))
                 .lossPrice(BigDecimal.valueOf(400.00))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure(1)
                 .build();
         webTestClient
                 .post()
@@ -217,6 +224,8 @@ class BalanceIntegratedTest {
                 .size(BigDecimal.valueOf(30))
                 .profitPrice(BigDecimal.valueOf(500.00))
                 .lossPrice(BigDecimal.valueOf(745.00))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure(1)
                 .build();
         webTestClient
                 .post()
@@ -904,6 +913,8 @@ class BalanceIntegratedTest {
                 .price(originalEntry.getPrice())
                 .size(originalEntry.getSize())
                 .profitPrice(originalEntry.getProfitPrice())
-                .lossPrice(originalEntry.getLossPrice());
+                .lossPrice(originalEntry.getLossPrice())
+                .graphType(originalEntry.getGraphType())
+                .graphMeasure(originalEntry.getGraphMeasure());
     }
 }
