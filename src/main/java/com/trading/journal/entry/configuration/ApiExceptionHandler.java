@@ -5,7 +5,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,6 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.client.HttpClientErrorException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -46,25 +47,23 @@ public class ApiExceptionHandler {
     }
 
     @ExceptionHandler(WebExchangeBindException.class)
-    public ResponseEntity<Map<String, String>> handleWebExchangeBindException(final WebExchangeBindException ex) {
+    public ResponseEntity<Map<String, List<String>>> handleWebExchangeBindException(final WebExchangeBindException ex) {
         return status(BAD_REQUEST).body(getBindingResult(ex.getBindingResult()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(final MethodArgumentNotValidException ex) {
+    public ResponseEntity<Map<String, List<String>>> handleMethodArgumentNotValidException(final MethodArgumentNotValidException ex) {
         return status(BAD_REQUEST).body(getBindingResult(ex.getBindingResult()));
     }
 
-    private Map<String, String> getBindingResult(final BindingResult bindingResult) {
-        final Map<String, String> errors = new ConcurrentHashMap<>();
+    private Map<String, List<String>> getBindingResult(final BindingResult bindingResult) {
+        final List<String> errors = new ArrayList<>();
         for (final ObjectError error : bindingResult.getAllErrors()) {
-            String fieldName = error.getObjectName();
-            if (error instanceof FieldError) {
-                fieldName = ((FieldError) error).getField();
-            }
-            errors.put(fieldName, error.getDefaultMessage());
+            errors.add(error.getDefaultMessage());
         }
-        return errors;
+        final Map<String, List<String>> errorsResponse = new ConcurrentHashMap<>();
+        errorsResponse.put("errors", errors);
+        return errorsResponse;
     }
 
     private Map<String, String> extractMessage(Exception exception) {
