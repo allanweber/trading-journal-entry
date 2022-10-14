@@ -207,11 +207,11 @@ class JournalControllerTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response -> {
-                    assertThat(response.get("startBalance")).isEqualTo("Start balance is required");
-                    assertThat(response.get("name")).isEqualTo("Journal name is required");
+                    assertThat(response.get("errors")).contains("Start balance is required");
+                    assertThat(response.get("errors")).contains("Journal name is required");
                 });
     }
 

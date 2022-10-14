@@ -14,6 +14,7 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.lang.reflect.Executable;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
@@ -90,10 +91,10 @@ class ApiExceptionHandlerTest {
         MethodParameter methodParameter = mock(MethodParameter.class);
         MethodArgumentNotValidException ex = new MethodArgumentNotValidException(methodParameter, bindingResult);
 
-        ResponseEntity<Map<String, String>> response = apiExceptionHandler.handleMethodArgumentNotValidException(ex);
+        ResponseEntity<Map<String, List<String>>> response = apiExceptionHandler.handleMethodArgumentNotValidException(ex);
 
         assertEquals(400, response.getStatusCodeValue());
-        assertTrue(Objects.requireNonNull(response.getBody()).containsKey("name"));
-        assertEquals("default message", Objects.requireNonNull(response.getBody()).get("name"));
+        assertTrue(Objects.requireNonNull(response.getBody()).containsKey("errors"));
+        assertEquals("default message", Objects.requireNonNull(response.getBody()).get("errors").get(0));
     }
 }

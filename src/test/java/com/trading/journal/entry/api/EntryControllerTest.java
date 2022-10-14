@@ -264,17 +264,17 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(7);
-                    assertThat(response.get("date")).isEqualTo("Date is required");
-                    assertThat(response.get("symbol")).isEqualTo("Symbol is required");
-                    assertThat(response.get("size")).isEqualTo("Position size is required");
-                    assertThat(response.get("price")).isEqualTo("Price is required");
-                    assertThat(response.get("direction")).isEqualTo("Direction is required");
-                    assertThat(response.get("graphType")).isEqualTo("Graph Type is required");
-                    assertThat(response.get("graphMeasure")).isEqualTo("Graph Measure is required");
+                    assertThat(response.get("errors")).hasSize(7);
+                    assertThat(response.get("errors")).contains("Date is required");
+                    assertThat(response.get("errors")).contains("Symbol is required");
+                    assertThat(response.get("errors")).contains("Position size is required");
+                    assertThat(response.get("errors")).contains("Price is required");
+                    assertThat(response.get("errors")).contains("Direction is required");
+                    assertThat(response.get("errors")).contains("Graph Type is required");
+                    assertThat(response.get("errors")).contains("Graph Measure is required");
                 });
     }
 
@@ -340,12 +340,12 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(2);
-                    assertThat(response.get("date")).isEqualTo("Date is required");
-                    assertThat(response.get("price")).isEqualTo("Price is required");
+                    assertThat(response.get("errors")).hasSize(2);
+                    assertThat(response.get("errors")).contains("Date is required");
+                    assertThat(response.get("errors")).contains("Price is required");
                 });
     }
 
@@ -411,12 +411,12 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(2);
-                    assertThat(response.get("date")).isEqualTo("Date is required");
-                    assertThat(response.get("price")).isEqualTo("Price is required");
+                    assertThat(response.get("errors")).hasSize(2);
+                    assertThat(response.get("errors")).contains("Date is required");
+                    assertThat(response.get("errors")).contains("Price is required");
                 });
     }
 
@@ -482,12 +482,12 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(2);
-                    assertThat(response.get("date")).isEqualTo("Date is required");
-                    assertThat(response.get("price")).isEqualTo("Price is required");
+                    assertThat(response.get("errors")).hasSize(2);
+                    assertThat(response.get("errors")).contains("Date is required");
+                    assertThat(response.get("errors")).contains("Price is required");
                 });
     }
 
