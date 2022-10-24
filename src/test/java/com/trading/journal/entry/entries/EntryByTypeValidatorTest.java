@@ -177,32 +177,6 @@ class EntryByTypeValidatorTest {
                 .symbol("MSFT")
                 .direction(EntryDirection.LONG)
                 .size(BigDecimal.valueOf(200))
-                .graphMeasure(1)
-                .build();
-        violations = validator.validate(entry);
-        assertThat(violations).hasSize(1);
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactly("Graph Type is required");
-
-        entry = Entry.builder()
-                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
-                .type(EntryType.TRADE)
-                .price(BigDecimal.valueOf(200))
-                .symbol("MSFT")
-                .direction(EntryDirection.LONG)
-                .size(BigDecimal.valueOf(200))
-                .graphType(GraphType.CANDLESTICK)
-                .build();
-        violations = validator.validate(entry);
-        assertThat(violations).hasSize(1);
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactly("Graph Measure is required");
-
-        entry = Entry.builder()
-                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
-                .type(EntryType.TRADE)
-                .price(BigDecimal.valueOf(200))
-                .symbol("MSFT")
-                .direction(EntryDirection.LONG)
-                .size(BigDecimal.valueOf(200))
                 .graphType(GraphType.CANDLESTICK)
                 .graphMeasure(-1)
                 .build();
