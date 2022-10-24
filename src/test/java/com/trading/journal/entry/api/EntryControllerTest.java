@@ -267,14 +267,12 @@ class EntryControllerTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
                 })
                 .value(response -> {
-                    assertThat(response.get("errors")).hasSize(7);
+                    assertThat(response.get("errors")).hasSize(5);
                     assertThat(response.get("errors")).contains("Date is required");
                     assertThat(response.get("errors")).contains("Symbol is required");
                     assertThat(response.get("errors")).contains("Position size is required");
                     assertThat(response.get("errors")).contains("Price is required");
                     assertThat(response.get("errors")).contains("Direction is required");
-                    assertThat(response.get("errors")).contains("Graph Type is required");
-                    assertThat(response.get("errors")).contains("Graph Measure is required");
                 });
     }
 

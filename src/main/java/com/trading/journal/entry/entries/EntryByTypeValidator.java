@@ -44,20 +44,6 @@ public class EntryByTypeValidator implements ConstraintValidator<EntryByType, En
                     .addConstraintViolation();
         }
 
-        if (Objects.isNull(entry.getGraphType())) {
-            isValid = false;
-            context.buildConstraintViolationWithTemplate("Graph Type is required")
-                    .addPropertyNode("graphType")
-                    .addConstraintViolation();
-        }
-
-        if (Objects.isNull(entry.getGraphMeasure())) {
-            isValid = false;
-            context.buildConstraintViolationWithTemplate("Graph Measure is required")
-                    .addPropertyNode("graphMeasure")
-                    .addConstraintViolation();
-        }
-
         return isValid;
     }
 }
