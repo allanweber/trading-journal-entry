@@ -111,7 +111,7 @@ class BalanceIntegratedTest {
                 .profitPrice(BigDecimal.valueOf(200.00))
                 .lossPrice(BigDecimal.valueOf(80.00))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1M")
                 .build();
         webTestClient
                 .post()
@@ -149,7 +149,7 @@ class BalanceIntegratedTest {
                 .profitPrice(BigDecimal.valueOf(400.00))
                 .lossPrice(BigDecimal.valueOf(150.00))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1M")
                 .build();
         webTestClient
                 .post()
@@ -187,7 +187,7 @@ class BalanceIntegratedTest {
                 .profitPrice(BigDecimal.valueOf(150.00))
                 .lossPrice(BigDecimal.valueOf(400.00))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1M")
                 .build();
         webTestClient
                 .post()
@@ -225,7 +225,7 @@ class BalanceIntegratedTest {
                 .profitPrice(BigDecimal.valueOf(500.00))
                 .lossPrice(BigDecimal.valueOf(745.00))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1M")
                 .build();
         webTestClient
                 .post()
