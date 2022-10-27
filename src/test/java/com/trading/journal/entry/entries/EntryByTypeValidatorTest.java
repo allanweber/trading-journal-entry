@@ -27,7 +27,7 @@ class EntryByTypeValidatorTest {
                 .price(BigDecimal.valueOf(200))
                 .size(BigDecimal.valueOf(2))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         Set<ConstraintViolation<Object>> violations = validator.validate(entry);
         assertThat(violations).hasSize(0);
@@ -43,7 +43,7 @@ class EntryByTypeValidatorTest {
                 .direction(EntryDirection.LONG)
                 .size(BigDecimal.valueOf(2))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         Set<ConstraintViolation<Object>> violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
@@ -56,7 +56,7 @@ class EntryByTypeValidatorTest {
                 .direction(EntryDirection.LONG)
                 .size(BigDecimal.valueOf(2))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
@@ -69,7 +69,7 @@ class EntryByTypeValidatorTest {
                 .direction(EntryDirection.LONG)
                 .size(BigDecimal.valueOf(2))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
@@ -83,7 +83,7 @@ class EntryByTypeValidatorTest {
                 .direction(EntryDirection.LONG)
                 .size(BigDecimal.valueOf(2))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
@@ -97,7 +97,7 @@ class EntryByTypeValidatorTest {
                 .direction(EntryDirection.LONG)
                 .size(BigDecimal.valueOf(2))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
@@ -110,7 +110,7 @@ class EntryByTypeValidatorTest {
                 .direction(EntryDirection.LONG)
                 .size(BigDecimal.valueOf(2))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
@@ -123,7 +123,7 @@ class EntryByTypeValidatorTest {
                 .symbol("MSFT")
                 .size(BigDecimal.valueOf(2))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
@@ -136,7 +136,7 @@ class EntryByTypeValidatorTest {
                 .symbol("MSFT")
                 .direction(EntryDirection.LONG)
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
@@ -150,7 +150,7 @@ class EntryByTypeValidatorTest {
                 .direction(EntryDirection.LONG)
                 .size(BigDecimal.valueOf(-2))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
@@ -164,25 +164,11 @@ class EntryByTypeValidatorTest {
                 .direction(EntryDirection.LONG)
                 .size(BigDecimal.ZERO)
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1")
                 .build();
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
         assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactly("Position size must be positive");
-
-        entry = Entry.builder()
-                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
-                .type(EntryType.TRADE)
-                .price(BigDecimal.valueOf(200))
-                .symbol("MSFT")
-                .direction(EntryDirection.LONG)
-                .size(BigDecimal.valueOf(200))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(-1)
-                .build();
-        violations = validator.validate(entry);
-        assertThat(violations).hasSize(1);
-        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactly("Graph Measure must be positive");
     }
 
     @DisplayName("Entry is valid for Withdrawal, Deposit and Taxes type")

@@ -248,7 +248,7 @@ class JournalControllerTest {
                 .price(BigDecimal.valueOf(1.1234))
                 .size(BigDecimal.valueOf(500.00))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1M")
                 .build();
 
         webTestClient

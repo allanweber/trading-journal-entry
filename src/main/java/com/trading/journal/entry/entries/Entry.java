@@ -39,8 +39,7 @@ public class Entry {
 
     private GraphType graphType;
 
-    @Positive(message = "Graph Measure must be positive")
-    private Integer graphMeasure;
+    private String graphMeasure;
 
     private String symbol;
 

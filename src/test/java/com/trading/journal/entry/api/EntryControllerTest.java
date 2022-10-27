@@ -154,7 +154,7 @@ class EntryControllerTest {
                 .price(BigDecimal.valueOf(1.1234))
                 .size(BigDecimal.valueOf(500.00))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1M")
                 .build();
 
         AtomicReference<String> entryId = new AtomicReference<>();
@@ -205,7 +205,7 @@ class EntryControllerTest {
                 .exitPrice(BigDecimal.valueOf(1.2345))
                 .costs(BigDecimal.valueOf(2.34))
                 .graphType(GraphType.CANDLESTICK)
-                .graphMeasure(1)
+                .graphMeasure("1M")
                 .build();
         webTestClient
                 .post()
