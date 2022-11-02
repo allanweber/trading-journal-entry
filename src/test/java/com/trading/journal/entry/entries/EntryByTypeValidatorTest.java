@@ -31,6 +31,21 @@ class EntryByTypeValidatorTest {
                 .build();
         Set<ConstraintViolation<Object>> violations = validator.validate(entry);
         assertThat(violations).hasSize(0);
+
+        entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
+                .direction(EntryDirection.LONG)
+                .type(EntryType.TRADE)
+                .symbol("MSFT")
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure("1")
+                .exitDate(LocalDateTime.of(2022, 9, 20, 15, 30, 51))
+                .exitPrice(BigDecimal.valueOf(200))
+                .build();
+       violations = validator.validate(entry);
+        assertThat(violations).hasSize(0);
     }
 
     @DisplayName("Entry is invalid for TRADE type")
@@ -169,6 +184,50 @@ class EntryByTypeValidatorTest {
         violations = validator.validate(entry);
         assertThat(violations).hasSize(1);
         assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactly("Position size must be positive");
+    }
+
+    @DisplayName("Entry is valid for TRADE type when exiting")
+    @Test
+    void tradeInvalidExit() {
+        Entry entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
+                .direction(EntryDirection.LONG)
+                .type(EntryType.TRADE)
+                .symbol("MSFT")
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .exitPrice(BigDecimal.valueOf(2))
+                .build();
+        Set<ConstraintViolation<Object>> violations = validator.validate(entry);
+        assertThat(violations).hasSize(1);
+        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactly("Exit Date is required");
+
+        entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
+                .direction(EntryDirection.LONG)
+                .type(EntryType.TRADE)
+                .symbol("MSFT")
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .exitDate(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
+                .build();
+        violations = validator.validate(entry);
+        assertThat(violations).hasSize(1);
+        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactly("Exit Price is required");
+
+        entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
+                .direction(EntryDirection.LONG)
+                .type(EntryType.TRADE)
+                .symbol("MSFT")
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .exitDate(LocalDateTime.of(2022, 9, 20, 15, 30, 49))
+                .exitPrice(BigDecimal.valueOf(2))
+                .build();
+        violations = validator.validate(entry);
+        assertThat(violations).hasSize(1);
+        assertThat(violations).extracting(ConstraintViolation::getMessage).containsExactly("Exit date must be after entry date");
     }
 
     @DisplayName("Entry is valid for Withdrawal, Deposit and Taxes type")
