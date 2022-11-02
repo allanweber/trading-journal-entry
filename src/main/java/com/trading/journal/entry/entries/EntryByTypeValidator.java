@@ -45,7 +45,7 @@ public class EntryByTypeValidator implements ConstraintValidator<EntryByType, En
                     .addConstraintViolation();
         }
 
-        if ((Objects.nonNull(entry.getExitDate()) && Objects.nonNull(entry.getDate())) && entry.getExitDate().isBefore(entry.getDate())) {
+        if (Objects.nonNull(entry.getExitDate()) && Objects.nonNull(entry.getDate()) && entry.getExitDate().isBefore(entry.getDate())) {
             isValid = false;
             context.buildConstraintViolationWithTemplate("Exit date must be after entry date")
                     .addPropertyNode("exitDate")
