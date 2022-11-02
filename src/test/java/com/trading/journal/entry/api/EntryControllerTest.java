@@ -203,6 +203,7 @@ class EntryControllerTest {
                 .profitPrice(BigDecimal.valueOf(1.2345))
                 .lossPrice(BigDecimal.valueOf(1.009))
                 .exitPrice(BigDecimal.valueOf(1.2345))
+                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
                 .costs(BigDecimal.valueOf(2.34))
                 .graphType(GraphType.CANDLESTICK)
                 .graphMeasure("1M")
@@ -250,6 +251,7 @@ class EntryControllerTest {
                 .profitPrice(BigDecimal.valueOf(1.2345))
                 .lossPrice(BigDecimal.valueOf(1.009))
                 .exitPrice(BigDecimal.valueOf(1.2345))
+                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
                 .costs(BigDecimal.valueOf(2.34))
                 .build();
 
