@@ -2,13 +2,16 @@ package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
+import com.trading.journal.entry.entries.EntryImageResponse;
 import com.trading.journal.entry.entries.EntryService;
+import com.trading.journal.entry.entries.UploadType;
 import com.trading.journal.entry.queries.QueryConverter;
 import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
@@ -60,5 +63,17 @@ public class EntryController implements EntryApi {
     public ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, String journalId, String entryId) {
         entryService.delete(accessTokenInfo, journalId, entryId);
         return ok().build();
+    }
+
+    @Override
+    public ResponseEntity<Void> uploadImage(AccessTokenInfo accessTokenInfo, String journalId, String entryId, UploadType type, MultipartFile file) {
+        entryService.uploadImage(accessTokenInfo, journalId, entryId, type, file);
+        return ok().build();
+    }
+
+    @Override
+    public ResponseEntity<EntryImageResponse> getImage(AccessTokenInfo accessTokenInfo, String journalId, String entryId, UploadType type) {
+        EntryImageResponse image = entryService.returnImage(accessTokenInfo, journalId, entryId, type);
+        return ok(image);
     }
 }

@@ -2,6 +2,7 @@ package com.trading.journal.entry.configuration;
 
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.validation.BindingResult;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.bind.support.WebExchangeBindException;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.multipart.MaxUploadSizeExceededException;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -36,9 +38,11 @@ public class ApiExceptionHandler {
         return status(ex.getStatusCode()).body(errors);
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<Map<String, String>> handleException(final Exception ex) {
-        return status(INTERNAL_SERVER_ERROR).body(extractMessage(ex));
+    @ExceptionHandler(MaxUploadSizeExceededException.class)
+    public ResponseEntity<Map<String, String>> handleMethodArgumentNotValidException(final MaxUploadSizeExceededException ex) {
+        log.error(CLIENT_EXCEPTION_HAPPENED, ex);
+        final Map<String, String> errors = extractMessage(ex);
+        return status(BAD_REQUEST).body(errors);
     }
 
     @ExceptionHandler(AuthenticationException.class)
@@ -56,6 +60,11 @@ public class ApiExceptionHandler {
         return status(BAD_REQUEST).body(getBindingResult(ex.getBindingResult()));
     }
 
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<Map<String, String>> handleException(final Exception ex) {
+        return status(INTERNAL_SERVER_ERROR).body(extractMessage(ex));
+    }
+
     private Map<String, List<String>> getBindingResult(final BindingResult bindingResult) {
         final List<String> errors = new ArrayList<>();
         for (final ObjectError error : bindingResult.getAllErrors()) {
@@ -67,7 +76,7 @@ public class ApiExceptionHandler {
     }
 
     private Map<String, String> extractMessage(Exception exception) {
-        final String message = Optional.ofNullable(exception.getCause()).orElse(exception).getMessage();
+        final String message = ExceptionUtils.getRootCause(exception).getMessage();
         log.error(UNEXPECTED_EXCEPTION_HAPPENED, exception);
         final Map<String, String> errors = new ConcurrentHashMap<>();
         errors.put("error", Optional.ofNullable(message).orElse(UNEXPECTED_EXCEPTION_HAPPENED));

@@ -2,6 +2,7 @@ package com.trading.journal.entry.entries;
 
 import com.allanweber.jwttoken.helper.DateHelper;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -64,8 +65,12 @@ public class Entry {
     @JsonFormat(pattern = DateHelper.DATE_FORMAT)
     private LocalDateTime exitDate;
 
+    @Setter
+    @JsonIgnore
     private String screenshotBefore;
 
+    @Setter
+    @JsonIgnore
     private String screenshotAfter;
 
     private String notes;

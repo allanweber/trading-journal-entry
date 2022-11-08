@@ -1,9 +1,6 @@
 package com.trading.journal.entry.balance;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.format.annotation.NumberFormat;
 
 import java.math.BigDecimal;
@@ -13,6 +10,10 @@ import java.math.BigDecimal;
 @Getter
 @Builder
 public class Balance {
+
+    @NumberFormat(pattern = "#0.00")
+    @Setter
+    private BigDecimal startBalance;
 
     @NumberFormat(pattern = "#0.00")
     private BigDecimal accountBalance;
