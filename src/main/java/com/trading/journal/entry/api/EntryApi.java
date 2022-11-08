@@ -2,11 +2,14 @@ package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
+import com.trading.journal.entry.entries.EntryImageResponse;
+import com.trading.journal.entry.entries.UploadType;
 import com.trading.journal.entry.queries.data.PageResponse;
 import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -48,4 +51,17 @@ public interface EntryApi {
     @DeleteMapping("/{journal-id}/{entry-id}")
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,  @PathVariable(name = "entry-id") String entryId);
+
+    @ApiOperation(notes = "Upload Trade image", value = "Upload Trade image")
+    @ApiResponses(@ApiResponse(code = 200, message = "Trade image uploaded"))
+    @PostMapping("/{journal-id}/{entry-id}/image")
+    ResponseEntity<Void> uploadImage(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,  @PathVariable(name = "entry-id") String entryId,
+                                                @RequestParam("type") UploadType type,
+                                                @RequestParam("file") MultipartFile file);
+
+    @ApiOperation(notes = "Return Trade image", value = "Return Trade image")
+    @ApiResponses(@ApiResponse(code = 200, message = "Trade image returned"))
+    @GetMapping("/{journal-id}/{entry-id}/image")
+    ResponseEntity<EntryImageResponse> getImage(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId,
+                                                @RequestParam("type") UploadType type);
 }

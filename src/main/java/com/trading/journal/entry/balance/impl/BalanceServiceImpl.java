@@ -39,6 +39,7 @@ public class BalanceServiceImpl implements BalanceService {
     @Override
     public Balance getCurrentBalance(AccessTokenInfo accessToken, String journalId) {
         Journal journal = journalService.get(accessToken, journalId);
+        journal.getCurrentBalance().setStartBalance(journal.getStartBalance());
         return journal.getCurrentBalance();
     }
 

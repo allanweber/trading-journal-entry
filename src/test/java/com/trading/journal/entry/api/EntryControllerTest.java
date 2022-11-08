@@ -6,22 +6,22 @@ import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.balance.Balance;
-import com.trading.journal.entry.entries.Entry;
-import com.trading.journal.entry.entries.EntryDirection;
-import com.trading.journal.entry.entries.EntryType;
-import com.trading.journal.entry.entries.GraphType;
+import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
@@ -535,5 +535,160 @@ class EntryControllerTest {
                 .isOk();
 
         assertThat(mongoTemplate.findAll(Entry.class, entryCollection)).isEmpty();
+    }
+
+    @DisplayName("Create a new Trade entry and add images to it")
+    @Test
+    void addImages() {
+        Entry entry = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                .type(EntryType.TRADE)
+                .symbol("USD/EUR")
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(1.1234))
+                .size(BigDecimal.valueOf(500.00))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure("1M")
+                .build();
+
+        AtomicReference<String> entryId = new AtomicReference<>();
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(entry)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Entry.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    entryId.set(response.getId());
+                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
+                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
+                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
+                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
+                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
+                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
+                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
+
+                    assertThat(response.getProfitPrice()).isNull();
+                    assertThat(response.getLossPrice()).isNull();
+                    assertThat(response.getGrossResult()).isNull();
+                    assertThat(response.getNetResult()).isNull();
+                    assertThat(response.getAccountChange()).isNull();
+                    assertThat(response.getAccountBalance()).isNull();
+                });
+
+
+        MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
+        bodyBuilder.part("file", new ClassPathResource("java.png"));
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("{entry-id}")
+                        .pathSegment("image")
+                        .queryParam("type", UploadType.IMAGE_BEFORE)
+                        .build(journalId, entryId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
+        assertThat(all).hasSize(1);
+        assertThat(all.get(0).getScreenshotBefore()).isNotNull();
+        assertThat(all.get(0).getScreenshotAfter()).isNull();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("{entry-id}")
+                        .pathSegment("image")
+                        .queryParam("type", UploadType.IMAGE_BEFORE)
+                        .build(journalId, entryId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk().expectBody(EntryImageResponse.class)
+                .value(response -> assertThat(response.getImage()).isNotNull());
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("{entry-id}")
+                        .pathSegment("image")
+                        .queryParam("type", UploadType.IMAGE_AFTER)
+                        .build(journalId, entryId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk().expectBody(EntryImageResponse.class)
+                .value(response -> assertThat(response.getImage()).isNull());
+
+        bodyBuilder = new MultipartBodyBuilder();
+        bodyBuilder.part("file", new ClassPathResource("java.png"));
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("{entry-id}")
+                        .pathSegment("image")
+                        .queryParam("type", UploadType.IMAGE_AFTER)
+                        .build(journalId, entryId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        all = mongoTemplate.findAll(Entry.class, entryCollection);
+        assertThat(all).hasSize(1);
+        assertThat(all.get(0).getScreenshotBefore()).isNotNull();
+        assertThat(all.get(0).getScreenshotAfter()).isNotNull();
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("{entry-id}")
+                        .pathSegment("image")
+                        .queryParam("type", UploadType.IMAGE_BEFORE)
+                        .build(journalId, entryId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk().expectBody(EntryImageResponse.class)
+                .value(response -> assertThat(response.getImage()).isNotNull());
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/entries")
+                        .pathSegment("{journal-id}")
+                        .pathSegment("{entry-id}")
+                        .pathSegment("image")
+                        .queryParam("type", UploadType.IMAGE_AFTER)
+                        .build(journalId, entryId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk().expectBody(EntryImageResponse.class)
+                .value(response -> assertThat(response.getImage()).isNotNull());
     }
 }
