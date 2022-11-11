@@ -7,4 +7,6 @@ public interface BalanceService {
     Balance calculateCurrentBalance(AccessTokenInfo accessToken, String journalId);
 
     Balance getCurrentBalance(AccessTokenInfo accessToken, String journalId);
+
+    Balance calculateAvailableBalance(AccessTokenInfo accessToken, String journalId);
 }

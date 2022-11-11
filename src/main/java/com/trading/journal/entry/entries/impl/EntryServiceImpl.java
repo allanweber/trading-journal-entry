@@ -67,6 +67,8 @@ public class EntryServiceImpl implements EntryService {
         Entry saved = repository.save(entriesCollection, calculated);
         if (saved.isFinished()) {
             balanceService.calculateCurrentBalance(accessToken, journalId);
+        } else {
+            balanceService.calculateAvailableBalance(accessToken, journalId);
         }
         return saved;
     }

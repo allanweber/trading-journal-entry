@@ -3,6 +3,7 @@ package com.trading.journal.entry.journal.impl;
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.balance.Balance;
+import com.trading.journal.entry.journal.Currency;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalRepository;
 import com.trading.journal.entry.queries.CollectionName;
@@ -56,7 +57,8 @@ class JournalServiceImplTest {
     @DisplayName("Get all journals")
     @Test
     void getAll() {
-        when(journalRepository.getAll(collectionName)).thenReturn(singletonList(Journal.builder().build()));
+        Journal mockJournal = buildJournal("1", "journal", 1);
+        when(journalRepository.getAll(collectionName)).thenReturn(singletonList(mockJournal));
         List<Journal> journals = journalService.getAll(accessToken);
         assertThat(journals).isNotEmpty();
     }
@@ -64,7 +66,8 @@ class JournalServiceImplTest {
     @DisplayName("Get a journal by id")
     @Test
     void geById() {
-        when(journalRepository.getById(collectionName, "123456")).thenReturn(Optional.of(Journal.builder().build()));
+        Journal mockJournal = buildJournal("1", "journal", 1);
+        when(journalRepository.getById(collectionName, "123456")).thenReturn(Optional.of(mockJournal));
         Journal journal = journalService.get(accessToken, "123456");
         assertThat(journal).isNotNull();
     }
@@ -83,33 +86,22 @@ class JournalServiceImplTest {
     @DisplayName("Save a journal")
     @Test
     void save() {
-        Journal to_save = Journal.builder().name("to save").startBalance(BigDecimal.ZERO)
-                .currentBalance(
-                        Balance.builder()
-                                .accountBalance(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .build()
-                )
-                .build();
-
-        when(journalRepository.save(collectionName, to_save)).thenReturn(Journal.builder().build());
-        Journal journal = journalService.save(accessToken, to_save);
+        Journal mockJournal = buildJournal("1", "journal", 1);
+        when(journalRepository.save(collectionName, mockJournal)).thenReturn(mockJournal);
+        Journal journal = journalService.save(accessToken, mockJournal);
         assertThat(journal).isNotNull();
     }
 
     @DisplayName("Save a journal with same name throw an exception")
     @Test
     void saveSameName() {
-        Journal to_save = Journal.builder().name("to save").build();
+        Journal to_save = buildJournal(null, "to save", 1);
 
         List<Filter> filters = asList(
                 Filter.builder().field("name").operation(FilterOperation.EQUAL).value("to save").build(),
                 Filter.builder().field("id").operation(FilterOperation.NOT_EQUAL).value(null).build()
         );
-        when(journalRepository.query(collectionName, filters)).thenReturn(singletonList(Journal.builder().build()));
+        when(journalRepository.query(collectionName, filters)).thenReturn(singletonList(buildJournal("1", "journal", 1)));
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> journalService.save(accessToken, to_save));
 
@@ -122,7 +114,7 @@ class JournalServiceImplTest {
     @DisplayName("Delete a journal and do not drop collection because there is more items in it")
     @Test
     void delete() {
-        Journal to_delete = Journal.builder().id("123").name("to_delete").build();
+        Journal to_delete = buildJournal("123", "to_delete", 1);
         when(journalRepository.getById(collectionName, "123")).thenReturn(Optional.of(to_delete));
         when(journalRepository.delete(collectionName, to_delete)).thenReturn(1L);
         when(journalRepository.hasItems(collectionName)).thenReturn(true);
@@ -137,7 +129,7 @@ class JournalServiceImplTest {
     @DisplayName("Delete a journal and drop collection because there is no more items in it")
     @Test
     void deleteAndDrop() {
-        Journal to_delete = Journal.builder().id("123").name("to_delete").build();
+        Journal to_delete = buildJournal("123", "to_delete", 1);
         when(journalRepository.getById(collectionName, "123")).thenReturn(Optional.of(to_delete));
         when(journalRepository.delete(collectionName, to_delete)).thenReturn(1L);
         when(journalRepository.hasItems(collectionName)).thenReturn(false);
@@ -168,7 +160,7 @@ class JournalServiceImplTest {
     @DisplayName("Update balance")
     @Test
     void updateBalance() {
-        Journal saved = Journal.builder().id("123").name("saved").startBalance(BigDecimal.valueOf(100)).build();
+        Journal saved = buildJournal("123", "saved", 100);
         when(journalRepository.getById(collectionName, "123")).thenReturn(Optional.of(saved));
 
         Balance balance = Balance.builder()
@@ -218,5 +210,24 @@ class JournalServiceImplTest {
         assertThat(exception.getStatusText()).isEqualTo("Journal not found");
 
         verify(journalRepository, never()).save(any(), any());
+    }
+
+    private static Journal buildJournal(String id, String name, double balance) {
+        return Journal.builder()
+                .id(id)
+                .name(name)
+                .currency(Currency.DOLLAR)
+                .startJournal(LocalDateTime.now())
+                .startBalance(BigDecimal.valueOf(balance))
+                .currentBalance(Balance.builder()
+                        .accountBalance(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .openedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .available(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .build())
+                .build();
     }
 }

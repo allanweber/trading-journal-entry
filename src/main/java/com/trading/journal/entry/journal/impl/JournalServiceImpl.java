@@ -32,12 +32,17 @@ public class JournalServiceImpl implements JournalService {
 
     @Override
     public List<Journal> getAll(AccessTokenInfo accessToken) {
-        return journalRepository.getAll(new CollectionName(accessToken));
+        return journalRepository.getAll(new CollectionName(accessToken))
+                .stream().peek(Journal::initializeBalance).toList();
     }
 
     @Override
     public Journal get(AccessTokenInfo accessToken, String journalId) {
         return journalRepository.getById(new CollectionName(accessToken), journalId)
+                .map(journal -> {
+                    journal.initializeBalance();
+                    return journal;
+                })
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Journal not found"));
     }
 
@@ -48,25 +53,20 @@ public class JournalServiceImpl implements JournalService {
         }
         Journal saved;
         if (Objects.isNull(journal.getCurrentBalance())) {
-            Journal journalWithBalance = Journal.builder()
-                    .id(journal.getId())
-                    .name(journal.getName())
-                    .startBalance(journal.getStartBalance())
-                    .lastBalance(LocalDateTime.now())
-                    .currentBalance(
-                            Balance.builder()
-                                    .accountBalance(journal.getStartBalance().setScale(2, RoundingMode.HALF_EVEN))
-                                    .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                    .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                    .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                    .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                    .build()
-                    )
+            Balance balance = Balance.builder()
+                    .accountBalance(journal.getStartBalance().setScale(2, RoundingMode.HALF_EVEN))
+                    .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                    .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                    .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                    .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                    .openedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                    .available(journal.getStartBalance().setScale(2, RoundingMode.HALF_EVEN))
                     .build();
-            saved = journalRepository.save(new CollectionName(accessToken), journalWithBalance);
-        } else {
-            saved = journalRepository.save(new CollectionName(accessToken), journal);
+            journal.setLastBalance(LocalDateTime.now());
+            journal.setCurrentBalance(balance);
         }
+        saved = journalRepository.save(new CollectionName(accessToken), journal);
+        saved.initializeBalance();
         return saved;
     }
 
@@ -86,16 +86,8 @@ public class JournalServiceImpl implements JournalService {
     @Override
     public void updateBalance(AccessTokenInfo accessToken, String journalId, Balance balance) {
         Journal journal = get(accessToken, journalId);
-
-        Journal toSave = Journal.builder()
-                .id(journal.getId())
-                .name(journal.getName())
-                .startBalance(journal.getStartBalance())
-                .currentBalance(balance)
-                .lastBalance(LocalDateTime.now())
-                .build();
-
-        journalRepository.save(new CollectionName(accessToken), toSave);
+        journal.setCurrentBalance(balance);
+        journalRepository.save(new CollectionName(accessToken), journal);
     }
 
     private boolean hasSameName(AccessTokenInfo accessToken, Journal journal) {

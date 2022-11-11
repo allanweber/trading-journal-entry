@@ -310,7 +310,8 @@
 							"listen": "prerequest",
 							"script": {
 								"exec": [
-									""
+									"var moment = require('moment');\r",
+									"pm.collectionVariables.set(\"journal-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));"
 								],
 								"type": "text/javascript"
 							}
@@ -328,6 +329,8 @@
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
 									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
 									"\r",
 									"\tpm.collectionVariables.set(\"journal-id\", response.id);\r",
 									"});"
@@ -347,7 +350,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"name\": \"shares-journal\",\r\n\t\"startBalance\": 15000.00\r\n}",
+							"raw": "{\r\n\t\"name\": \"shares-journal\",\r\n\t\"startBalance\": 15000.00,\r\n\t\"startJournal\": \"{{journal-date}}\",\r\n\t\"currency\":\"DOLLAR\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -391,6 +394,8 @@
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
 									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
 									"\r",
 									"\tpm.collectionVariables.set(\"journal-id\", response.id);\r",
 									"});"
@@ -498,6 +503,8 @@
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
 									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
 									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
@@ -506,6 +513,9 @@
 									"\tpm.expect(response.currentBalance.deposits).to.equal(0.00);\r",
 									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
 									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(15000.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -540,47 +550,18 @@
 			"name": "Entries",
 			"item": [
 				{
-					"name": "Create a Trade Entry 1",
+					"name": "Create a Trade Entry MSFT LONG 3x 244,01",
 					"event": [
 						{
 							"listen": "prerequest",
 							"script": {
 								"exec": [
 									"var moment = require('moment');\r",
-									"\r",
 									"const entry = \"entry1-\";\r",
 									"\r",
-									"const direction = randoDirection();\r",
-									"const entryPrice = parseFloat( _.random(10, 1999, true).toFixed(2));\r",
-									"const entrySize = parseFloat(_.random(1, 10, true).toFixed(2));\r",
-									"\r",
 									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(entry + \"symbol\", randomSymbol());\r",
-									"pm.collectionVariables.set(entry + \"direction\", direction);\r",
-									"pm.collectionVariables.set(entry + \"price\", entryPrice);\r",
-									"pm.collectionVariables.set(entry + \"size\", entrySize);\r",
 									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
 									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
-									"\r",
-									"function randomSymbol() {\r",
-									"\tvar textArray = [\r",
-									"    'AAPL',\r",
-									"    'MSFT',\r",
-									"\t'AMZN',\r",
-									"\t'TSLA',\r",
-									"\t'GOOGL',\r",
-									"\t'NVDA',\r",
-									"\t'META'\r",
-									"\t];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}\r",
-									"\r",
-									"function randoDirection() {\r",
-									"\tvar textArray = ['LONG', 'SHORT'];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}\r",
 									"\r",
 									"function randoGraph() {\r",
 									"\tvar textArray = ['CANDLESTICK','RENKO','KAGI','LINE'];\r",
@@ -601,13 +582,13 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
-									"\r",
 									"\tpm.collectionVariables.set(\"entry1-id\", response.id);\r",
 									"\r",
-									"\tpm.collectionVariables.set(\"entry1-price\", response.price);\r",
-									"\tpm.collectionVariables.set(\"entry1-size\", response.size);\r",
+									"\tpm.expect(response.price).to.eql(244.01);\r",
+									"\tpm.expect(response.size).to.eql(3);\r",
+									"\tpm.expect(response.accountRisked * 100 ).to.eql(4.88);\r",
+									"\tpm.expect(response.plannedRR).to.eql(-1.00);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -625,882 +606,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create a Trade Entry 2",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"var moment = require('moment');\r",
-									"\r",
-									"const entry = \"entry2-\";\r",
-									"\r",
-									"const direction = randoDirection();\r",
-									"const entryPrice = parseFloat( _.random(10, 1999, true).toFixed(2));\r",
-									"const entrySize = parseFloat(_.random(1, 10, true).toFixed(2));\r",
-									"\r",
-									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(entry + \"symbol\", randomSymbol());\r",
-									"pm.collectionVariables.set(entry + \"direction\", direction);\r",
-									"pm.collectionVariables.set(entry + \"price\", entryPrice);\r",
-									"pm.collectionVariables.set(entry + \"size\", entrySize);\r",
-									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
-									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
-									"\r",
-									"var profitPrice = 0.00;\r",
-									"var lossPrice = 0.00;\r",
-									"if(direction == 'LONG') {\r",
-									"\tprofitPrice = (entryPrice * 1.25).toFixed(2);\r",
-									"\tlossPrice = (entryPrice * 0.85).toFixed(2);\r",
-									"} else {\r",
-									"\tprofitPrice = (entryPrice * 0.85).toFixed(2);\r",
-									"\tlossPrice = (entryPrice * 1.25).toFixed(2);\r",
-									"}\r",
-									"\r",
-									"const costs = (entryPrice * 0.001).toFixed(2);\r",
-									"\r",
-									"pm.collectionVariables.set(entry + \"profitPrice\", profitPrice);\r",
-									"pm.collectionVariables.set(entry + \"lossPrice\",  lossPrice);\r",
-									"pm.collectionVariables.set(entry + \"costs\", costs);\r",
-									"\r",
-									"function randomSymbol() {\r",
-									"\tvar textArray = [\r",
-									"    'AAPL',\r",
-									"    'MSFT',\r",
-									"\t'AMZN',\r",
-									"\t'TSLA',\r",
-									"\t'GOOGL',\r",
-									"\t'NVDA',\r",
-									"\t'META'\r",
-									"\t];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}\r",
-									"\r",
-									"function randoDirection() {\r",
-									"\tvar textArray = ['LONG', 'SHORT'];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}\r",
-									"\r",
-									"function randoGraph() {\r",
-									"\tvar textArray = ['CANDLESTICK','RENKO','KAGI','LINE'];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", function () {\r",
-									"  pm.response.to.have.status(201);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"entry2-id\", response.id);\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"entry2-price\", response.price);\r",
-									"\tpm.collectionVariables.set(\"entry2-size\", response.size);\r",
-									"\tpm.collectionVariables.set(\"entry2-profitPrice\", response.profitPrice);\r",
-									"\tpm.collectionVariables.set(\"entry2-lossPrice\", response.lossPrice);\r",
-									"\tpm.collectionVariables.set(\"entry2-costs\", response.costs);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry2-symbol}}\",\r\n\t\"direction\": \"{{entry2-direction}}\",\r\n\t\"price\": {{entry2-price}},\r\n\t\"size\": {{entry2-size}},\r\n\t\"profitPrice\": {{entry2-profitPrice}},\r\n\t\"lossPrice\": {{entry2-lossPrice}},\r\n\t\"costs\": {{entry2-costs}},\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create a Trade Entry 3",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"var moment = require('moment');\r",
-									"\r",
-									"const entry = \"entry3-\";\r",
-									"\r",
-									"const direction = randoDirection();\r",
-									"const entryPrice = parseFloat( _.random(10, 1999, true).toFixed(2));\r",
-									"const entrySize = parseFloat(_.random(1, 10, true).toFixed(2));\r",
-									"\r",
-									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(entry + \"symbol\", randomSymbol());\r",
-									"pm.collectionVariables.set(entry + \"direction\", direction);\r",
-									"pm.collectionVariables.set(entry + \"price\", entryPrice);\r",
-									"pm.collectionVariables.set(entry + \"size\", entrySize);\r",
-									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
-									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
-									"\r",
-									"var profitPrice = 0.00;\r",
-									"var lossPrice = 0.00;\r",
-									"if(direction == 'LONG') {\r",
-									"\tprofitPrice = (entryPrice * 1.25).toFixed(2);\r",
-									"\tlossPrice = (entryPrice * 0.85).toFixed(2);\r",
-									"} else {\r",
-									"\tprofitPrice = (entryPrice * 0.85).toFixed(2);\r",
-									"\tlossPrice = (entryPrice * 1.25).toFixed(2);\r",
-									"}\r",
-									"\r",
-									"const costs = (entryPrice * 0.001).toFixed(2);\r",
-									"\r",
-									"pm.collectionVariables.set(entry + \"profitPrice\", profitPrice);\r",
-									"pm.collectionVariables.set(entry + \"lossPrice\",  lossPrice);\r",
-									"pm.collectionVariables.set(entry + \"costs\", costs);\r",
-									"\r",
-									"function randomSymbol() {\r",
-									"\tvar textArray = [\r",
-									"    'AAPL',\r",
-									"    'MSFT',\r",
-									"\t'AMZN',\r",
-									"\t'TSLA',\r",
-									"\t'GOOGL',\r",
-									"\t'NVDA',\r",
-									"\t'META'\r",
-									"\t];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}\r",
-									"\r",
-									"function randoDirection() {\r",
-									"\tvar textArray = ['LONG', 'SHORT'];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}\r",
-									"\r",
-									"function randoGraph() {\r",
-									"\tvar textArray = ['CANDLESTICK','RENKO','KAGI','LINE'];\r",
-									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
-									"\treturn  textArray[randomNumber];\r",
-									"}"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", function () {\r",
-									"  pm.response.to.have.status(201);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"entry3-id\", response.id);\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"entry3-price\", response.price);\r",
-									"\tpm.collectionVariables.set(\"entry3-size\", response.size);\r",
-									"\tpm.collectionVariables.set(\"entry3-profitPrice\", response.profitPrice);\r",
-									"\tpm.collectionVariables.set(\"entry3-lossPrice\", response.lossPrice);\r",
-									"\tpm.collectionVariables.set(\"entry3-costs\", response.costs);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry3-symbol}}\",\r\n\t\"direction\": \"{{entry3-direction}}\",\r\n\t\"price\": {{entry3-price}},\r\n\t\"size\": {{entry3-size}},\r\n\t\"profitPrice\": {{entry3-profitPrice}},\r\n\t\"lossPrice\": {{entry3-lossPrice}},\r\n\t\"costs\": {{entry3-costs}},\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create a Deposit  Entry",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"var moment = require('moment');\r",
-									"\r",
-									"const entryPrice = parseFloat( _.random(10, 1999, true)).toFixed(2);\r",
-									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-price\", entryPrice);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", function () {\r",
-									"  pm.response.to.have.status(201);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\r",
-									"\tconst accountBalance = response.netResult;\r",
-									"\tconst deposits = response.price;\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance);\r",
-									"\tpm.collectionVariables.set(\"deposits\", deposits);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"DEPOSIT\",\r\n\t\"price\": {{entry-price}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create a Taxes Entry",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"var moment = require('moment');\r",
-									"\r",
-									"const entryPrice = parseFloat( _.random(10, 1999, true)).toFixed(2);\r",
-									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-price\", entryPrice);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", function () {\r",
-									"  pm.response.to.have.status(201);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\r",
-									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) + parseFloat(response.netResult);\r",
-									"\tconst taxes = response.price;\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance);\r",
-									"\tpm.collectionVariables.set(\"taxes\", taxes);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"TAXES\",\r\n\t\"price\": {{entry-price}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create a Withdrawal Entry",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"var moment = require('moment');\r",
-									"\r",
-									"const entryPrice = parseFloat( _.random(10, 1999, true)).toFixed(2);\r",
-									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"pm.collectionVariables.set(\"entry-price\", entryPrice);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 201\", function () {\r",
-									"  pm.response.to.have.status(201);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\r",
-									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) + parseFloat(response.netResult);\r",
-									"\tconst withdrawals = response.price;\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance);\r",
-									"\tpm.collectionVariables.set(\"withdrawals\", withdrawals);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"WITHDRAWAL\",\r\n\t\"price\": {{entry-price}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Entries",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"  pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.length).to.equal(6);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Update Trade Entry 1",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"const direction = pm.collectionVariables.get(\"entry1-direction\");\r",
-									"\r",
-									"const entry = \"entry1-\";\r",
-									"\r",
-									"const entryPrice = parseFloat(pm.collectionVariables.get(entry + \"price\"));\r",
-									"\r",
-									"var profitPrice = 0.00;\r",
-									"var lossPrice = 0.00;\r",
-									"if(direction == 'LONG') {\r",
-									"\tprofitPrice = (entryPrice * 1.25).toFixed(2);\r",
-									"\tlossPrice = (entryPrice * 0.85).toFixed(2);\r",
-									"} else {\r",
-									"\tprofitPrice = (entryPrice * 0.85).toFixed(2);\r",
-									"\tlossPrice = (entryPrice * 1.25).toFixed(2);\r",
-									"}\r",
-									"\r",
-									"const costs = (entryPrice * 0.001).toFixed(2);\r",
-									"\r",
-									"pm.collectionVariables.set(entry + \"profitPrice\", profitPrice);\r",
-									"pm.collectionVariables.set(entry + \"lossPrice\",  lossPrice);\r",
-									"pm.collectionVariables.set(entry + \"costs\", costs);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"  pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry1-id\"));\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"entry1-price\", response.price);\r",
-									"\tpm.collectionVariables.set(\"entry1-size\", response.size);\r",
-									"\tpm.collectionVariables.set(\"entry1-profitPrice\", response.profitPrice);\r",
-									"\tpm.collectionVariables.set(\"entry1-lossPrice\", response.lossPrice);\r",
-									"\tpm.collectionVariables.set(\"entry1-costs\", response.costs);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"profitPrice\": {{entry1-profitPrice}},\r\n\t\"lossPrice\": {{entry1-lossPrice}},\r\n\t\"costs\": {{entry1-costs}},\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Get All Entries",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"  pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.length).to.equal(6);\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "GET",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Exit Trade Entry 1 Winning",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"var moment = require('moment');\r",
-									"pm.collectionVariables.set(\"entry1-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"\r",
-									"const profitPrice = parseFloat(pm.collectionVariables.get(\"entry1-profitPrice\"));\r",
-									"const exitPrice = profitPrice;\r",
-									"\r",
-									"pm.collectionVariables.set(\"entry1-exitPrice\", exitPrice);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"  pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry1-id\"));\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"entry1-netResult\", parseFloat(response.netResult));\r",
-									"\r",
-									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) +  parseFloat(response.netResult);\r",
-									"\tconst closedPositions = parseFloat(response.netResult);\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance.toFixed(2));\r",
-									"\tpm.collectionVariables.set(\"closedPositions\", closedPositions.toFixed(2));\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry1-symbol}}\",\r\n\t\"direction\": \"{{entry1-direction}}\",\r\n\t\"price\": {{entry1-price}},\r\n\t\"size\": {{entry1-size}},\r\n\t\"profitPrice\": {{entry1-profitPrice}},\r\n\t\"lossPrice\": {{entry1-lossPrice}},\r\n\t\"costs\": {{entry1-costs}},\r\n\t\"exitPrice\": {{entry1-exitPrice}},\r\n\t\"exitDate\": \"{{entry1-exitDate}}\",\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Exit Trade Entry 2 Losing",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"var moment = require('moment');\r",
-									"pm.collectionVariables.set(\"entry2-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"\r",
-									"const lossPrice = pm.collectionVariables.get(\"entry2-lossPrice\");\r",
-									"const exitPrice = lossPrice;\r",
-									"\r",
-									"pm.collectionVariables.set(\"entry2-exitPrice\", exitPrice);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"  pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry2-id\"));\r",
-									"\r",
-									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) + parseFloat(response.netResult);\r",
-									"\tconst closedPositions = parseFloat(pm.collectionVariables.get(\"closedPositions\")) + parseFloat(response.netResult);\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance.toFixed(2));\r",
-									"\tpm.collectionVariables.set(\"closedPositions\", closedPositions.toFixed(2));\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry2-id}}\",\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry2-symbol}}\",\r\n\t\"direction\": \"{{entry2-direction}}\",\r\n\t\"price\": {{entry2-price}},\r\n\t\"size\": {{entry2-size}},\r\n\t\"profitPrice\": {{entry2-profitPrice}},\r\n\t\"lossPrice\": {{entry2-lossPrice}},\r\n\t\"costs\": {{entry2-costs}},\r\n\t\"exitPrice\": {{entry2-exitPrice}},\r\n\t\"exitDate\": \"{{entry2-exitDate}}\",\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"entries",
-								"{{journal-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Exit Trade Entry 3 Winning",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									"var moment = require('moment');\r",
-									"pm.collectionVariables.set(\"entry3-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
-									"\r",
-									"const profitPrice = parseFloat(pm.collectionVariables.get(\"entry3-profitPrice\"));\r",
-									"const exitPrice = profitPrice;\r",
-									"\r",
-									"pm.collectionVariables.set(\"entry3-exitPrice\", exitPrice);"
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 200\", function () {\r",
-									"  pm.response.to.have.status(200);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry3-id\"));\r",
-									"\r",
-									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\")) + parseFloat(response.netResult);\r",
-									"\tconst closedPositions = parseFloat(pm.collectionVariables.get(\"closedPositions\")) + parseFloat(response.netResult);\r",
-									"\r",
-									"\tpm.collectionVariables.set(\"accountBalance\", accountBalance.toFixed(2));\r",
-									"\tpm.collectionVariables.set(\"closedPositions\", closedPositions.toFixed(2));\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry3-id}}\",\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"{{entry3-symbol}}\",\r\n\t\"direction\": \"{{entry3-direction}}\",\r\n\t\"price\": {{entry3-price}},\r\n\t\"size\": {{entry3-size}},\r\n\t\"profitPrice\": {{entry3-profitPrice}},\r\n\t\"lossPrice\": {{entry3-lossPrice}},\r\n\t\"costs\": {{entry3-costs}},\r\n\t\"exitPrice\": {{entry3-exitPrice}},\r\n\t\"exitDate\": \"{{entry3-exitDate}}\",\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1545,22 +651,1305 @@
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
 									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
 									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\"));\r",
-									"\tconst closedPositions = parseFloat(pm.collectionVariables.get(\"closedPositions\"));\r",
-									"\tconst deposits = parseFloat(pm.collectionVariables.get(\"deposits\"));\r",
-									"\tconst taxes = parseFloat(pm.collectionVariables.get(\"taxes\"));\r",
-									"\tconst withdrawals = parseFloat(pm.collectionVariables.get(\"withdrawals\"));\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(15000.00);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
 									"\r",
-									"\tconst balance = parseFloat(response.startBalance) + parseFloat(accountBalance);\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(732.03);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(14267.97);\t\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a Trade Entry AMZN  SHORT 5.5 x 99.50 - Costs 2.51",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"const entry = \"entry2-\";\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(balance);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(closedPositions);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(deposits);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(taxes);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(withdrawals);\r",
+									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
+									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
+									"\r",
+									"function randoGraph() {\r",
+									"\tvar textArray = ['CANDLESTICK','RENKO','KAGI','LINE'];\r",
+									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
+									"\treturn  textArray[randomNumber];\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.collectionVariables.set(\"entry2-id\", response.id);\r",
+									"\r",
+									"\tpm.expect(response.price).to.eql(99.50);\r",
+									"\tpm.expect(response.size).to.eql(5.5);\r",
+									"\tpm.expect(response.profitPrice).to.eql(90.00);\r",
+									"\tpm.expect(response.lossPrice).to.eql(102.50);\r",
+									"\tpm.expect(response.costs).to.eql(2.51);\r",
+									"\tpm.expect(response.accountRisked * 100 ).to.eql(0.11);\r",
+									"\tpm.expect(response.plannedRR).to.eql(3.17);\r",
+									"\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"AMZN\",\r\n\t\"direction\": \"SHORT\",\r\n\t\"price\": 99.50,\r\n\t\"size\": 5.5,\r\n\t\"profitPrice\": 90.00,\r\n\t\"lossPrice\": 102.50,\r\n\t\"costs\": 2.51,\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(15000.00);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(1279.28);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(13720.72);\t\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a Trade Entry SP500 LONG 2x 3967.85",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"const entry = \"entry3-\";\r",
+									"\r",
+									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
+									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
+									"\r",
+									"function randoGraph() {\r",
+									"\tvar textArray = ['CANDLESTICK','RENKO','KAGI','LINE'];\r",
+									"\tvar randomNumber = Math.floor(Math.random()*textArray.length);\r",
+									"\treturn  textArray[randomNumber];\r",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.collectionVariables.set(\"entry3-id\", response.id);\r",
+									"\t\r",
+									"\tpm.expect(response.price).to.eql(3967.85);\r",
+									"\tpm.expect(response.size).to.eql(2);\r",
+									"\tpm.expect(response.profitPrice).to.eql(4150.00);\r",
+									"\tpm.expect(response.lossPrice).to.eql(3900.00);\r",
+									"\tpm.expect(parseFloat( (response.accountRisked * 100).toFixed(2) )).to.eql(0.9);\r",
+									"\tpm.expect(response.plannedRR).to.eql(2.68);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 3967.85,\r\n\t\"size\": 2,\r\n\t\"profitPrice\": 4150.00,\r\n\t\"lossPrice\": 3900.00,\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(15000.00);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(9214.98);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(5785.02);\t\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a Deposit  Entry 2000.00",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"\r",
+									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.netResult).to.eql(2000.00);\r",
+									"\tpm.expect(response.accountChange * 100).to.eql(13.33);\r",
+									"\tpm.expect(response.accountBalance).to.eql(17000.00);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"DEPOSIT\",\r\n\t\"price\": 2000.00\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(17000.00);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(9214.98);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(7785.02);\t\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a Taxes Entry 150.50",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"\r",
+									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.netResult).to.eql(-150.50);\r",
+									"\tpm.expect(response.accountChange * 100).to.eql(-0.89);\r",
+									"\tpm.expect(response.accountBalance).to.eql(16849.50);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"TAXES\",\r\n\t\"price\": 150.50\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(16849.50);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(9214.98);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(7634.52);\t\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a Withdrawal Entry 5000.00",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"\r",
+									"pm.collectionVariables.set(\"entry-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.netResult).to.eql(-5000.000);\r",
+									"\tpm.expect(response.accountChange * 100).to.eql(-29.67);\r",
+									"\tpm.expect(response.accountBalance).to.eql(11849.50);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"WITHDRAWAL\",\r\n\t\"price\": 5000.00\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(11849.50);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(9214.98);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(2634.52);\t\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Entries",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(6);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Trade Entry MSFT LONG 3x 244,01 with Profit, Loss and Cost",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry1-id\"));\r",
+									"\t\r",
+									"\tpm.expect(response.date).to.eql(pm.collectionVariables.get('entry1-date'));\r",
+									"\tpm.expect(response.symbol).to.eql('MSFT');\r",
+									"\tpm.expect(response.graphType).to.eql(pm.collectionVariables.get('entry1-graph'));\r",
+									"\r",
+									"\tpm.expect(response.price).to.eql(244.01);\r",
+									"\tpm.expect(response.size).to.eql(3);\r",
+									"\tpm.expect(response.accountRisked * 100 ).to.eql(0.31);\r",
+									"\tpm.expect(response.plannedRR).to.eql(3.00);\r",
+									"\tpm.expect(response.profitPrice).to.eql(280.61);\r",
+									"\tpm.expect(response.lossPrice).to.eql(231.80);\r",
+									"\tpm.expect(response.costs).to.eql(1.23);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}},\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Entries",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(6);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Exit Trade  MSFT LONG winning at 280.61",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"pm.collectionVariables.set(\"entry1-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry1-id\"));\r",
+									"\r",
+									"\tpm.expect(response.grossResult).to.eql(109.80);\r",
+									"\tpm.expect(response.netResult).to.eql(108.57);\r",
+									"\tpm.expect(parseFloat( (response.accountChange * 100).toFixed(2) )).to.eql(0.92);\r",
+									"\tpm.expect(response.accountBalance).to.eql(11958.07);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}},\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"exitPrice\": 280.61,\r\n\t\"exitDate\": \"{{entry1-exitDate}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(11958.07);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(108.57);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(8482.95);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(3475.12);\t\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Exit Trade AMZN  SHORT losing at 102.50",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"pm.collectionVariables.set(\"entry2-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry2-id\"));\r",
+									"\r",
+									"\tpm.expect(response.grossResult).to.eql(-16.50);\r",
+									"\tpm.expect(response.netResult).to.eql(-19.01);\r",
+									"\tpm.expect(response.accountBalance).to.eql(11939.06);\r",
+									"\tpm.expect(parseFloat( (response.accountChange * 100).toFixed(2) )).to.eql(-0.16);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"id\": \"{{entry2-id}}\",\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"AMZN\",\r\n\t\"direction\": \"SHORT\",\r\n\t\"price\": 99.50,\r\n\t\"size\": 5.5,\r\n\t\"profitPrice\": 90.00,\r\n\t\"lossPrice\": 102.50,\r\n\t\"costs\": 2.51,\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}},\r\n\t\"exitPrice\": 102.50,\r\n\t\"exitDate\": \"{{entry2-exitDate}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(11939.06);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(89.56);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(7935.70);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(4003.36);\t\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Exit Trade SP500 LONG winning at  4150.00",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"pm.collectionVariables.set(\"entry3-exitDate\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).to.eql(pm.collectionVariables.get(\"entry3-id\"));\r",
+									"\r",
+									"\tpm.expect(response.grossResult).to.eql(364.3);\r",
+									"\tpm.expect(response.netResult).to.eql(364.3);\r",
+									"\tpm.expect(response.accountBalance).to.eql(12303.36);\r",
+									"\tpm.expect(parseFloat( (response.accountChange * 100).toFixed(2) )).to.eql(3.05);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"id\": \"{{entry3-id}}\",\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 3967.85,\r\n\t\"size\": 2,\r\n\t\"profitPrice\": 4150.00,\r\n\t\"lossPrice\": 3900.00,\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}},\r\n\t\"exitPrice\": 4150.00,\r\n\t\"exitDate\": \"{{entry3-exitDate}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"entries",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Check Journal Balance",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(12303.36);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(453.86);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(12303.36);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1730,22 +2119,21 @@
 									"    \r",
 									"\tpm.expect(response.id).not.eql(null);\r",
 									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
 									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tconst accountBalance = parseFloat(pm.collectionVariables.get(\"accountBalance\"));\r",
-									"\tconst closedPositions = parseFloat(pm.collectionVariables.get(\"closedPositions\"));\r",
-									"\tconst deposits = parseFloat(pm.collectionVariables.get(\"deposits\"));\r",
-									"\tconst taxes = parseFloat(pm.collectionVariables.get(\"taxes\"));\r",
-									"\tconst withdrawals = parseFloat(pm.collectionVariables.get(\"withdrawals\"));\r",
+									"\tpm.expect(response.currentBalance.accountBalance).to.equal(12194.79);\r",
+									"\tpm.expect(response.currentBalance.closedPositions).to.equal(345.29);\r",
+									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
 									"\r",
-									"\tconst balance = parseFloat(response.startBalance) + parseFloat(accountBalance);\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(balance);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(closedPositions);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(deposits);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(taxes);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(withdrawals);\r",
+									"\tpm.expect(response.currentBalance.openedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.currentBalance.available).to.equal(12194.79);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2077,6 +2465,10 @@
 			"value": ""
 		},
 		{
+			"key": "journal-date",
+			"value": ""
+		},
+		{
 			"key": "journal-id",
 			"value": ""
 		},
@@ -2085,19 +2477,11 @@
 			"value": ""
 		},
 		{
-			"key": "entry1-symbol",
+			"key": "entry1-graph",
 			"value": ""
 		},
 		{
-			"key": "entry1-direction",
-			"value": ""
-		},
-		{
-			"key": "entry1-price",
-			"value": ""
-		},
-		{
-			"key": "entry1-size",
+			"key": "entry1-measure",
 			"value": ""
 		},
 		{
@@ -2109,31 +2493,11 @@
 			"value": ""
 		},
 		{
-			"key": "entry2-symbol",
+			"key": "entry2-graph",
 			"value": ""
 		},
 		{
-			"key": "entry2-direction",
-			"value": ""
-		},
-		{
-			"key": "entry2-price",
-			"value": ""
-		},
-		{
-			"key": "entry2-size",
-			"value": ""
-		},
-		{
-			"key": "entry2-profitPrice",
-			"value": ""
-		},
-		{
-			"key": "entry2-lossPrice",
-			"value": ""
-		},
-		{
-			"key": "entry2-costs",
+			"key": "entry2-measure",
 			"value": ""
 		},
 		{
@@ -2145,31 +2509,11 @@
 			"value": ""
 		},
 		{
-			"key": "entry3-symbol",
+			"key": "entry3-graph",
 			"value": ""
 		},
 		{
-			"key": "entry3-direction",
-			"value": ""
-		},
-		{
-			"key": "entry3-price",
-			"value": ""
-		},
-		{
-			"key": "entry3-size",
-			"value": ""
-		},
-		{
-			"key": "entry3-profitPrice",
-			"value": ""
-		},
-		{
-			"key": "entry3-lossPrice",
-			"value": ""
-		},
-		{
-			"key": "entry3-costs",
+			"key": "entry3-measure",
 			"value": ""
 		},
 		{
@@ -2181,47 +2525,7 @@
 			"value": ""
 		},
 		{
-			"key": "entry-price",
-			"value": ""
-		},
-		{
-			"key": "accountBalance",
-			"value": ""
-		},
-		{
-			"key": "deposits",
-			"value": ""
-		},
-		{
-			"key": "taxes",
-			"value": ""
-		},
-		{
-			"key": "withdrawals",
-			"value": ""
-		},
-		{
-			"key": "entry1-profitPrice",
-			"value": ""
-		},
-		{
-			"key": "entry1-lossPrice",
-			"value": ""
-		},
-		{
-			"key": "entry1-costs",
-			"value": ""
-		},
-		{
 			"key": "entry1-exitDate",
-			"value": ""
-		},
-		{
-			"key": "entry1-exitPrice",
-			"value": ""
-		},
-		{
-			"key": "closedPositions",
 			"value": ""
 		},
 		{
@@ -2229,15 +2533,19 @@
 			"value": ""
 		},
 		{
-			"key": "entry2-exitPrice",
-			"value": ""
-		},
-		{
 			"key": "entry3-exitDate",
 			"value": ""
 		},
 		{
-			"key": "entry3-exitPrice",
+			"key": "entry1-exitPrice",
+			"value": ""
+		},
+		{
+			"key": "accountBalance",
+			"value": ""
+		},
+		{
+			"key": "closedPositions",
 			"value": ""
 		},
 		{
@@ -2246,34 +2554,6 @@
 		},
 		{
 			"key": "user-id",
-			"value": ""
-		},
-		{
-			"key": "entry1-graph",
-			"value": ""
-		},
-		{
-			"key": "entry2-graph",
-			"value": ""
-		},
-		{
-			"key": "entry3-graph",
-			"value": ""
-		},
-		{
-			"key": "entry1-netResult",
-			"value": ""
-		},
-		{
-			"key": "entry1-measure",
-			"value": ""
-		},
-		{
-			"key": "entry2-measure",
-			"value": ""
-		},
-		{
-			"key": "entry3-measure",
 			"value": ""
 		}
 	]
