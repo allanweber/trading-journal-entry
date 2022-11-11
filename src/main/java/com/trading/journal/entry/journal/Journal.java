@@ -3,10 +3,7 @@ package com.trading.journal.entry.journal;
 import com.allanweber.jwttoken.helper.DateHelper;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.trading.journal.entry.balance.Balance;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.NumberFormat;
@@ -14,6 +11,7 @@ import org.springframework.format.annotation.NumberFormat;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 @Document(collection = "journals")
@@ -29,12 +27,27 @@ public class Journal {
     @NotBlank(message = "Journal name is required")
     private String name;
 
+    @JsonFormat(pattern = DateHelper.DATE_FORMAT)
+    @NotNull(message = "Start journal date is required")
+    private LocalDateTime startJournal;
+
     @NotNull(message = "Start balance is required")
     @NumberFormat(pattern = "#0.00")
     private BigDecimal startBalance;
 
+    @NotNull(message = "Currency is required")
+    private Currency currency;
+
+    @Setter
     private Balance currentBalance;
 
     @JsonFormat(pattern = DateHelper.DATE_FORMAT)
+    @Setter
     private LocalDateTime lastBalance;
+
+    public void initializeBalance() {
+        this.getCurrentBalance().setStartJournal(this.startJournal);
+        this.getCurrentBalance().setCurrency(this.currency);
+        this.getCurrentBalance().setStartBalance(this.startBalance.setScale(2, RoundingMode.HALF_EVEN));
+    }
 }

@@ -3,6 +3,7 @@ package com.trading.journal.entry.entries;
 import com.allanweber.jwttoken.helper.DateHelper;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -21,6 +22,7 @@ import java.util.Objects;
 @Builder
 @EqualsAndHashCode
 @EntryByType
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Entry {
 
     @Id
@@ -109,6 +111,7 @@ public class Entry {
      * End
      */
 
+    @JsonIgnore
     public boolean isFinished() {
         return Objects.nonNull(netResult);
     }

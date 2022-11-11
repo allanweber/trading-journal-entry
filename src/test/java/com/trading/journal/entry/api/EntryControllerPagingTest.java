@@ -5,8 +5,10 @@ import com.allanweber.jwttoken.service.JwtResolveToken;
 import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
+import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
+import com.trading.journal.entry.journal.Currency;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.queries.data.PageResponse;
 import org.junit.jupiter.api.*;
@@ -23,6 +25,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 
 import static java.util.Collections.singletonList;
@@ -56,7 +59,22 @@ class EntryControllerPagingTest {
         webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
 
         journalCollection = "PagingTenancy_journals";
-        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").build(), journalCollection);
+        Journal build = Journal.builder().name("JOURNAL-1")
+                .currency(Currency.DOLLAR)
+                .startJournal(LocalDateTime.now())
+                .startBalance(BigDecimal.ZERO)
+                .currentBalance( Balance.builder()
+                        .accountBalance(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .openedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .available(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
+                        .build())
+                .build();
+
+        Journal journal = mongoTemplate.save(build, journalCollection);
         journalId = journal.getId();
 
         entryCollection = "PagingTenancy_JOURNAL-1_entries";
