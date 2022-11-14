@@ -400,7 +400,7 @@ class BalanceIntegratedTest {
                 .expectBody(Entry.class)
                 .value(response -> {
                     assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(4.44).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.1350).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0964).setScale(4, RoundingMode.HALF_EVEN));
                     assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(500.00));
                     assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(745.00));
                     assertThat(response.getExitPrice()).isEqualTo(BigDecimal.valueOf(745.00));
@@ -482,7 +482,7 @@ class BalanceIntegratedTest {
                 .expectBody(Entry.class)
                 .value(response -> {
                     assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(9.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0500).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0395).setScale(4, RoundingMode.HALF_EVEN));
                     assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(150.00));
                     assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(400.00));
                     assertThat(response.getCosts()).isEqualTo(BigDecimal.valueOf(50.00));
@@ -748,7 +748,7 @@ class BalanceIntegratedTest {
                 .expectBody(Entry.class)
                 .value(response -> {
                     assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0300).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0286).setScale(4, RoundingMode.HALF_EVEN));
                     assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(200.00));
                     assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(80.00));
                     assertThat(response.getExitPrice()).isEqualTo(BigDecimal.valueOf(80.00).setScale(2, RoundingMode.HALF_EVEN));
