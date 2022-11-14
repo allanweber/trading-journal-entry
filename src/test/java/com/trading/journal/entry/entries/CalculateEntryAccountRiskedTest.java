@@ -37,25 +37,6 @@ class CalculateEntryAccountRiskedTest {
         assertThat(calculated.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0527));
     }
 
-    @DisplayName("Do not change account risked when trade finish")
-    @Test
-    void notChangeRisk() {
-        Entry entry = Entry.builder().type(EntryType.TRADE)
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(200))
-                .size(BigDecimal.valueOf(2))
-                .profitPrice(BigDecimal.valueOf(240))
-                .lossPrice(BigDecimal.valueOf(180))
-                .accountRisked(BigDecimal.valueOf(0.0400).setScale(4, RoundingMode.HALF_EVEN))
-                .exitPrice(BigDecimal.valueOf(240))
-                .date(LocalDateTime.now())
-                .build();
-
-        BigDecimal balance = BigDecimal.valueOf(50000);
-        Entry calculated = new CalculateEntry(entry, balance).calculate();
-        assertThat(calculated.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0400).setScale(4, RoundingMode.HALF_EVEN));
-    }
-
     @DisplayName("Account Risked for Short")
     @Test
     void shortAccountRisked() {
