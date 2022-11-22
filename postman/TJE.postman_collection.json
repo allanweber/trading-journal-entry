@@ -614,13 +614,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -763,13 +764,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -910,13 +912,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -1045,13 +1048,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -1180,13 +1184,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -1316,13 +1321,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -1436,13 +1442,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -1509,13 +1516,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -1561,13 +1569,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -1628,13 +1637,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -1763,13 +1773,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -1898,13 +1909,14 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
@@ -2029,13 +2041,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}/{{entry1-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/{{entry1-id}}",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
+								"journals",
 								"{{journal-id}}",
+								"entries",
 								"{{entry1-id}}"
 							]
 						}
@@ -2082,13 +2095,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/entries/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"entries",
-								"{{journal-id}}"
+								"journals",
+								"{{journal-id}}",
+								"entries"
 							]
 						}
 					},
