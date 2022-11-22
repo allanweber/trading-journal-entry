@@ -120,8 +120,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryMSFT)
@@ -158,8 +157,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryAPPL)
@@ -196,8 +194,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryNVDA)
@@ -234,8 +231,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryTSLA)
@@ -259,8 +255,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -284,8 +279,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -311,8 +305,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryAPPL)
@@ -335,8 +328,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -360,8 +352,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -391,8 +382,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryTSLA)
@@ -415,8 +405,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -440,8 +429,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -473,8 +461,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryNVDA)
@@ -498,8 +485,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -523,8 +509,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -554,8 +539,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(withdrawal)
@@ -579,8 +563,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -604,8 +587,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -644,8 +626,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(taxes)
@@ -669,8 +650,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -694,8 +674,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -739,8 +718,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryMSFT)
@@ -763,8 +741,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -788,8 +765,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -825,8 +801,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(deposit)
@@ -850,8 +825,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -875,8 +849,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -910,9 +883,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
-                        .pathSegment("{entry-id}")
+                        .path("/journals/{journal-id}/entries/{entry-id}")
                         .build(journalId, entryAPPLId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -923,8 +894,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -948,8 +918,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

@@ -269,8 +269,7 @@ class JournalControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -340,8 +339,7 @@ class JournalControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(1))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -360,8 +358,7 @@ class JournalControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journal.getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -397,8 +394,7 @@ class JournalControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journal.getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -442,8 +438,7 @@ class JournalControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}/balance")
+                        .path("/journals/{journal-id}/balance")
                         .build(journal.getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()

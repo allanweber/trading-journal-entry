@@ -126,8 +126,7 @@ class EntryControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -161,8 +160,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -211,8 +209,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(updateEntry)
@@ -258,8 +255,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -290,8 +286,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -332,8 +327,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -361,8 +355,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -403,8 +396,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -432,8 +424,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -474,8 +465,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -504,8 +494,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -525,9 +514,7 @@ class EntryControllerTest {
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
-                        .pathSegment("{entry-id}")
+                        .path("/journals/{journal-id}/entries/{entry-id}")
                         .build(journalId, entryId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
@@ -555,8 +542,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
+                        .path("/journals/{journal-id}/entries")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entry)
@@ -592,10 +578,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
-                        .pathSegment("{entry-id}")
-                        .pathSegment("image")
+                        .path("/journals/{journal-id}/entries/{entry-id}/image")
                         .queryParam("type", UploadType.IMAGE_BEFORE)
                         .build(journalId, entryId.get()))
                 .accept(MediaType.APPLICATION_JSON)
@@ -612,10 +595,7 @@ class EntryControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
-                        .pathSegment("{entry-id}")
-                        .pathSegment("image")
+                        .path("/journals/{journal-id}/entries/{entry-id}/image")
                         .queryParam("type", UploadType.IMAGE_BEFORE)
                         .build(journalId, entryId.get()))
                 .accept(MediaType.APPLICATION_JSON)
@@ -627,10 +607,7 @@ class EntryControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
-                        .pathSegment("{entry-id}")
-                        .pathSegment("image")
+                        .path("/journals/{journal-id}/entries/{entry-id}/image")
                         .queryParam("type", UploadType.IMAGE_AFTER)
                         .build(journalId, entryId.get()))
                 .accept(MediaType.APPLICATION_JSON)
@@ -644,10 +621,7 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
-                        .pathSegment("{entry-id}")
-                        .pathSegment("image")
+                        .path("/journals/{journal-id}/entries/{entry-id}/image")
                         .queryParam("type", UploadType.IMAGE_AFTER)
                         .build(journalId, entryId.get()))
                 .accept(MediaType.APPLICATION_JSON)
@@ -664,10 +638,7 @@ class EntryControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
-                        .pathSegment("{entry-id}")
-                        .pathSegment("image")
+                        .path("/journals/{journal-id}/entries/{entry-id}/image")
                         .queryParam("type", UploadType.IMAGE_BEFORE)
                         .build(journalId, entryId.get()))
                 .accept(MediaType.APPLICATION_JSON)
@@ -679,10 +650,7 @@ class EntryControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/entries")
-                        .pathSegment("{journal-id}")
-                        .pathSegment("{entry-id}")
-                        .pathSegment("image")
+                        .path("/journals/{journal-id}/entries/{entry-id}/image")
                         .queryParam("type", UploadType.IMAGE_AFTER)
                         .build(journalId, entryId.get()))
                 .accept(MediaType.APPLICATION_JSON)
