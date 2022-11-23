@@ -7,6 +7,7 @@ import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.*;
+import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -145,9 +146,8 @@ class EntryControllerTest {
     @DisplayName("Create a new Trade entry")
     @Test
     void createTrade() {
-        Entry entry = Entry.builder()
+        Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .type(EntryType.TRADE)
                 .symbol("USD/EUR")
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(1.1234))
@@ -160,10 +160,10 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/trade")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
+                .bodyValue(trade)
                 .exchange()
                 .expectStatus()
                 .isCreated()
@@ -190,10 +190,8 @@ class EntryControllerTest {
                     assertThat(response.getAccountBalance()).isNull();
                 });
 
-        Entry updateEntry = Entry.builder()
-                .id(entryId.get())
+        Trade updateEntry = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .type(EntryType.TRADE)
                 .symbol("USD/EUR")
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(1.1234))
@@ -207,10 +205,10 @@ class EntryControllerTest {
                 .graphMeasure("1M")
                 .build();
         webTestClient
-                .post()
+                .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
+                        .build(journalId, entryId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(updateEntry)
                 .exchange()
@@ -243,8 +241,7 @@ class EntryControllerTest {
     @DisplayName("Try to create an invalid Trade entry")
     @Test
     void invalidTrade() {
-        Entry entry = Entry.builder()
-                .type(EntryType.TRADE)
+        Trade trade = Trade.builder()
                 .profitPrice(BigDecimal.valueOf(1.2345))
                 .lossPrice(BigDecimal.valueOf(1.009))
                 .exitPrice(BigDecimal.valueOf(1.2345))
@@ -255,10 +252,10 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/trade")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
+                .bodyValue(trade)
                 .exchange()
                 .expectStatus()
                 .isBadRequest()
@@ -274,230 +271,27 @@ class EntryControllerTest {
                 });
     }
 
-    @DisplayName("Create a new Withdrawal entry")
-    @Test
-    void createWithdrawal() {
-        Entry entry = Entry.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .type(EntryType.WITHDRAWAL)
-                .price(BigDecimal.valueOf(50))
-                .build();
-
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("Location")
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.WITHDRAWAL);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(50));
-
-                    assertThat(response.getSymbol()).isNull();
-                    assertThat(response.getDirection()).isNull();
-                    assertThat(response.getSize()).isNull();
-                    assertThat(response.getProfitPrice()).isNull();
-                    assertThat(response.getLossPrice()).isNull();
-                    assertThat(response.getPlannedRR()).isNull();
-                    assertThat(response.getAccountRisked()).isNull();
-                    assertThat(response.getGrossResult()).isNull();
-
-                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(-50.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(-0.5000).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(50.00).setScale(2, RoundingMode.HALF_EVEN));
-                });
-    }
-
-    @DisplayName("Try to create an invalid Withdrawal entry")
-    @Test
-    void invalidWithdrawal() {
-        Entry entry = Entry.builder()
-                .type(EntryType.WITHDRAWAL)
-                .build();
-
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
-                .exchange()
-                .expectStatus()
-                .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
-                })
-                .value(response -> {
-                    assertThat(response.get("errors")).hasSize(2);
-                    assertThat(response.get("errors")).contains("Date is required");
-                    assertThat(response.get("errors")).contains("Price is required");
-                });
-    }
-
-    @DisplayName("Create a new Taxes entry")
-    @Test
-    void createTaxes() {
-        Entry entry = Entry.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .type(EntryType.TAXES)
-                .price(BigDecimal.valueOf(50))
-                .build();
-
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("Location")
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TAXES);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(50));
-
-                    assertThat(response.getSymbol()).isNull();
-                    assertThat(response.getDirection()).isNull();
-                    assertThat(response.getSize()).isNull();
-                    assertThat(response.getProfitPrice()).isNull();
-                    assertThat(response.getLossPrice()).isNull();
-                    assertThat(response.getPlannedRR()).isNull();
-                    assertThat(response.getAccountRisked()).isNull();
-                    assertThat(response.getGrossResult()).isNull();
-
-                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(-50.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(-0.5000).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(50.00).setScale(2, RoundingMode.HALF_EVEN));
-                });
-    }
-
-    @DisplayName("Try to create an invalid Taxes entry")
-    @Test
-    void invalidTaxes() {
-        Entry entry = Entry.builder()
-                .type(EntryType.TAXES)
-                .build();
-
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
-                .exchange()
-                .expectStatus()
-                .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
-                })
-                .value(response -> {
-                    assertThat(response.get("errors")).hasSize(2);
-                    assertThat(response.get("errors")).contains("Date is required");
-                    assertThat(response.get("errors")).contains("Price is required");
-                });
-    }
-
-    @DisplayName("Create a new Deposit entry")
-    @Test
-    void createDeposit() {
-        Entry entry = Entry.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .type(EntryType.DEPOSIT)
-                .price(BigDecimal.valueOf(50))
-                .build();
-
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("Location")
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.DEPOSIT);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(50));
-
-                    assertThat(response.getSymbol()).isNull();
-                    assertThat(response.getDirection()).isNull();
-                    assertThat(response.getSize()).isNull();
-                    assertThat(response.getProfitPrice()).isNull();
-                    assertThat(response.getLossPrice()).isNull();
-                    assertThat(response.getPlannedRR()).isNull();
-                    assertThat(response.getAccountRisked()).isNull();
-                    assertThat(response.getGrossResult()).isNull();
-
-                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(50.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5000).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(150.00).setScale(2, RoundingMode.HALF_EVEN));
-                });
-    }
-
-    @DisplayName("Try to create an invalid Deposit entry")
-    @Test
-    void invalidDeposit() {
-        Entry entry = Entry.builder()
-                .type(EntryType.DEPOSIT)
-                .build();
-
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
-                .exchange()
-                .expectStatus()
-                .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
-                })
-                .value(response -> {
-                    assertThat(response.get("errors")).hasSize(2);
-                    assertThat(response.get("errors")).contains("Date is required");
-                    assertThat(response.get("errors")).contains("Price is required");
-                });
-    }
-
     @DisplayName("Create a new entry and delete it")
     @Test
     void deleteEntry() {
-        Entry entry = Entry.builder()
+        Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .type(EntryType.DEPOSIT)
-                .price(BigDecimal.valueOf(50))
+                .symbol("USD/EUR")
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(1.1234))
+                .size(BigDecimal.valueOf(500.00))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure("1M")
                 .build();
 
         AtomicReference<String> entryId = new AtomicReference<>();
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/trade")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
+                .bodyValue(trade)
                 .exchange()
                 .expectStatus()
                 .isCreated()
@@ -527,9 +321,8 @@ class EntryControllerTest {
     @DisplayName("Create a new Trade entry and add images to it")
     @Test
     void addImages() {
-        Entry entry = Entry.builder()
+        Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .type(EntryType.TRADE)
                 .symbol("USD/EUR")
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(1.1234))
@@ -542,10 +335,10 @@ class EntryControllerTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/trade")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
+                .bodyValue(trade)
                 .exchange()
                 .expectStatus()
                 .isCreated()

@@ -1,4 +1,4 @@
-package com.trading.journal.entry.entries;
+package com.trading.journal.entry.entries.trade;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;
@@ -9,8 +9,8 @@ import java.lang.annotation.Target;
 
 @Target({ ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
-@Constraint(validatedBy = EntryByTypeValidator.class)
-public @interface EntryByType {
+@Constraint(validatedBy = ValidTradeValidator.class)
+public @interface ValidTrade {
 
     String message() default "This entry is invalid";
 

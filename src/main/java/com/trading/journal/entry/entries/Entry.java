@@ -21,7 +21,6 @@ import java.util.Objects;
 @Getter
 @Builder
 @EqualsAndHashCode
-@EntryByType
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Entry {
 

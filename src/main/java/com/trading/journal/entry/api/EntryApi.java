@@ -11,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.validation.Valid;
 import java.util.List;
 
 @Api(tags = "Entries Api")
@@ -38,26 +37,18 @@ public interface EntryApi {
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 
-    @ApiOperation(notes = "Save entry", value = "Save entry, some fields are calculated")
-    @ApiResponses({
-            @ApiResponse(code = 201, message = "Entry created"),
-            @ApiResponse(code = 200, message = "Entry updated")
-    })
-    @PostMapping
-    ResponseEntity<Entry> save(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Entry data);
-
     @ApiOperation(notes = "Delete entry", value = "Delete entry")
     @ApiResponses(@ApiResponse(code = 200, message = "Entry deleted"))
     @DeleteMapping("/{entry-id}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,  @PathVariable(name = "entry-id") String entryId);
+    ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId);
 
     @ApiOperation(notes = "Upload Trade image", value = "Upload Trade image")
     @ApiResponses(@ApiResponse(code = 200, message = "Trade image uploaded"))
     @PostMapping("/{entry-id}/image")
-    ResponseEntity<Void> uploadImage(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,  @PathVariable(name = "entry-id") String entryId,
-                                                @RequestParam("type") UploadType type,
-                                                @RequestParam("file") MultipartFile file);
+    ResponseEntity<Void> uploadImage(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId,
+                                     @RequestParam("type") UploadType type,
+                                     @RequestParam("file") MultipartFile file);
 
     @ApiOperation(notes = "Return Trade image", value = "Return Trade image")
     @ApiResponses(@ApiResponse(code = 200, message = "Trade image returned"))
