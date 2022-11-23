@@ -12,13 +12,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
-import java.net.URI;
 import java.util.List;
-import java.util.Objects;
 
-import static org.springframework.http.ResponseEntity.created;
 import static org.springframework.http.ResponseEntity.ok;
 
 @RequiredArgsConstructor
@@ -43,20 +39,6 @@ public class EntryController implements EntryApi {
     public ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, String journalId) {
         List<Entry> entries = entryService.getAll(accessTokenInfo, journalId);
         return ok(entries);
-    }
-
-    @Override
-    public ResponseEntity<Entry> save(AccessTokenInfo accessTokenInfo, String journalId, Entry entry) {
-        boolean isNewEntry = Objects.isNull(entry.getId());
-        Entry created = entryService.save(accessTokenInfo, journalId, entry);
-        ResponseEntity<Entry> body;
-        if (isNewEntry) {
-            URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
-            body = created(uri).body(created);
-        } else {
-            body = ok(created);
-        }
-        return body;
     }
 
     @Override

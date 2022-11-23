@@ -11,6 +11,7 @@ import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.entries.GraphType;
+import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.journal.Currency;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
@@ -255,9 +256,8 @@ class JournalControllerTest {
 
         assertThat(mongoTemplate.findAll(Journal.class, journalCollection)).isNotEmpty();
 
-        Entry entry = Entry.builder()
+        Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .type(EntryType.TRADE)
                 .symbol("USD/EUR")
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(1.1234))
@@ -265,14 +265,13 @@ class JournalControllerTest {
                 .graphType(GraphType.CANDLESTICK)
                 .graphMeasure("1M")
                 .build();
-
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/trade")
                         .build(journalId.get()))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entry)
+                .bodyValue(trade)
                 .exchange()
                 .expectStatus()
                 .isCreated()

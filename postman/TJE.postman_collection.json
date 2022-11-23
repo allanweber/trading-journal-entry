@@ -606,7 +606,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -614,14 +614,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"trade"
 							]
 						}
 					},
@@ -756,7 +757,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"AMZN\",\r\n\t\"direction\": \"SHORT\",\r\n\t\"price\": 99.50,\r\n\t\"size\": 5.5,\r\n\t\"profitPrice\": 90.00,\r\n\t\"lossPrice\": 102.50,\r\n\t\"costs\": 2.51,\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"symbol\": \"AMZN\",\r\n\t\"direction\": \"SHORT\",\r\n\t\"price\": 99.50,\r\n\t\"size\": 5.5,\r\n\t\"profitPrice\": 90.00,\r\n\t\"lossPrice\": 102.50,\r\n\t\"costs\": 2.51,\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -764,14 +765,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"trade"
 							]
 						}
 					},
@@ -904,7 +906,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 3967.85,\r\n\t\"size\": 2,\r\n\t\"profitPrice\": 4150.00,\r\n\t\"lossPrice\": 3900.00,\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 3967.85,\r\n\t\"size\": 2,\r\n\t\"profitPrice\": 4150.00,\r\n\t\"lossPrice\": 3900.00,\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}}\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -912,14 +914,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"trade"
 							]
 						}
 					},
@@ -1040,7 +1043,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"DEPOSIT\",\r\n\t\"price\": 2000.00\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"price\": 2000.00\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1048,14 +1051,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/deposit",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"deposit"
 							]
 						}
 					},
@@ -1176,7 +1180,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"TAXES\",\r\n\t\"price\": 150.50\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"price\": 150.50\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1184,14 +1188,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/taxes",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"taxes"
 							]
 						}
 					},
@@ -1313,7 +1318,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"type\": \"WITHDRAWAL\",\r\n\t\"price\": 5000.00\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry-date}}\",\r\n\t\"price\": 5000.00\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1321,14 +1326,15 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/withdrawal",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"withdrawal"
 							]
 						}
 					},
@@ -1498,7 +1504,7 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
@@ -1508,7 +1514,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}},\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}},\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1516,14 +1522,16 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/{{entry1-id}}",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"trade",
+								"{{entry1-id}}"
 							]
 						}
 					},
@@ -1619,7 +1627,7 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
@@ -1629,7 +1637,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry1-id}}\",\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}},\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"exitPrice\": 280.61,\r\n\t\"exitDate\": \"{{entry1-exitDate}}\"\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry1-date}}\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"graphType\": \"{{entry1-graph}}\",\r\n\t\"graphMeasure\": {{entry1-measure}},\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"exitPrice\": 280.61,\r\n\t\"exitDate\": \"{{entry1-exitDate}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1637,14 +1645,16 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/{{entry1-id}}",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"trade",
+								"{{entry1-id}}"
 							]
 						}
 					},
@@ -1755,7 +1765,7 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
@@ -1765,7 +1775,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry2-id}}\",\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"AMZN\",\r\n\t\"direction\": \"SHORT\",\r\n\t\"price\": 99.50,\r\n\t\"size\": 5.5,\r\n\t\"profitPrice\": 90.00,\r\n\t\"lossPrice\": 102.50,\r\n\t\"costs\": 2.51,\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}},\r\n\t\"exitPrice\": 102.50,\r\n\t\"exitDate\": \"{{entry2-exitDate}}\"\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry2-date}}\",\r\n\t\"symbol\": \"AMZN\",\r\n\t\"direction\": \"SHORT\",\r\n\t\"price\": 99.50,\r\n\t\"size\": 5.5,\r\n\t\"profitPrice\": 90.00,\r\n\t\"lossPrice\": 102.50,\r\n\t\"costs\": 2.51,\r\n\t\"graphType\": \"{{entry2-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}},\r\n\t\"exitPrice\": 102.50,\r\n\t\"exitDate\": \"{{entry2-exitDate}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1773,14 +1783,16 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/{{entry2-id}}",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"trade",
+								"{{entry2-id}}"
 							]
 						}
 					},
@@ -1891,7 +1903,7 @@
 						}
 					],
 					"request": {
-						"method": "POST",
+						"method": "PATCH",
 						"header": [
 							{
 								"key": "Authorization",
@@ -1901,7 +1913,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"id\": \"{{entry3-id}}\",\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"type\": \"TRADE\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 3967.85,\r\n\t\"size\": 2,\r\n\t\"profitPrice\": 4150.00,\r\n\t\"lossPrice\": 3900.00,\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}},\r\n\t\"exitPrice\": 4150.00,\r\n\t\"exitDate\": \"{{entry3-exitDate}}\"\r\n}",
+							"raw": "{\r\n\t\"date\": \"{{entry3-date}}\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 3967.85,\r\n\t\"size\": 2,\r\n\t\"profitPrice\": 4150.00,\r\n\t\"lossPrice\": 3900.00,\r\n\t\"graphType\": \"{{entry3-graph}}\",\r\n\t\"graphMeasure\": {{entry2-measure}},\r\n\t\"exitPrice\": 4150.00,\r\n\t\"exitDate\": \"{{entry3-exitDate}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -1909,14 +1921,16 @@
 							}
 						},
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/{{entry3-id}}",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
 								"{{journal-id}}",
-								"entries"
+								"entries",
+								"trade",
+								"{{entry3-id}}"
 							]
 						}
 					},

@@ -10,6 +10,10 @@ import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.entries.GraphType;
+import com.trading.journal.entry.entries.deposit.Deposit;
+import com.trading.journal.entry.entries.taxes.Taxes;
+import com.trading.journal.entry.entries.trade.Trade;
+import com.trading.journal.entry.entries.withdrawal.Withdrawal;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -105,9 +109,8 @@ class BalanceIntegratedTest {
     void createTrade() {
         //Create an entry
         AtomicReference<String> entryMSFTId = new AtomicReference<>();
-        Entry entryMSFT = Entry.builder()
+        Trade entryMSFT = Trade.builder()
                 .date(LocalDateTime.of(2022, 1, 1, 12, 0, 0))
-                .type(EntryType.TRADE)
                 .symbol("MSFT")
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(100.00))
@@ -120,7 +123,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/trade")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryMSFT)
@@ -142,9 +145,8 @@ class BalanceIntegratedTest {
 
         //Create an entry
         AtomicReference<String> entryAPPLId = new AtomicReference<>();
-        Entry entryAPPL = Entry.builder()
+        Trade entryAPPL = Trade.builder()
                 .date(LocalDateTime.of(2022, 1, 2, 12, 0, 0))
-                .type(EntryType.TRADE)
                 .symbol("APPL")
                 .direction(EntryDirection.LONG)
                 .price(BigDecimal.valueOf(200.00))
@@ -157,7 +159,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/trade")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryAPPL)
@@ -179,9 +181,8 @@ class BalanceIntegratedTest {
 
         //Create an entry
         AtomicReference<String> entryNVDAId = new AtomicReference<>();
-        Entry entryNVDA = Entry.builder()
+        Trade entryNVDA = Trade.builder()
                 .date(LocalDateTime.of(2022, 1, 3, 12, 0, 0))
-                .type(EntryType.TRADE)
                 .symbol("NVDA")
                 .direction(EntryDirection.SHORT)
                 .price(BigDecimal.valueOf(375.00))
@@ -194,7 +195,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/trade")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryNVDA)
@@ -216,9 +217,8 @@ class BalanceIntegratedTest {
 
         //Create an entry
         AtomicReference<String> entryTSLAId = new AtomicReference<>();
-        Entry entryTSLA = Entry.builder()
+        Trade entryTSLA = Trade.builder()
                 .date(LocalDateTime.of(2022, 1, 4, 12, 0, 0))
-                .type(EntryType.TRADE)
                 .symbol("TSLA")
                 .direction(EntryDirection.SHORT)
                 .price(BigDecimal.valueOf(700))
@@ -231,7 +231,7 @@ class BalanceIntegratedTest {
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/trade")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryTSLA)
@@ -295,18 +295,16 @@ class BalanceIntegratedTest {
                 });
 
         //Exit SECOND added trade, APPL winning
-        entryAPPL = rebuildEntryWithId(entryAPPL, entryAPPLId.get())
+        entryAPPL = rebuildEntry(entryAPPL)
                 .exitPrice(BigDecimal.valueOf(400.00))
                 .exitDate(LocalDateTime.of(2022, 1, 2, 12, 0, 0))
                 .costs(BigDecimal.ZERO)
-                .plannedRR(BigDecimal.valueOf(4.00).setScale(2, RoundingMode.HALF_EVEN))
-                .accountRisked(BigDecimal.valueOf(0.1000).setScale(4, RoundingMode.HALF_EVEN))
                 .build();
         webTestClient
-                .post()
+                .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
+                        .build(journalId, entryAPPLId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryAPPL)
                 .exchange()
@@ -372,18 +370,16 @@ class BalanceIntegratedTest {
                 });
 
         //Exit LAST added trade, TSLA losing
-        entryTSLA = rebuildEntryWithId(entryTSLA, entryTSLAId.get())
+        entryTSLA = rebuildEntry(entryTSLA)
                 .exitPrice(BigDecimal.valueOf(745.00))
                 .exitDate(LocalDateTime.of(2022, 1, 5, 12, 0, 0))
                 .costs(BigDecimal.ZERO)
-                .plannedRR(BigDecimal.valueOf(4.44).setScale(2, RoundingMode.HALF_EVEN))
-                .accountRisked(BigDecimal.valueOf(0.1350).setScale(4, RoundingMode.HALF_EVEN))
                 .build();
         webTestClient
-                .post()
+                .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
+                        .build(journalId, entryTSLAId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryTSLA)
                 .exchange()
@@ -451,18 +447,16 @@ class BalanceIntegratedTest {
                 });
 
         //Exit THIRD added trade, NVDA winning
-        entryNVDA = rebuildEntryWithId(entryNVDA, entryNVDAId.get())
+        entryNVDA = rebuildEntry(entryNVDA)
                 .exitPrice(BigDecimal.valueOf(160).setScale(2, RoundingMode.HALF_EVEN))
                 .exitDate(LocalDateTime.of(2022, 1, 6, 12, 0, 0))
                 .costs(BigDecimal.valueOf(50.00))
-                .plannedRR(BigDecimal.valueOf(9.00).setScale(2, RoundingMode.HALF_EVEN))
-                .accountRisked(BigDecimal.valueOf(0.0500).setScale(4, RoundingMode.HALF_EVEN))
                 .build();
         webTestClient
-                .post()
+                .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
+                        .build(journalId, entryNVDAId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryNVDA)
                 .exchange()
@@ -531,15 +525,14 @@ class BalanceIntegratedTest {
                 });
 
         // WITHDRAWAL
-        Entry withdrawal = Entry.builder()
-                .type(EntryType.WITHDRAWAL)
+        Withdrawal withdrawal = Withdrawal.builder()
                 .date(LocalDateTime.now())
                 .price(BigDecimal.valueOf(6000.00).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/withdrawal")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(withdrawal)
@@ -618,15 +611,14 @@ class BalanceIntegratedTest {
                 });
 
         //TAXES
-        Entry taxes = Entry.builder()
-                .type(EntryType.TAXES)
+        Taxes taxes = Taxes.builder()
                 .date(LocalDateTime.now())
                 .price(BigDecimal.valueOf(400.00).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/taxes")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(taxes)
@@ -708,18 +700,16 @@ class BalanceIntegratedTest {
                 });
 
         //LOSE MSFT losing
-        entryMSFT = rebuildEntryWithId(entryMSFT, entryMSFTId.get())
+        entryMSFT = rebuildEntry(entryMSFT)
                 .exitPrice(BigDecimal.valueOf(80.00).setScale(2, RoundingMode.HALF_EVEN))
                 .exitDate(LocalDateTime.of(2022, 1, 7, 12, 0, 0))
                 .costs(BigDecimal.ZERO)
-                .plannedRR(BigDecimal.valueOf(5.00).setScale(2, RoundingMode.HALF_EVEN))
-                .accountRisked(BigDecimal.valueOf(0.0300).setScale(4, RoundingMode.HALF_EVEN))
                 .build();
         webTestClient
-                .post()
+                .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
+                        .build(journalId, entryMSFTId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(entryMSFT)
                 .exchange()
@@ -793,15 +783,14 @@ class BalanceIntegratedTest {
                 });
 
         // DEPOSIT
-        Entry deposit = Entry.builder()
-                .type(EntryType.DEPOSIT)
+        Deposit deposit = Deposit.builder()
                 .date(LocalDateTime.now())
                 .price(BigDecimal.valueOf(3000.00).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
+                        .path("/journals/{journal-id}/entries/deposit")
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(deposit)
@@ -949,18 +938,16 @@ class BalanceIntegratedTest {
                 });
     }
 
-    private static Entry.EntryBuilder rebuildEntryWithId(Entry originalEntry, String id) {
-        return Entry.builder()
-                .id(id)
-                .date(originalEntry.getDate())
-                .type(originalEntry.getType())
-                .symbol(originalEntry.getSymbol())
-                .direction(originalEntry.getDirection())
-                .price(originalEntry.getPrice())
-                .size(originalEntry.getSize())
-                .profitPrice(originalEntry.getProfitPrice())
-                .lossPrice(originalEntry.getLossPrice())
-                .graphType(originalEntry.getGraphType())
-                .graphMeasure(originalEntry.getGraphMeasure());
+    private static Trade.TradeBuilder rebuildEntry(Trade original) {
+        return Trade.builder()
+                .date(original.getDate())
+                .symbol(original.getSymbol())
+                .direction(original.getDirection())
+                .price(original.getPrice())
+                .size(original.getSize())
+                .profitPrice(original.getProfitPrice())
+                .lossPrice(original.getLossPrice())
+                .graphType(original.getGraphType())
+                .graphMeasure(original.getGraphMeasure());
     }
 }
