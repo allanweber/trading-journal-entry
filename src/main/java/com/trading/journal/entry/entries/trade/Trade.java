@@ -8,6 +8,7 @@ import com.trading.journal.entry.entries.GraphType;
 import lombok.*;
 import org.springframework.format.annotation.NumberFormat;
 
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
@@ -31,7 +32,7 @@ public class Trade {
     @NumberFormat(pattern = "#0.00")
     private BigDecimal price;
 
-    @NotNull(message = "Symbol is required")
+    @NotBlank(message = "Symbol is required")
     private String symbol;
 
     @NotNull(message = "Direction is required")
