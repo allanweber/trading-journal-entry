@@ -500,22 +500,17 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(15000.00);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(15000.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
+									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.deposits).to.equal(0.00);\r",
+									"\tpm.expect(response.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.available).to.equal(15000.00);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -532,13 +527,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -651,23 +647,17 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(15000.00);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(732.03);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(14267.97);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
+									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.deposits).to.equal(0.00);\r",
+									"\tpm.expect(response.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(732.03);\r",
+									"\tpm.expect(response.available).to.equal(14267.97);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -684,13 +674,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -802,23 +793,17 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(15000.00);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(1279.28);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(13720.72);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
+									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.deposits).to.equal(0.00);\r",
+									"\tpm.expect(response.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(1279.28);\r",
+									"\tpm.expect(response.available).to.equal(13720.72);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -835,13 +820,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -950,24 +936,18 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(15000.00);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(9214.98);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(5785.02);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
+									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.deposits).to.equal(0.00);\r",
+									"\tpm.expect(response.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(9214.98);\r",
+									"\tpm.expect(response.available).to.equal(5785.02);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -984,13 +964,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -1087,24 +1068,18 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(17000.00);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(9214.98);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(7785.02);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(17000.00);\r",
+									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.taxes).to.equal(0.00);\r",
+									"\tpm.expect(response.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(9214.98);\r",
+									"\tpm.expect(response.available).to.equal(7785.02);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1121,13 +1096,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -1225,23 +1201,17 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(16849.50);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(9214.98);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(7634.52);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(16849.50);\r",
+									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.withdrawals).to.equal(0.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(9214.98);\r",
+									"\tpm.expect(response.available).to.equal(7634.52);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1258,13 +1228,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -1363,23 +1334,17 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(11849.50);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(9214.98);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(2634.52);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(11849.50);\r",
+									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(9214.98);\r",
+									"\tpm.expect(response.available).to.equal(2634.52);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1396,13 +1361,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -1683,23 +1649,17 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(11958.07);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(108.57);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(8482.95);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(3475.12);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(11958.07);\r",
+									"\tpm.expect(response.closedPositions).to.equal(108.57);\r",
+									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(8482.95);\r",
+									"\tpm.expect(response.available).to.equal(3475.12);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1716,13 +1676,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -1820,24 +1781,18 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(11939.06);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(89.56);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(7935.70);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(4003.36);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(11939.06);\r",
+									"\tpm.expect(response.closedPositions).to.equal(89.56);\r",
+									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(7935.70);\r",
+									"\tpm.expect(response.available).to.equal(4003.36);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1854,13 +1809,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -1958,24 +1914,18 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(12303.36);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(453.86);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(12303.36);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(12303.36);\r",
+									"\tpm.expect(response.closedPositions).to.equal(453.86);\r",
+									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.available).to.equal(12303.36);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1992,13 +1942,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},
@@ -2145,23 +2096,17 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.id).not.eql(null);\r",
-									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
 									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
 									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
 									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
-									"\tpm.expect(response.currentBalance.accountBalance).to.equal(12194.79);\r",
-									"\tpm.expect(response.currentBalance.closedPositions).to.equal(345.29);\r",
-									"\tpm.expect(response.currentBalance.deposits).to.equal(2000.00);\r",
-									"\tpm.expect(response.currentBalance.taxes).to.equal(150.50);\r",
-									"\tpm.expect(response.currentBalance.withdrawals).to.equal(5000.00);\r",
-									"\tpm.expect(response.currentBalance.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.currentBalance.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\r",
-									"\tpm.expect(response.currentBalance.openedPositions).to.equal(0.00);\r",
-									"\tpm.expect(response.currentBalance.available).to.equal(12194.79);\t\r",
+									"\tpm.expect(response.accountBalance).to.equal(12194.79);\r",
+									"\tpm.expect(response.closedPositions).to.equal(345.29);\r",
+									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
+									"\tpm.expect(response.taxes).to.equal(150.50);\r",
+									"\tpm.expect(response.withdrawals).to.equal(5000.00);\r",
+									"\tpm.expect(response.openedPositions).to.equal(0.00);\r",
+									"\tpm.expect(response.available).to.equal(12194.79);\t\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2178,13 +2123,14 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/balance",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
 								"journals",
-								"{{journal-id}}"
+								"{{journal-id}}",
+								"balance"
 							]
 						}
 					},

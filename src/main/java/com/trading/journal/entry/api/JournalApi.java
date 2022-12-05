@@ -3,6 +3,7 @@ package com.trading.journal.entry.api;
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.journal.Journal;
+import com.trading.journal.entry.journal.JournalData;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -22,25 +23,25 @@ public interface JournalApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Journals retrieved"))
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<List<Journal>> getAll(AccessTokenInfo accessTokenInfo);
+    ResponseEntity<List<JournalData>> getAll(AccessTokenInfo accessTokenInfo);
 
     @ApiOperation(notes = "Get a journal", value = "Get a journal")
     @ApiResponses(@ApiResponse(code = 200, message = "Journal retrieved"))
     @GetMapping("/{journal-id}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Journal> get(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
+    ResponseEntity<JournalData> get(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 
     @ApiOperation(notes = "Create new journal", value = "Create new journal")
     @ApiResponses(@ApiResponse(code = 201, message = "Journal created"))
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    ResponseEntity<Journal> save(AccessTokenInfo accessTokenInfo, @RequestBody @Valid Journal data);
+    ResponseEntity<JournalData> save(AccessTokenInfo accessTokenInfo, @RequestBody @Valid Journal data);
 
     @ApiOperation(notes = "Delete a journal", value = "Delete a journal")
     @ApiResponses(@ApiResponse(code = 200, message = "Journal deleted"))
     @DeleteMapping("/{journal-id}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Journal> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
+    ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 
     @ApiOperation(notes = "Get a journal", value = "Get a journal")
     @ApiResponses(@ApiResponse(code = 200, message = "Journal retrieved"))

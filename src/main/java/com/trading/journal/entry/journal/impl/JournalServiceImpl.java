@@ -32,17 +32,12 @@ public class JournalServiceImpl implements JournalService {
 
     @Override
     public List<Journal> getAll(AccessTokenInfo accessToken) {
-        return journalRepository.getAll(new CollectionName(accessToken))
-                .stream().peek(Journal::initializeBalance).toList();
+        return journalRepository.getAll(new CollectionName(accessToken));
     }
 
     @Override
     public Journal get(AccessTokenInfo accessToken, String journalId) {
         return journalRepository.getById(new CollectionName(accessToken), journalId)
-                .map(journal -> {
-                    journal.initializeBalance();
-                    return journal;
-                })
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Journal not found"));
     }
 
@@ -66,7 +61,6 @@ public class JournalServiceImpl implements JournalService {
             journal.setCurrentBalance(balance);
         }
         saved = journalRepository.save(new CollectionName(accessToken), journal);
-        saved.initializeBalance();
         return saved;
     }
 

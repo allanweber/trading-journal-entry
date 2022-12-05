@@ -152,12 +152,6 @@ class JournalControllerTest {
                     assertThat(journal.getId()).isNotNull();
                     assertThat(journal.getName()).isEqualTo("journal-1");
                     assertThat(journal.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 9, 19, 49, 0));
-                    assertThat(journal.getCurrentBalance().getAccountBalance()).isEqualTo(BigDecimal.valueOf(150.32));
-                    assertThat(journal.getCurrentBalance().getTaxes()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(journal.getCurrentBalance().getWithdrawals()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(journal.getCurrentBalance().getDeposits()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(journal.getCurrentBalance().getClosedPositions()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(journal.getLastBalance()).isBetween(LocalDateTime.now().minusSeconds(5), LocalDateTime.now().plusSeconds(5));
                 });
     }
 
