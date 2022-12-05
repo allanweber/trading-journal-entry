@@ -4,6 +4,7 @@ import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.journal.Journal;
+import com.trading.journal.entry.journal.JournalData;
 import com.trading.journal.entry.journal.JournalService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -25,26 +26,26 @@ public class JournalController implements JournalApi {
     private final BalanceService balanceService;
 
     @Override
-    public ResponseEntity<List<Journal>> getAll(AccessTokenInfo accessTokenInfo) {
+    public ResponseEntity<List<JournalData>> getAll(AccessTokenInfo accessTokenInfo) {
         List<Journal> journals = journalService.getAll(accessTokenInfo);
-        return ok(journals);
+        return ok(journals.stream().map(JournalData::fromJournal).toList());
     }
 
     @Override
-    public ResponseEntity<Journal> get(AccessTokenInfo accessTokenInfo, String journalId) {
+    public ResponseEntity<JournalData> get(AccessTokenInfo accessTokenInfo, String journalId) {
         Journal journal = journalService.get(accessTokenInfo, journalId);
-        return ok(journal);
+        return ok(JournalData.fromJournal(journal));
     }
 
     @Override
-    public ResponseEntity<Journal> save(AccessTokenInfo accessTokenInfo, Journal data) {
-        Journal created = journalService.save(accessTokenInfo, data);
-        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
-        return created(uri).body(created);
+    public ResponseEntity<JournalData> save(AccessTokenInfo accessTokenInfo, Journal journal) {
+        Journal saved = journalService.save(accessTokenInfo, journal);
+        URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(saved.getId()).toUri();
+        return created(uri).body(JournalData.fromJournal(saved));
     }
 
     @Override
-    public ResponseEntity<Journal> delete(AccessTokenInfo accessTokenInfo, String journalId) {
+    public ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, String journalId) {
         journalService.delete(accessTokenInfo, journalId);
         return ok().build();
     }

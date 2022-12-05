@@ -2,10 +2,10 @@ package com.trading.journal.entry.journal;
 
 import com.allanweber.jwttoken.helper.DateHelper;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.trading.journal.entry.balance.Balance;
-import lombok.*;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import org.springframework.format.annotation.NumberFormat;
 
 import javax.validation.constraints.NotBlank;
@@ -13,14 +13,11 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
-@Document(collection = "journals")
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder
-public class Journal {
-
-    @Id
+public class JournalData {
     private String id;
 
     @NotBlank(message = "Journal name is required")
@@ -37,10 +34,13 @@ public class Journal {
     @NotNull(message = "Currency is required")
     private Currency currency;
 
-    @Setter
-    private Balance currentBalance;
-
-    @JsonFormat(pattern = DateHelper.DATE_FORMAT)
-    @Setter
-    private LocalDateTime lastBalance;
+    public static JournalData fromJournal(Journal journal) {
+        return JournalData.builder()
+                .id(journal.getId())
+                .name(journal.getName())
+                .startJournal(journal.getStartJournal())
+                .startBalance(journal.getStartBalance())
+                .currency(journal.getCurrency())
+                .build();
+    }
 }
