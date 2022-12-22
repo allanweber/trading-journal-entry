@@ -4,6 +4,7 @@ import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryService;
 import com.trading.journal.entry.entries.EntryType;
+import com.trading.journal.entry.entries.impl.WithdrawalServiceImpl;
 import com.trading.journal.entry.entries.withdrawal.Withdrawal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;

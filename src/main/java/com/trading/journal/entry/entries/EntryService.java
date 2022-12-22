@@ -11,7 +11,7 @@ public interface EntryService {
 
     PageResponse<Entry> query(AccessTokenInfo accessToken, String journalId, PageableRequest pageableRequest);
 
-    List<Entry> getAll(AccessTokenInfo accessToken, String journalId);
+    List<Entry> getAll(GetAll all);
 
     Entry save(AccessTokenInfo accessToken, String journalId, Entry entry);
 
