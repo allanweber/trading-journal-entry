@@ -106,24 +106,29 @@ class EntryControllerTest {
     @DisplayName("Get all entries from a journal must be ordered by date")
     @Test
     void all() {
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 1, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(20.00)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 5, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(30.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 10, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(40.00)).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 3, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(50.00)).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 2, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).symbol("MSFT").type(EntryType.TRADE).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 8, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(20.00)).symbol("AAPL").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 5, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(30.00)).symbol("NVDA").type(EntryType.TRADE).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 8, 10, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(40.00)).symbol("TSLA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 3, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(50.00)).symbol("AMZN").type(EntryType.TRADE).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 8, 2, 18, 23, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(60.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 6, 0, 21, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(70.00)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 4, 17, 22, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(80.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 8, 16, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(90.00)).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 8, 9, 15, 24, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(100.00)).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 8, 7, 23, 25, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(60.00)).symbol("MSFT").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 6, 0, 21, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(70.00)).symbol("AAPL").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 4, 17, 22, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(80.00)).symbol("NVDA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 8, 16, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(90.00)).symbol("TSLA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 9, 15, 24, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(100.00)).symbol("AMZN").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 7, 23, 25, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(110.00)).symbol("MSFT").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 15, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(120.31)).symbol("AAPL").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 14, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(130.00)).symbol("NVDA").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 13, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(140.59)).symbol("TSLA").direction(EntryDirection.SHORT).date(LocalDateTime.of(2022, 9, 12, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(150.00)).symbol("AMZN").direction(EntryDirection.LONG).date(LocalDateTime.of(2022, 9, 11, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(110.00)).symbol("MSFT").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 15, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(120.31)).symbol("AAPL").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 14, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(130.00)).symbol("NVDA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 13, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(140.59)).symbol("TSLA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 12, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(150.00)).symbol("AMZN").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 11, 18, 23, 30)).build(), entryCollection);
 
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).type(EntryType.DEPOSIT).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 10, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).type(EntryType.TAXES).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 10, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).type(EntryType.WITHDRAWAL).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 10, 1, 18, 23, 30)).build(), entryCollection);
+
+        //GET ALL RECORDS
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
@@ -136,10 +141,185 @@ class EntryControllerTest {
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(15);
+                    assertThat(response).hasSize(18);
                     assertThat(response).extracting(Entry::getDate)
                             .extracting(LocalDateTime::getDayOfMonth)
-                            .containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15);
+                            .containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 1, 1);
+                });
+
+        //GET BY SYMBOL
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("symbol", "MSFT")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(3);
+                });
+
+        //GET BY TYPE TRADE
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("type", "TRADE")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(15);
+                });
+
+        //GET BY TYPE DEPOSIT
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("type", "DEPOSIT")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(1);
+                });
+
+        //GET BY TYPE TAXES
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("type", "TAXES")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(1);
+                });
+
+        //GET BY TYPE WITHDRAWAL
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("type", "WITHDRAWAL")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(1);
+                });
+
+        //GET BY STATUS CLOSED
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("status", "CLOSED")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(6);
+                });
+
+        //GET BY STATUS OPEN
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("status", "OPEN")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(12);
+                });
+
+        //GET BY FROM DATE
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("from", "2022-09-11 00:00:00")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(8);
+                });
+
+        //GET BY TYPE, SYMBOL AND FROM DATE
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("type", "TRADE")
+                        .queryParam("symbol", "TSLA")
+                        .queryParam("from", "2022-09-11 00:00:00")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(1);
+                });
+
+        //GET BY TYPE, SYMBOL, FROM DATE STATUS CLOSED
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("type", "TRADE")
+                        .queryParam("symbol", "TSLA")
+                        .queryParam("status", "CLOSED")
+                        .queryParam("from", "2022-09-11 00:00:00")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(0);
                 });
     }
 

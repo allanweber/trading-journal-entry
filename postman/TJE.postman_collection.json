@@ -546,7 +546,7 @@
 			"name": "Entries",
 			"item": [
 				{
-					"name": "Create a Trade Entry MSFT LONG 3x 244,01",
+					"name": "Create a Trade Entry MSFT LONG 3x 244,01 10 Days ago",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -555,7 +555,7 @@
 									"var moment = require('moment');\r",
 									"const entry = \"entry1-\";\r",
 									"\r",
-									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"pm.collectionVariables.set(entry + \"date\", moment().subtract(10, 'days').format(\"YYYY-MM-DD HH:mm:ss\"));\r",
 									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
 									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
 									"\r",
@@ -688,7 +688,7 @@
 					"response": []
 				},
 				{
-					"name": "Create a Trade Entry AMZN  SHORT 5.5 x 99.50 - Costs 2.51",
+					"name": "Create a Trade Entry AMZN  SHORT 5.5 x 99.50 - Costs 2.51 1 Month ago",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -697,7 +697,7 @@
 									"var moment = require('moment');\r",
 									"const entry = \"entry2-\";\r",
 									"\r",
-									"pm.collectionVariables.set(entry + \"date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));\r",
+									"pm.collectionVariables.set(entry + \"date\", moment().subtract(1, 'month').format(\"YYYY-MM-DD HH:mm:ss\"));\r",
 									"pm.collectionVariables.set(entry + \"graph\", randoGraph());\r",
 									"pm.collectionVariables.set(entry + \"measure\", _.random(1, 10, false));\r",
 									"\r",
@@ -834,7 +834,7 @@
 					"response": []
 				},
 				{
-					"name": "Create a Trade Entry SP500 LONG 2x 3967.85",
+					"name": "Create a Trade Entry SP500 LONG 2x 3967.85 Today",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -1690,6 +1690,133 @@
 					"response": []
 				},
 				{
+					"name": "Get All OPEN Return 2 Trade",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries?status=OPEN&type=TRADE",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "OPEN"
+								},
+								{
+									"key": "type",
+									"value": "TRADE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All Closed Return 1 Trade",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(1);\r",
+									"\tpm.expect(response[0].symbol).to.equal('MSFT');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries?status=CLOSED&type=TRADE",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries"
+							],
+							"query": [
+								{
+									"key": "status",
+									"value": "CLOSED"
+								},
+								{
+									"key": "type",
+									"value": "TRADE"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Exit Trade AMZN  SHORT losing at 102.50",
 					"event": [
 						{
@@ -1950,6 +2077,189 @@
 								"journals",
 								"{{journal-id}}",
 								"balance"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All by MSFT Symbol return 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(1);\r",
+									"\tpm.expect(response[0].symbol).to.equal('MSFT');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries?symbol=MSFT",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries"
+							],
+							"query": [
+								{
+									"key": "symbol",
+									"value": "MSFT"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All DEPOSIT return 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries?type=DEPOSIT",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "DEPOSIT"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All TRADES since 10 days ago return 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"pm.collectionVariables.set(\"days-ago\", moment().subtract(10, 'days').startOf('day').format(\"YYYY-MM-DD HH:mm:ss\"));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries?type=TRADE&from={{days-ago}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries"
+							],
+							"query": [
+								{
+									"key": "type",
+									"value": "TRADE"
+								},
+								{
+									"key": "from",
+									"value": "{{days-ago}}"
+								}
 							]
 						}
 					},
@@ -2528,6 +2838,10 @@
 		},
 		{
 			"key": "user-id",
+			"value": ""
+		},
+		{
+			"key": "days-ago",
 			"value": ""
 		}
 	]

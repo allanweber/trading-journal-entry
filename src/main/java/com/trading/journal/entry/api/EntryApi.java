@@ -1,9 +1,7 @@
 package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
-import com.trading.journal.entry.entries.Entry;
-import com.trading.journal.entry.entries.EntryImageResponse;
-import com.trading.journal.entry.entries.UploadType;
+import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.queries.data.PageResponse;
 import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
@@ -35,7 +33,11 @@ public interface EntryApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Entries retrieved"))
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
+    ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
+                                       @ApiParam(name = "symbol", value = "MSFT, TSLA, etc") @RequestParam(value = "symbol", required = false) String symbol,
+                                       @ApiParam(name = "type", value = "TRADE, TAXES, DEPOSIT, WITHDRAWAL") @RequestParam(value = "type", required = false) EntryType type,
+                                       @ApiParam(name = "status", value = "OPEN or CLOSED") @RequestParam(value = "status", required = false) EntryStatus status,
+                                       @ApiParam(name = "from", value = "2022-01-01 00:00:00") @RequestParam(value = "from", required = false) String from);
 
     @ApiOperation(notes = "Delete entry", value = "Delete entry")
     @ApiResponses(@ApiResponse(code = 200, message = "Entry deleted"))

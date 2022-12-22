@@ -1,10 +1,7 @@
 package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
-import com.trading.journal.entry.entries.Entry;
-import com.trading.journal.entry.entries.EntryImageResponse;
-import com.trading.journal.entry.entries.EntryService;
-import com.trading.journal.entry.entries.UploadType;
+import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.queries.QueryConverter;
 import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.queries.data.PageableRequest;
@@ -36,8 +33,9 @@ public class EntryController implements EntryApi {
     }
 
     @Override
-    public ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, String journalId) {
-        List<Entry> entries = entryService.getAll(accessTokenInfo, journalId);
+    public ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, String journalId, String symbol, EntryType type, EntryStatus status, String from) {
+        GetAll getAll = GetAll.builder().accessTokenInfo(accessTokenInfo).journalId(journalId).symbol(symbol).type(type).status(status).from(from).build();
+        List<Entry> entries = entryService.getAll(getAll);
         return ok(entries);
     }
 
