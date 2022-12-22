@@ -1557,6 +1557,60 @@
 					"response": []
 				},
 				{
+					"name": "Count open trades",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.trades).to.equal(3);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/open",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"open"
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Exit Trade  MSFT LONG winning at 280.61",
 					"event": [
 						{
@@ -2260,6 +2314,60 @@
 									"key": "from",
 									"value": "{{days-ago}}"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Count open trades",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.trades).to.equal(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/open",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"open"
 							]
 						}
 					},

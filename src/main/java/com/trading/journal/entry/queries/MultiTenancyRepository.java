@@ -1,6 +1,7 @@
 package com.trading.journal.entry.queries;
 
 import com.trading.journal.entry.queries.data.Filter;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -24,4 +25,6 @@ public interface MultiTenancyRepository<T, I extends Serializable> extends Mongo
     boolean hasItems(CollectionName collectionName);
 
     void drop(CollectionName collectionName);
+
+    long count(Query query, CollectionName collectionName);
 }

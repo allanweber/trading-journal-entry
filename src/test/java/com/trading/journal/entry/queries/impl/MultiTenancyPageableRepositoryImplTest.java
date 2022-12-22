@@ -13,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.repository.query.MongoEntityInformation;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -127,5 +128,13 @@ class MultiTenancyPageableRepositoryImplTest {
     void drop() {
         repository.drop(collectionName);
         verify(mongoOperations).dropCollection(collection);
+    }
+
+    @DisplayName("Count by query")
+    @Test
+    void count() {
+        when(mongoOperations.count(any(), eq(collection))).thenReturn(1L);
+        long count = repository.count(new Query(), collectionName);
+        assertThat(count).isEqualTo(1L);
     }
 }
