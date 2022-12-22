@@ -21,6 +21,8 @@ import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
@@ -720,5 +722,17 @@ class EntryServiceImplTest {
 
         EntryImageResponse response = entryService.returnImage(accessToken, journalId, entryId, UploadType.IMAGE_AFTER);
         assertThat(response.getImage()).isNotNull();
+    }
+
+    @DisplayName("Count open trades")
+    @Test
+    void countOpen() {
+        Query query = Query.query(new Criteria("type").is(EntryType.TRADE).and("netResult").exists(false));
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.count(query, collectionName)).thenReturn(1L);
+
+        long open = entryService.countOpen(accessToken, journalId);
+        assertThat(open).isEqualTo(1L);
     }
 }

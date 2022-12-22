@@ -95,4 +95,10 @@ public class MultiTenancyPageableRepositoryImpl<T, I extends Serializable> exten
         Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
         mongoOperations.dropCollection(collectionName.collectionName(metadata));
     }
+
+    @Override
+    public long count(Query query, CollectionName collectionName) {
+        Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
+        return mongoOperations.count(query, collectionName.collectionName(metadata));
+    }
 }

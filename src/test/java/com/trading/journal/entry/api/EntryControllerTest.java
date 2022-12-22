@@ -321,6 +321,21 @@ class EntryControllerTest {
                 .value(response -> {
                     assertThat(response).hasSize(0);
                 });
+
+        //Count open trades
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/open")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(OpenTrades.class)
+                .value(response ->
+                    assertThat(response.getTrades()).isEqualTo(12L)
+                );
     }
 
     @DisplayName("Create a new Trade entry")
