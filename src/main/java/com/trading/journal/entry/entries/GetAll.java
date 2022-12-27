@@ -23,6 +23,10 @@ public class GetAll {
 
     private String from;
 
+    private EntryDirection direction;
+
+    private EntryResult result;
+
     public boolean hasSymbol() {
         return StringUtils.hasText(symbol);
     }
@@ -37,5 +41,13 @@ public class GetAll {
 
     public boolean hasStatus() {
         return status != null;
+    }
+
+    public boolean hasDirection() {
+        return direction != null;
+    }
+
+    public boolean hasResult() {
+        return result != null;
     }
 }
