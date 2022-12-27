@@ -160,9 +160,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(3);
-                });
+                .value(response -> assertThat(response).hasSize(3));
 
         //GET BY TYPE TRADE
         webTestClient
@@ -177,9 +175,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(15);
-                });
+                .value(response -> assertThat(response).hasSize(15));
 
         //GET BY TYPE DEPOSIT
         webTestClient
@@ -194,9 +190,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(1);
-                });
+                .value(response -> assertThat(response).hasSize(1));
 
         //GET BY TYPE TAXES
         webTestClient
@@ -211,9 +205,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(1);
-                });
+                .value(response -> assertThat(response).hasSize(1));
 
         //GET BY TYPE WITHDRAWAL
         webTestClient
@@ -228,9 +220,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(1);
-                });
+                .value(response -> assertThat(response).hasSize(1));
 
         //GET BY STATUS CLOSED
         webTestClient
@@ -245,9 +235,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(6);
-                });
+                .value(response -> assertThat(response).hasSize(6));
 
         //GET BY STATUS OPEN
         webTestClient
@@ -262,9 +250,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(12);
-                });
+                .value(response -> assertThat(response).hasSize(12));
 
         //GET BY FROM DATE
         webTestClient
@@ -279,9 +265,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(8);
-                });
+                .value(response -> assertThat(response).hasSize(8));
 
         //GET BY TYPE, SYMBOL AND FROM DATE
         webTestClient
@@ -298,9 +282,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(1);
-                });
+                .value(response -> assertThat(response).hasSize(1));
 
         //GET BY TYPE, SYMBOL, FROM DATE STATUS CLOSED
         webTestClient
@@ -318,9 +300,7 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
-                .value(response -> {
-                    assertThat(response).hasSize(0);
-                });
+                .value(response -> assertThat(response).hasSize(0));
 
         //Count open trades
         webTestClient
@@ -334,8 +314,128 @@ class EntryControllerTest {
                 .isOk()
                 .expectBody(OpenTrades.class)
                 .value(response ->
-                    assertThat(response.getTrades()).isEqualTo(12L)
+                        assertThat(response.getTrades()).isEqualTo(12L)
                 );
+    }
+
+    @DisplayName("Get Entries by Direction")
+    @Test
+    void direction() {
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("LONG")
+                        .direction(EntryDirection.LONG)
+                        .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(100))
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("SHORT")
+                        .direction(EntryDirection.SHORT)
+                        .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(100))
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("direction", EntryDirection.LONG)
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(1);
+                    assertThat(response).extracting(Entry::getSymbol).containsExactly("LONG");
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("direction", EntryDirection.SHORT)
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(1);
+                    assertThat(response).extracting(Entry::getSymbol).containsExactly("SHORT");
+                });
+    }
+
+    @DisplayName("Get Entries by result WIN or LOSE")
+    @Test
+    void result() {
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("WIN")
+                        .direction(EntryDirection.LONG)
+                        .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(100))
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("LOSE")
+                        .direction(EntryDirection.SHORT)
+                        .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(-100))
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("result", EntryResult.WIN)
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(1);
+                    assertThat(response).extracting(Entry::getSymbol).containsExactly("WIN");
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("result", EntryResult.LOSE)
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(1);
+                    assertThat(response).extracting(Entry::getSymbol).containsExactly("LOSE");
+                });
     }
 
     @DisplayName("Create a new Trade entry")

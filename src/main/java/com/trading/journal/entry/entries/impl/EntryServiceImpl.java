@@ -64,11 +64,21 @@ public class EntryServiceImpl implements EntryService {
         if (all.hasFrom()) {
             filters.add(Filter.builder().field("date").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value(all.getFrom()).build());
         }
-        if(all.hasStatus()) {
-            if(OPEN.equals(all.getStatus())) {
+        if (all.hasStatus()) {
+            if (OPEN.equals(all.getStatus())) {
                 filters.add(Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("false").build());
             } else {
                 filters.add(Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("true").build());
+            }
+        }
+        if (all.hasDirection()) {
+            filters.add(Filter.builder().field("direction").operation(FilterOperation.EQUAL).value(all.getDirection().name()).build());
+        }
+        if (all.hasResult()) {
+            if (EntryResult.WIN.equals(all.getResult())) {
+                filters.add(Filter.builder().field("netResult").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value("0").build());
+            } else {
+                filters.add(Filter.builder().field("netResult").operation(FilterOperation.LESS_THAN).value("0").build());
             }
         }
 

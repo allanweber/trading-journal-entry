@@ -241,6 +241,98 @@ class EntryServiceImplTest {
         assertThat(response).isNotEmpty();
     }
 
+    @DisplayName("Get all entries by LONG Direction")
+    @Test
+    void allByLong() {
+        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+                .direction(EntryDirection.LONG)
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+
+        PageableRequest request = PageableRequest.builder()
+                .page(0)
+                .size(Integer.MAX_VALUE)
+                .filters(singletonList(Filter.builder().field("direction").operation(FilterOperation.EQUAL).value("LONG").build()))
+                .sort(Sort.by("date").ascending())
+                .build();
+
+        Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
+        when(repository.findAll(collectionName, request)).thenReturn(page);
+
+        List<Entry> response = entryService.getAll(getAll);
+        assertThat(response).isNotEmpty();
+    }
+
+    @DisplayName("Get all entries by SHORT Direction")
+    @Test
+    void allByShort() {
+        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+                .direction(EntryDirection.SHORT)
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+
+        PageableRequest request = PageableRequest.builder()
+                .page(0)
+                .size(Integer.MAX_VALUE)
+                .filters(singletonList(Filter.builder().field("direction").operation(FilterOperation.EQUAL).value("SHORT").build()))
+                .sort(Sort.by("date").ascending())
+                .build();
+
+        Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
+        when(repository.findAll(collectionName, request)).thenReturn(page);
+
+        List<Entry> response = entryService.getAll(getAll);
+        assertThat(response).isNotEmpty();
+    }
+
+    @DisplayName("Get all WIN Trades")
+    @Test
+    void allWin() {
+        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+                .result(EntryResult.WIN)
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+
+        PageableRequest request = PageableRequest.builder()
+                .page(0)
+                .size(Integer.MAX_VALUE)
+                .filters(singletonList(Filter.builder().field("netResult").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value("0").build()))
+                .sort(Sort.by("date").ascending())
+                .build();
+
+        Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
+        when(repository.findAll(collectionName, request)).thenReturn(page);
+
+        List<Entry> response = entryService.getAll(getAll);
+        assertThat(response).isNotEmpty();
+    }
+
+    @DisplayName("Get all LOSE Trades")
+    @Test
+    void allLose() {
+        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+                .result(EntryResult.LOSE)
+                .build();
+
+        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+
+        PageableRequest request = PageableRequest.builder()
+                .page(0)
+                .size(Integer.MAX_VALUE)
+                .filters(singletonList(Filter.builder().field("netResult").operation(FilterOperation.LESS_THAN).value("0").build()))
+                .sort(Sort.by("date").ascending())
+                .build();
+
+        Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
+        when(repository.findAll(collectionName, request)).thenReturn(page);
+
+        List<Entry> response = entryService.getAll(getAll);
+        assertThat(response).isNotEmpty();
+    }
+
     @DisplayName("Get all entries by multiple filter")
     @Test
     void allByMultiples() {
