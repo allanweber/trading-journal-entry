@@ -59,10 +59,4 @@ public interface EntryApi {
     @GetMapping("/{entry-id}/image")
     ResponseEntity<EntryImageResponse> getImage(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId,
                                                 @RequestParam("type") UploadType type);
-
-    @ApiOperation(notes = "Count open trades", value = "Retrieve number of open trades")
-    @ApiResponses(@ApiResponse(code = 200, message = "Open trades"))
-    @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/open")
-    ResponseEntity<OpenTrades> countOpen(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 }

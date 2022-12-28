@@ -20,6 +20,4 @@ public interface EntryService {
     void uploadImage(AccessTokenInfo accessToken, String journalId, String entryId, UploadType type, MultipartFile file);
 
     EntryImageResponse returnImage(AccessTokenInfo accessToken, String journalId, String entryId, UploadType type);
-
-    long countOpen(AccessTokenInfo accessToken, String journalId);
 }

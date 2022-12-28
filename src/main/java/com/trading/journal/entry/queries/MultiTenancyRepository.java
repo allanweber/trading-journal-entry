@@ -27,4 +27,6 @@ public interface MultiTenancyRepository<T, I extends Serializable> extends Mongo
     void drop(CollectionName collectionName);
 
     long count(Query query, CollectionName collectionName);
+
+    List<String> distinct(String field, CollectionName collectionName);
 }

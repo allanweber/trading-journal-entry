@@ -20,6 +20,7 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.List;
 import java.util.Optional;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -136,5 +137,14 @@ class MultiTenancyPageableRepositoryImplTest {
         when(mongoOperations.count(any(), eq(collection))).thenReturn(1L);
         long count = repository.count(new Query(), collectionName);
         assertThat(count).isEqualTo(1L);
+    }
+
+    @DisplayName("Find distinct")
+    @Test
+    void distinctQuery() {
+        when(mongoOperations.findDistinct(any(), eq("a"), eq(collection), any(), eq(String.class)))
+                .thenReturn(asList("A", "b"));
+        List<String> distinct = repository.distinct("a", collectionName);
+        assertThat(distinct).hasSize(2);
     }
 }

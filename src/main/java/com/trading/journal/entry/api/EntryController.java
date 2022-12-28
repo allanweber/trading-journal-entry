@@ -66,9 +66,5 @@ public class EntryController implements EntryApi {
         return ok(image);
     }
 
-    @Override
-    public ResponseEntity<OpenTrades> countOpen(AccessTokenInfo accessTokenInfo, String journalId) {
-        long open = entryService.countOpen(accessTokenInfo, journalId);
-        return ok(OpenTrades.builder().trades(open).build());
-    }
+
 }

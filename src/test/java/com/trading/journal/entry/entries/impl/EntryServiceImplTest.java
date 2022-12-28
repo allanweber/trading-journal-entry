@@ -21,8 +21,6 @@ import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.web.multipart.MultipartFile;
@@ -48,8 +46,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 class EntryServiceImplTest {
 
-    public static String journalId = "123456";
-    private static AccessTokenInfo accessToken;
+    public static String JOURNAL_ID = "123456";
+    private static final AccessTokenInfo ACCESS_TOKEN =  new AccessTokenInfo("subject", 1L, "TENANCY", emptyList());
 
     private static CollectionName collectionName;
 
@@ -67,21 +65,20 @@ class EntryServiceImplTest {
 
     @BeforeAll
     static void setUp() {
-        accessToken = new AccessTokenInfo("subject", 1L, "TENANCY", emptyList());
-        collectionName = new CollectionName(accessToken, "my-journal");
+        collectionName = new CollectionName(ACCESS_TOKEN, "my-journal");
     }
 
     @DisplayName("Query entries from a journal")
     @Test
     void query() {
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder().page(1).build();
 
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request)).thenReturn(page);
 
-        PageResponse<Entry> response = entryService.query(accessToken, journalId, request);
+        PageResponse<Entry> response = entryService.query(ACCESS_TOKEN, JOURNAL_ID, request);
         assertThat(response.getItems()).isNotEmpty();
         assertThat(response.getTotalItems()).isPositive();
     }
@@ -89,7 +86,7 @@ class EntryServiceImplTest {
     @DisplayName("Query entries from a journal with sort")
     @Test
     void queryWithSort() {
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -100,7 +97,7 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request)).thenReturn(page);
 
-        PageResponse<Entry> response = entryService.query(accessToken, journalId, request);
+        PageResponse<Entry> response = entryService.query(ACCESS_TOKEN, JOURNAL_ID, request);
         assertThat(response.getItems()).isNotEmpty();
         assertThat(response.getTotalItems()).isPositive();
     }
@@ -108,9 +105,9 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries with no filter")
     @Test
     void all() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId).build();
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID).build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -129,11 +126,11 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries by symbol")
     @Test
     void allBySymbol() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .symbol("MSFT")
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -152,11 +149,11 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries by type")
     @Test
     void allByType() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .type(EntryType.DEPOSIT)
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -175,11 +172,11 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries by from")
     @Test
     void allByFrom() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .from("2022-12-01 13:00:00")
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -198,11 +195,11 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries by OPEN status")
     @Test
     void allByOpen() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .status(EntryStatus.OPEN)
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -221,11 +218,11 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries by CLOSED status")
     @Test
     void allByClosed() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .status(EntryStatus.CLOSED)
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -244,11 +241,11 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries by LONG Direction")
     @Test
     void allByLong() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .direction(EntryDirection.LONG)
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -267,11 +264,11 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries by SHORT Direction")
     @Test
     void allByShort() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .direction(EntryDirection.SHORT)
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -290,11 +287,11 @@ class EntryServiceImplTest {
     @DisplayName("Get all WIN Trades")
     @Test
     void allWin() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .result(EntryResult.WIN)
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -313,11 +310,11 @@ class EntryServiceImplTest {
     @DisplayName("Get all LOSE Trades")
     @Test
     void allLose() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .result(EntryResult.LOSE)
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -336,14 +333,14 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries by multiple filter")
     @Test
     void allByMultiples() {
-        GetAll getAll = GetAll.builder().accessTokenInfo(accessToken).journalId(journalId)
+        GetAll getAll = GetAll.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .symbol("MSFT")
                 .type(EntryType.DEPOSIT)
                 .from("2022-12-01 13:00:00")
                 .status(EntryStatus.CLOSED)
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
@@ -397,13 +394,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(1074.41).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
         when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(accessToken, journalId, toSave);
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
         assertThat(entry).isNotNull();
 
         verify(balanceService).calculateCurrentBalance(any(), anyString());
@@ -442,13 +439,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(1394.41).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
-        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1394.41)).build());
+        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1394.41)).build());
 
-        Entry entry = entryService.save(accessToken, journalId, toSave);
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
         assertThat(entry).isNotNull();
     }
 
@@ -470,14 +467,14 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
 
         when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(accessToken, journalId, toSave);
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
         assertThat(entry).isNotNull();
 
         verify(balanceService).calculateCurrentBalance(any(), anyString());
@@ -501,13 +498,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
-        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
+        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
 
-        Entry entry = entryService.save(accessToken, journalId, toSave);
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
         assertThat(entry).isNotNull();
     }
 
@@ -529,13 +526,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
         when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(accessToken, journalId, toSave);
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
         assertThat(entry).isNotNull();
 
         verify(balanceService).calculateCurrentBalance(any(), anyString());
@@ -559,13 +556,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
-        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
+        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
 
-        Entry entry = entryService.save(accessToken, journalId, toSave);
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
         assertThat(entry).isNotNull();
     }
 
@@ -587,13 +584,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(1234.56).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
         when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(accessToken, journalId, toSave);
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
         assertThat(entry).isNotNull();
 
         verify(balanceService).calculateCurrentBalance(any(), anyString());
@@ -617,13 +614,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(1234.56).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
 
-        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1234.56)).build());
+        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1234.56)).build());
 
-        Entry entry = entryService.save(accessToken, journalId, toSave);
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
         assertThat(entry).isNotNull();
     }
 
@@ -638,11 +635,11 @@ class EntryServiceImplTest {
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
         when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        entryService.delete(accessToken, journalId, entryId);
+        entryService.delete(ACCESS_TOKEN, JOURNAL_ID, entryId);
 
         verify(repository).delete(collectionName, entry);
 
@@ -660,12 +657,12 @@ class EntryServiceImplTest {
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
 
-        when(balanceService.calculateCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
+        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
 
-        entryService.delete(accessToken, journalId, entryId);
+        entryService.delete(ACCESS_TOKEN, JOURNAL_ID, entryId);
 
         verify(repository).delete(collectionName, entry);
     }
@@ -675,10 +672,10 @@ class EntryServiceImplTest {
     void deleteNotFound() {
         String entryId = UUID.randomUUID().toString();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(collectionName, entryId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.delete(accessToken, journalId, entryId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.delete(ACCESS_TOKEN, JOURNAL_ID, entryId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Entry not found");
 
@@ -695,10 +692,10 @@ class EntryServiceImplTest {
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
 
-        entryService.delete(accessToken, journalId, entryId);
+        entryService.delete(ACCESS_TOKEN, JOURNAL_ID, entryId);
 
         verify(repository).delete(collectionName, entry);
 
@@ -730,13 +727,13 @@ class EntryServiceImplTest {
                 .plannedRR(BigDecimal.valueOf(2.00).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(accessToken, journalId)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
         when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(accessToken, journalId, toSave);
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
         assertThat(entry).isNotNull();
 
         verify(balanceService, never()).calculateCurrentBalance(any(), anyString());
@@ -753,12 +750,12 @@ class EntryServiceImplTest {
                 .build();
         MultipartFile file = mock(MultipartFile.class);
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
         when(file.getBytes()).thenReturn(new byte[]{0});
         when(repository.save(argThat(save -> nonNull(entry.getScreenshotBefore()) && isNull(entry.getScreenshotAfter())))).thenReturn(entry);
 
-        entryService.uploadImage(accessToken, journalId, entryId, UploadType.IMAGE_BEFORE, file);
+        entryService.uploadImage(ACCESS_TOKEN, JOURNAL_ID, entryId, UploadType.IMAGE_BEFORE, file);
     }
 
     @DisplayName("Save image after")
@@ -772,12 +769,12 @@ class EntryServiceImplTest {
                 .build();
         MultipartFile file = mock(MultipartFile.class);
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
         when(file.getBytes()).thenReturn(new byte[]{0});
         when(repository.save(argThat(save -> isNull(entry.getScreenshotBefore()) && nonNull(entry.getScreenshotAfter())))).thenReturn(entry);
 
-        entryService.uploadImage(accessToken, journalId, entryId, UploadType.IMAGE_AFTER, file);
+        entryService.uploadImage(ACCESS_TOKEN, JOURNAL_ID, entryId, UploadType.IMAGE_AFTER, file);
     }
 
     @DisplayName("Return image before")
@@ -791,10 +788,10 @@ class EntryServiceImplTest {
                 .screenshotBefore("image")
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
 
-        EntryImageResponse response = entryService.returnImage(accessToken, journalId, entryId, UploadType.IMAGE_BEFORE);
+        EntryImageResponse response = entryService.returnImage(ACCESS_TOKEN, JOURNAL_ID, entryId, UploadType.IMAGE_BEFORE);
         assertThat(response.getImage()).isNotNull();
     }
 
@@ -809,22 +806,10 @@ class EntryServiceImplTest {
                 .screenshotAfter("image")
                 .build();
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
 
-        EntryImageResponse response = entryService.returnImage(accessToken, journalId, entryId, UploadType.IMAGE_AFTER);
+        EntryImageResponse response = entryService.returnImage(ACCESS_TOKEN, JOURNAL_ID, entryId, UploadType.IMAGE_AFTER);
         assertThat(response.getImage()).isNotNull();
-    }
-
-    @DisplayName("Count open trades")
-    @Test
-    void countOpen() {
-        Query query = Query.query(new Criteria("type").is(EntryType.TRADE).and("netResult").exists(false));
-
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.count(query, collectionName)).thenReturn(1L);
-
-        long open = entryService.countOpen(accessToken, journalId);
-        assertThat(open).isEqualTo(1L);
     }
 }

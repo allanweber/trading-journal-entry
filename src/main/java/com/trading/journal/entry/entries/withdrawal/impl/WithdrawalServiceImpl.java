@@ -1,4 +1,4 @@
-package com.trading.journal.entry.entries.impl;
+package com.trading.journal.entry.entries.withdrawal.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
