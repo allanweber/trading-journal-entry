@@ -1,4 +1,4 @@
-package com.trading.journal.entry.entries;
+package com.trading.journal.entry.entries.trade;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;

@@ -101,4 +101,10 @@ public class MultiTenancyPageableRepositoryImpl<T, I extends Serializable> exten
         Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
         return mongoOperations.count(query, collectionName.collectionName(metadata));
     }
+
+    @Override
+    public List<String> distinct(String field, CollectionName collectionName) {
+        Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
+        return mongoOperations.findDistinct(new Query(), field, collectionName.collectionName(metadata), metadata.getJavaType(), String.class);
+    }
 }

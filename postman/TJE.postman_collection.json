@@ -1596,7 +1596,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/open",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/open",
 							"host": [
 								"{{entry-api}}"
 							],
@@ -1604,6 +1604,7 @@
 								"journals",
 								"{{journal-id}}",
 								"entries",
+								"trade",
 								"open"
 							]
 						}
@@ -2359,7 +2360,7 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/open",
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/open",
 							"host": [
 								"{{entry-api}}"
 							],
@@ -2367,7 +2368,63 @@
 								"journals",
 								"{{journal-id}}",
 								"entries",
+								"trade",
 								"open"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all symbols",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(3);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/symbols",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade",
+								"symbols"
 							]
 						}
 					},

@@ -16,8 +16,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -152,13 +150,6 @@ public class EntryServiceImpl implements EntryService {
             response = new EntryImageResponse(entry.getScreenshotAfter());
         }
         return response;
-    }
-
-    @Override
-    public long countOpen(AccessTokenInfo accessToken, String journalId) {
-        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
-        Criteria criteria = new Criteria("type").is(EntryType.TRADE).and("netResult").exists(false);
-        return repository.count(Query.query(criteria), entriesCollection);
     }
 
     private Entry get(CollectionName collectionName, String entryId) {

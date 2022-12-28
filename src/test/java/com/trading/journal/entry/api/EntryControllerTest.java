@@ -7,6 +7,7 @@ import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.*;
+import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
@@ -67,11 +68,7 @@ class EntryControllerTest {
 
         journalCollection = "PagingTenancy_journals";
         entryCollection = "PagingTenancy_JOURNAL-1_entries";
-    }
 
-    @BeforeEach
-    public void cleanJournal() {
-        mongoTemplate.dropCollection(journalCollection);
         Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(100))
                 .currentBalance(
                         Balance.builder()
@@ -301,21 +298,6 @@ class EntryControllerTest {
                 .expectBody(new ParameterizedTypeReference<List<Entry>>() {
                 })
                 .value(response -> assertThat(response).hasSize(0));
-
-        //Count open trades
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/open")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(OpenTrades.class)
-                .value(response ->
-                        assertThat(response.getTrades()).isEqualTo(12L)
-                );
     }
 
     @DisplayName("Get Entries by Direction")
@@ -436,181 +418,6 @@ class EntryControllerTest {
                     assertThat(response).hasSize(1);
                     assertThat(response).extracting(Entry::getSymbol).containsExactly("LOSE");
                 });
-    }
-
-    @DisplayName("Create a new Trade entry")
-    @Test
-    void createTrade() {
-        Trade trade = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .build();
-
-        AtomicReference<String> entryId = new AtomicReference<>();
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(trade)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("Location")
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    entryId.set(response.getId());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
-
-                    assertThat(response.getProfitPrice()).isNull();
-                    assertThat(response.getLossPrice()).isNull();
-                    assertThat(response.getGrossResult()).isNull();
-                    assertThat(response.getNetResult()).isNull();
-                    assertThat(response.getAccountChange()).isNull();
-                    assertThat(response.getAccountBalance()).isNull();
-                });
-
-        Trade updateEntry = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .profitPrice(BigDecimal.valueOf(1.2345))
-                .lossPrice(BigDecimal.valueOf(1.009))
-                .exitPrice(BigDecimal.valueOf(1.2345))
-                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
-                .costs(BigDecimal.valueOf(2.34))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .build();
-        webTestClient
-                .patch()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(updateEntry)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isEqualTo(entryId.get());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
-                    assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
-
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getGrossResult()).isEqualTo(BigDecimal.valueOf(55.55).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(53.21).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5321).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(153.21).setScale(2, RoundingMode.HALF_EVEN));
-                });
-
-        List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
-        assertThat(all).hasSize(1);
-    }
-
-    @DisplayName("Try to create an invalid Trade entry")
-    @Test
-    void invalidTrade() {
-        Trade trade = Trade.builder()
-                .profitPrice(BigDecimal.valueOf(1.2345))
-                .lossPrice(BigDecimal.valueOf(1.009))
-                .exitPrice(BigDecimal.valueOf(1.2345))
-                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
-                .costs(BigDecimal.valueOf(2.34))
-                .build();
-
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(trade)
-                .exchange()
-                .expectStatus()
-                .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, List<String>>>() {
-                })
-                .value(response -> {
-                    assertThat(response.get("errors")).hasSize(5);
-                    assertThat(response.get("errors")).contains("Date is required");
-                    assertThat(response.get("errors")).contains("Symbol is required");
-                    assertThat(response.get("errors")).contains("Position size is required");
-                    assertThat(response.get("errors")).contains("Price is required");
-                    assertThat(response.get("errors")).contains("Direction is required");
-                });
-    }
-
-    @DisplayName("Create a new entry and delete it")
-    @Test
-    void deleteEntry() {
-        Trade trade = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .build();
-
-        AtomicReference<String> entryId = new AtomicReference<>();
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(trade)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("Location")
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    entryId.set(response.getId());
-                });
-
-        assertThat(mongoTemplate.findAll(Entry.class, entryCollection)).hasSize(1);
-
-        webTestClient
-                .delete()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/{entry-id}")
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk();
-
-        assertThat(mongoTemplate.findAll(Entry.class, entryCollection)).isEmpty();
     }
 
     @DisplayName("Create a new Trade entry and add images to it")
