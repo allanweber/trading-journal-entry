@@ -27,6 +27,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.function.BiFunction;
 
+import static com.trading.journal.entry.entries.EntryStatus.CLOSED;
 import static com.trading.journal.entry.entries.EntryStatus.OPEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
@@ -60,7 +61,11 @@ public class EntryServiceImpl implements EntryService {
             filters.add(Filter.builder().field("type").operation(FilterOperation.EQUAL).value(all.getType().name()).build());
         }
         if (all.hasFrom()) {
-            filters.add(Filter.builder().field("date").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value(all.getFrom()).build());
+            if (!all.hasStatus() || OPEN.equals(all.getStatus())) {
+                filters.add(Filter.builder().field("date").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value(all.getFrom()).build());
+            } else {
+                filters.add(Filter.builder().field("exitDate").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value(all.getFrom()).build());
+            }
         }
         if (all.hasStatus()) {
             if (OPEN.equals(all.getStatus())) {
@@ -80,11 +85,15 @@ public class EntryServiceImpl implements EntryService {
             }
         }
 
+        String sort = "date";
+        if (CLOSED.equals(all.getStatus())) {
+            sort = "exitDate";
+        }
         PageableRequest pageableRequest = PageableRequest.builder()
                 .page(0)
                 .size(Integer.MAX_VALUE)
                 .filters(filters)
-                .sort(Sort.by("date").ascending())
+                .sort(Sort.by(sort).ascending())
                 .build();
         Page<Entry> entries = repository.findAll(collectionName, pageableRequest);
         return entries.stream().toList();
