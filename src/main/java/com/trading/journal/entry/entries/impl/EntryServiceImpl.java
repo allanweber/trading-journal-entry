@@ -9,7 +9,6 @@ import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.data.Filter;
-import com.trading.journal.entry.queries.data.FilterOperation;
 import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.RequiredArgsConstructor;
@@ -22,13 +21,10 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
 import java.util.function.BiFunction;
 
-import static com.trading.journal.entry.entries.EntryStatus.CLOSED;
-import static com.trading.journal.entry.entries.EntryStatus.OPEN;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RequiredArgsConstructor
@@ -52,48 +48,12 @@ public class EntryServiceImpl implements EntryService {
     @Override
     public List<Entry> getAll(GetAll all) {
         CollectionName collectionName = collectionName().apply(all.getAccessTokenInfo(), all.getJournalId());
-
-        List<Filter> filters = new ArrayList<>();
-        if (all.hasSymbol()) {
-            filters.add(Filter.builder().field("symbol").operation(FilterOperation.EQUAL).value(all.getSymbol()).build());
-        }
-        if (all.hasType()) {
-            filters.add(Filter.builder().field("type").operation(FilterOperation.EQUAL).value(all.getType().name()).build());
-        }
-        if (all.hasFrom()) {
-            if (!all.hasStatus() || OPEN.equals(all.getStatus())) {
-                filters.add(Filter.builder().field("date").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value(all.getFrom()).build());
-            } else {
-                filters.add(Filter.builder().field("exitDate").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value(all.getFrom()).build());
-            }
-        }
-        if (all.hasStatus()) {
-            if (OPEN.equals(all.getStatus())) {
-                filters.add(Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("false").build());
-            } else {
-                filters.add(Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("true").build());
-            }
-        }
-        if (all.hasDirection()) {
-            filters.add(Filter.builder().field("direction").operation(FilterOperation.EQUAL).value(all.getDirection().name()).build());
-        }
-        if (all.hasResult()) {
-            if (EntryResult.WIN.equals(all.getResult())) {
-                filters.add(Filter.builder().field("netResult").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value("0").build());
-            } else {
-                filters.add(Filter.builder().field("netResult").operation(FilterOperation.LESS_THAN).value("0").build());
-            }
-        }
-
-        String sort = "date";
-        if (CLOSED.equals(all.getStatus())) {
-            sort = "exitDate";
-        }
+        List<Filter> filters = all.filterAll();
         PageableRequest pageableRequest = PageableRequest.builder()
                 .page(0)
                 .size(Integer.MAX_VALUE)
                 .filters(filters)
-                .sort(Sort.by(sort).ascending())
+                .sort(Sort.by(all.sortBy()).ascending())
                 .build();
         Page<Entry> entries = repository.findAll(collectionName, pageableRequest);
         return entries.stream().toList();
