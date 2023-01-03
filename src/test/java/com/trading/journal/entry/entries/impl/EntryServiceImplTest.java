@@ -228,7 +228,7 @@ class EntryServiceImplTest {
                 .page(0)
                 .size(Integer.MAX_VALUE)
                 .filters(singletonList(Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("true").build()))
-                .sort(Sort.by("date").ascending())
+                .sort(Sort.by("exitDate").ascending())
                 .build();
 
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
@@ -348,10 +348,10 @@ class EntryServiceImplTest {
                 .filters(asList(
                         Filter.builder().field("symbol").operation(FilterOperation.EQUAL).value("MSFT").build(),
                         Filter.builder().field("type").operation(FilterOperation.EQUAL).value("DEPOSIT").build(),
-                        Filter.builder().field("date").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value("2022-12-01 13:00:00").build(),
+                        Filter.builder().field("exitDate").operation(FilterOperation.GREATER_THAN_OR_EQUAL_TO).value("2022-12-01 13:00:00").build(),
                         Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("true").build()
                 ))
-                .sort(Sort.by("date").ascending())
+                .sort(Sort.by("exitDate").ascending())
                 .build();
 
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
