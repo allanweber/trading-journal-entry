@@ -77,6 +77,12 @@ public class EntryServiceImpl implements EntryService {
     }
 
     @Override
+    public Entry getById(AccessTokenInfo accessToken, String journalId, String entryId) {
+        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
+        return get(entriesCollection, entryId);
+    }
+
+    @Override
     public void delete(AccessTokenInfo accessToken, String journalId, String entryId) {
         CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
         Entry entry = get(entriesCollection, entryId);

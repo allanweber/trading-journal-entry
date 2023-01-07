@@ -11,10 +11,16 @@ public interface TradeMapper {
 
     TradeMapper INSTANCE = Mappers.getMapper(TradeMapper.class);
 
-    @Mapping(target = "type",  expression = "java(com.trading.journal.entry.entries.EntryType.TRADE)")
+    @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.TRADE)")
     Entry toEntry(Trade trade);
 
-    @Mapping(target = "type",  expression = "java(com.trading.journal.entry.entries.EntryType.TRADE)")
+    @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.TRADE)")
+    @Mapping(target = "id", source = "entry.id")
+    @Mapping(target = "exitPrice", source = "closeTrade.exitPrice")
+    @Mapping(target = "exitDate", source = "closeTrade.exitDate")
+    Entry toEntryFromClose(Entry entry, CloseTrade closeTrade);
+
+    @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.TRADE)")
     @Mapping(target = "id", source = "id")
     Entry toEntry(Trade trade, String id);
 }

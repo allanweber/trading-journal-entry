@@ -47,7 +47,7 @@ import static org.mockito.Mockito.*;
 class EntryServiceImplTest {
 
     public static String JOURNAL_ID = "123456";
-    private static final AccessTokenInfo ACCESS_TOKEN =  new AccessTokenInfo("subject", 1L, "TENANCY", emptyList());
+    private static final AccessTokenInfo ACCESS_TOKEN = new AccessTokenInfo("subject", 1L, "TENANCY", emptyList());
 
     private static CollectionName collectionName;
 
@@ -811,5 +811,38 @@ class EntryServiceImplTest {
 
         EntryImageResponse response = entryService.returnImage(ACCESS_TOKEN, JOURNAL_ID, entryId, UploadType.IMAGE_AFTER);
         assertThat(response.getImage()).isNotNull();
+    }
+
+    @DisplayName("Get a entry by id")
+    @Test
+    void getById() {
+        String entryId = UUID.randomUUID().toString();
+        Entry entry = Entry.builder()
+                .type(EntryType.DEPOSIT)
+                .price(BigDecimal.valueOf(234.56))
+                .netResult(BigDecimal.valueOf(234.56))
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .build();
+
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+
+
+        Entry byId = entryService.getById(ACCESS_TOKEN, JOURNAL_ID, entryId);
+
+        assertThat(byId).isEqualTo(entry);
+    }
+
+    @DisplayName("Get a entry by id not found return an exception")
+    @Test
+    void getByIdNotFound() {
+        String entryId = UUID.randomUUID().toString();
+
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(collectionName, entryId)).thenReturn(Optional.empty());
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.getById(ACCESS_TOKEN, JOURNAL_ID, entryId));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
+        assertThat(exception.getStatusText()).isEqualTo("Entry not found");
     }
 }

@@ -6,9 +6,11 @@ import com.trading.journal.entry.entries.Entry;
 import java.util.List;
 
 public interface TradeService {
-    Entry create(AccessTokenInfo accessTokenInfo, String journalId, Trade trade);
+    Entry open(AccessTokenInfo accessTokenInfo, String journalId, Trade trade);
 
     Entry update(AccessTokenInfo accessTokenInfo, String journalId, String tradeId, Trade trade);
+
+    Entry close(AccessTokenInfo accessTokenInfo, String journalId, String tradeId, CloseTrade trade);
 
     long countOpen(AccessTokenInfo accessToken, String journalId);
 
