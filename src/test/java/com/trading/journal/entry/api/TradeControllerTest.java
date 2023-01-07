@@ -10,6 +10,7 @@ import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.entries.GraphType;
+import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
@@ -156,8 +157,6 @@ class TradeControllerTest {
                 .size(BigDecimal.valueOf(500.00))
                 .profitPrice(BigDecimal.valueOf(1.2345))
                 .lossPrice(BigDecimal.valueOf(1.009))
-                .exitPrice(BigDecimal.valueOf(1.2345))
-                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
                 .costs(BigDecimal.valueOf(2.34))
                 .graphType(GraphType.CANDLESTICK)
                 .graphMeasure("1M")
@@ -169,6 +168,36 @@ class TradeControllerTest {
                         .build(journalId, entryId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .bodyValue(updateEntry)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Entry.class)
+                .value(response -> {
+                    assertThat(response.getId()).isEqualTo(entryId.get());
+                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
+                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
+                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
+                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
+                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
+                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
+                    assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
+                    assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
+
+                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
+                });
+
+        CloseTrade closeEntry = CloseTrade.builder()
+                .exitPrice(BigDecimal.valueOf(1.2345))
+                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
+                .build();
+        webTestClient
+                .patch()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}/close")
+                        .build(journalId, entryId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(closeEntry)
                 .exchange()
                 .expectStatus()
                 .isOk()
@@ -202,8 +231,6 @@ class TradeControllerTest {
         Trade trade = Trade.builder()
                 .profitPrice(BigDecimal.valueOf(1.2345))
                 .lossPrice(BigDecimal.valueOf(1.009))
-                .exitPrice(BigDecimal.valueOf(1.2345))
-                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
                 .costs(BigDecimal.valueOf(2.34))
                 .build();
 

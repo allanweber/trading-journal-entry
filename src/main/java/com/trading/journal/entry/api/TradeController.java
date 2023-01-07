@@ -2,10 +2,7 @@ package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
-import com.trading.journal.entry.entries.trade.OpenTrades;
-import com.trading.journal.entry.entries.trade.Symbol;
-import com.trading.journal.entry.entries.trade.Trade;
-import com.trading.journal.entry.entries.trade.TradeService;
+import com.trading.journal.entry.entries.trade.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -24,8 +21,8 @@ public class TradeController implements TradeApi {
     private final TradeService tradeService;
 
     @Override
-    public ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, String journalId, Trade trade) {
-        Entry created = tradeService.create(accessTokenInfo, journalId, trade);
+    public ResponseEntity<Entry> open(AccessTokenInfo accessTokenInfo, String journalId, Trade trade) {
+        Entry created = tradeService.open(accessTokenInfo, journalId, trade);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
         return created(uri).body(created);
     }
@@ -34,6 +31,12 @@ public class TradeController implements TradeApi {
     public ResponseEntity<Entry> update(AccessTokenInfo accessTokenInfo, String journalId, String tradeId, Trade trade) {
         Entry updated = tradeService.update(accessTokenInfo, journalId, tradeId, trade);
         return ok(updated);
+    }
+
+    @Override
+    public ResponseEntity<Entry> close(AccessTokenInfo accessTokenInfo, String journalId, String tradeId, CloseTrade trade) {
+        Entry closed = tradeService.close(accessTokenInfo, journalId, tradeId, trade);
+        return ok(closed);
     }
 
     @Override

@@ -20,7 +20,6 @@ import java.time.LocalDateTime;
 @Builder
 @EqualsAndHashCode
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ValidTrade
 public class Trade {
 
     @NotNull(message = "Date is required")
@@ -55,12 +54,6 @@ public class Trade {
 
     @NumberFormat(pattern = "#0.00")
     private BigDecimal costs;
-
-    @NumberFormat(pattern = "#0.00")
-    private BigDecimal exitPrice;
-
-    @JsonFormat(pattern = DateHelper.DATE_FORMAT)
-    private LocalDateTime exitDate;
 
     private String notes;
 }

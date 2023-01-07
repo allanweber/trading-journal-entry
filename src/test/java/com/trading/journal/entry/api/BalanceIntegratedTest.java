@@ -12,6 +12,7 @@ import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.entries.GraphType;
 import com.trading.journal.entry.entries.deposit.Deposit;
 import com.trading.journal.entry.entries.taxes.Taxes;
+import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.withdrawal.Withdrawal;
 import com.trading.journal.entry.journal.Journal;
@@ -191,6 +192,7 @@ class BalanceIntegratedTest {
                 .lossPrice(BigDecimal.valueOf(400.00))
                 .graphType(GraphType.CANDLESTICK)
                 .graphMeasure("1M")
+                .costs(BigDecimal.valueOf(50.00))
                 .build();
         webTestClient
                 .post()
@@ -295,18 +297,17 @@ class BalanceIntegratedTest {
                 });
 
         //Exit SECOND added trade, APPL winning
-        entryAPPL = rebuildEntry(entryAPPL)
+        CloseTrade closeAPPL = CloseTrade.builder()
                 .exitPrice(BigDecimal.valueOf(400.00))
                 .exitDate(LocalDateTime.of(2022, 1, 2, 12, 0, 0))
-                .costs(BigDecimal.ZERO)
                 .build();
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}/close")
                         .build(journalId, entryAPPLId.get()))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entryAPPL)
+                .bodyValue(closeAPPL)
                 .exchange()
                 .expectBody(Entry.class)
                 .value(response -> {
@@ -370,18 +371,17 @@ class BalanceIntegratedTest {
                 });
 
         //Exit LAST added trade, TSLA losing
-        entryTSLA = rebuildEntry(entryTSLA)
+        CloseTrade closeTSLA = CloseTrade.builder()
                 .exitPrice(BigDecimal.valueOf(745.00))
                 .exitDate(LocalDateTime.of(2022, 1, 5, 12, 0, 0))
-                .costs(BigDecimal.ZERO)
                 .build();
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}/close")
                         .build(journalId, entryTSLAId.get()))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entryTSLA)
+                .bodyValue(closeTSLA)
                 .exchange()
                 .expectBody(Entry.class)
                 .value(response -> {
@@ -447,18 +447,17 @@ class BalanceIntegratedTest {
                 });
 
         //Exit THIRD added trade, NVDA winning
-        entryNVDA = rebuildEntry(entryNVDA)
+        CloseTrade closeNVDA = CloseTrade.builder()
                 .exitPrice(BigDecimal.valueOf(160).setScale(2, RoundingMode.HALF_EVEN))
                 .exitDate(LocalDateTime.of(2022, 1, 6, 12, 0, 0))
-                .costs(BigDecimal.valueOf(50.00))
                 .build();
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}/close")
                         .build(journalId, entryNVDAId.get()))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entryNVDA)
+                .bodyValue(closeNVDA)
                 .exchange()
                 .expectBody(Entry.class)
                 .value(response -> {
@@ -700,18 +699,17 @@ class BalanceIntegratedTest {
                 });
 
         //LOSE MSFT losing
-        entryMSFT = rebuildEntry(entryMSFT)
+        CloseTrade closeMSFT = CloseTrade.builder()
                 .exitPrice(BigDecimal.valueOf(80.00).setScale(2, RoundingMode.HALF_EVEN))
                 .exitDate(LocalDateTime.of(2022, 1, 7, 12, 0, 0))
-                .costs(BigDecimal.ZERO)
                 .build();
         webTestClient
                 .patch()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
+                        .path("/journals/{journal-id}/entries/trade/{trade-id}/close")
                         .build(journalId, entryMSFTId.get()))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(entryMSFT)
+                .bodyValue(closeMSFT)
                 .exchange()
                 .expectBody(Entry.class)
                 .value(response -> {

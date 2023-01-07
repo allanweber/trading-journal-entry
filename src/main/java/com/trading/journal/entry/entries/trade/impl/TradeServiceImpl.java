@@ -5,10 +5,7 @@ import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryRepository;
 import com.trading.journal.entry.entries.EntryService;
 import com.trading.journal.entry.entries.EntryType;
-import com.trading.journal.entry.entries.trade.Symbol;
-import com.trading.journal.entry.entries.trade.Trade;
-import com.trading.journal.entry.entries.trade.TradeMapper;
-import com.trading.journal.entry.entries.trade.TradeService;
+import com.trading.journal.entry.entries.trade.*;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
@@ -31,7 +28,7 @@ public class TradeServiceImpl implements TradeService {
     private final JournalService journalService;
 
     @Override
-    public Entry create(AccessTokenInfo accessTokenInfo, String journalId, Trade trade) {
+    public Entry open(AccessTokenInfo accessTokenInfo, String journalId, Trade trade) {
         Entry entry = TradeMapper.INSTANCE.toEntry(trade);
         return entryService.save(accessTokenInfo, journalId, entry);
     }
@@ -40,6 +37,13 @@ public class TradeServiceImpl implements TradeService {
     public Entry update(AccessTokenInfo accessTokenInfo, String journalId, String tradeId, Trade trade) {
         Entry entry = TradeMapper.INSTANCE.toEntry(trade, tradeId);
         return entryService.save(accessTokenInfo, journalId, entry);
+    }
+
+    @Override
+    public Entry close(AccessTokenInfo accessTokenInfo, String journalId, String tradeId, CloseTrade trade) {
+        Entry entry = entryService.getById(accessTokenInfo, journalId, tradeId);
+        Entry closeTrade = TradeMapper.INSTANCE.toEntryFromClose(entry, trade);
+        return entryService.save(accessTokenInfo, journalId, closeTrade);
     }
 
     @Override
