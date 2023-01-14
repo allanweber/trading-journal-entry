@@ -2434,6 +2434,267 @@
 					"response": []
 				},
 				{
+					"name": "Aggregate trades by day",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.type).to.equal('DAY');\r",
+									"\r",
+									"\tpm.expect(response.items.length).to.equal(3);\r",
+									"\r",
+									"\tconst tenDaysAgo = moment().subtract(10, 'days').format(\"YYYY-MM-DD\");\r",
+									"\tconst monthAgo = moment().subtract(1, 'month').format(\"YYYY-MM-DD\");\r",
+									"\tconst today = moment().format(\"YYYY-MM-DD\");\r",
+									"\r",
+									"\tpm.expect(response.items[0].group).to.equal(today);\r",
+									"\tpm.expect(response.items[0].count).to.equal(1);\r",
+									"\tpm.expect(response.items[0].items[0].symbol).to.equal('SP500');\r",
+									"\r",
+									"\tpm.expect(response.items[1].group).to.equal(tenDaysAgo);\r",
+									"\tpm.expect(response.items[1].count).to.equal(1);\r",
+									"\tpm.expect(response.items[1].items[0].symbol).to.equal('MSFT');\r",
+									"\r",
+									"\tpm.expect(response.items[2].group).to.equal(monthAgo);\r",
+									"\tpm.expect(response.items[2].count).to.equal(1);\r",
+									"\tpm.expect(response.items[2].items[0].symbol).to.equal('AMZN');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/aggregate?aggregation=DAY",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade",
+								"aggregate"
+							],
+							"query": [
+								{
+									"key": "aggregation",
+									"value": "DAY"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Aggregate trades by week",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.type).to.equal('WEEK');\r",
+									"\r",
+									"\tpm.expect(response.items.length).to.equal(3);\r",
+									"\r",
+									"\tconst tenDaysAgo = moment().subtract(10, 'days').format(\"YYYY-WW\");\r",
+									"\tconst monthAgo = moment().subtract(1, 'month').format(\"YYYY-WW\");\r",
+									"\tconst today = moment().format(\"YYYY-WW\");\r",
+									"\r",
+									"\tpm.expect(response.items[0].group).to.equal(today);\r",
+									"\tpm.expect(response.items[0].count).to.equal(1);\r",
+									"\tpm.expect(response.items[0].items[0].symbol).to.equal('SP500');\r",
+									"\r",
+									"\tpm.expect(response.items[1].group).to.equal(tenDaysAgo);\r",
+									"\tpm.expect(response.items[1].count).to.equal(1);\r",
+									"\tpm.expect(response.items[1].items[0].symbol).to.equal('MSFT');\r",
+									"\r",
+									"\tpm.expect(response.items[2].group).to.equal(monthAgo);\r",
+									"\tpm.expect(response.items[2].count).to.equal(1);\r",
+									"\tpm.expect(response.items[2].items[0].symbol).to.equal('AMZN');\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/aggregate?aggregation=WEEK",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade",
+								"aggregate"
+							],
+							"query": [
+								{
+									"key": "aggregation",
+									"value": "WEEK"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Aggregate trades by month",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"\r",
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.type).to.equal('MONTH');\r",
+									"\r",
+									"\tconst tenDaysAgo = moment().subtract(10, 'days').format(\"YYYY-MM\");\r",
+									"\tconst monthAgo = moment().subtract(1, 'month').format(\"YYYY-MM\");\r",
+									"\tconst today = moment().format(\"YYYY-MM\");\r",
+									"\r",
+									"\tif(today === tenDaysAgo) {\r",
+									"\t\tpm.expect(response.items.length).to.equal(2);\r",
+									"\t} else {\r",
+									"\t\tpm.expect(response.items.length).to.equal(3);\r",
+									"\t}\r",
+									"\r",
+									"\tif(today === tenDaysAgo) {\r",
+									"\t\tpm.expect(response.items[0].group).to.equal(today);\r",
+									"\t\tpm.expect(response.items[0].count).to.equal(2);\r",
+									"\r",
+									"\t\tpm.expect(response.items[0].items[0].symbol).to.equal('SP500');\r",
+									"\t\tpm.expect(response.items[0].items[1].symbol).to.equal('MSFT');\r",
+									"\t} else {\r",
+									"\t\tpm.expect(response.items[0].group).to.equal(today);\r",
+									"\t\tpm.expect(response.items[0].count).to.equal(1);\r",
+									"\t\tpm.expect(response.items[0].items[0].symbol).to.equal('SP500');\r",
+									"\r",
+									"\t\tpm.expect(response.items[1].group).to.equal(tenDaysAgo);\r",
+									"\t\tpm.expect(response.items[1].count).to.equal(1);\r",
+									"\t\tpm.expect(response.items[1].items[0].symbol).to.equal('MSFT');\r",
+									"\t}\r",
+									"\r",
+									"\tif(today === tenDaysAgo) {\r",
+									"\t\tpm.expect(response.items[1].group).to.equal(monthAgo);\r",
+									"\t\tpm.expect(response.items[1].count).to.equal(1);\r",
+									"\t\tpm.expect(response.items[1].items[0].symbol).to.equal('AMZN');\r",
+									"\t} else {\r",
+									"\t\tpm.expect(response.items[2].group).to.equal(monthAgo);\r",
+									"\t\tpm.expect(response.items[2].count).to.equal(1);\r",
+									"\t\tpm.expect(response.items[2].items[0].symbol).to.equal('AMZN');\r",
+									"\t}\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/aggregate?aggregation=MONTH",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade",
+								"aggregate"
+							],
+							"query": [
+								{
+									"key": "aggregation",
+									"value": "MONTH"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
 					"name": "Delete Entry 1",
 					"event": [
 						{
@@ -2989,15 +3250,7 @@
 			"value": ""
 		},
 		{
-			"key": "entry1-exitPrice",
-			"value": ""
-		},
-		{
-			"key": "accountBalance",
-			"value": ""
-		},
-		{
-			"key": "closedPositions",
+			"key": "days-ago",
 			"value": ""
 		},
 		{
@@ -3009,7 +3262,15 @@
 			"value": ""
 		},
 		{
-			"key": "days-ago",
+			"key": "entry1-exitPrice",
+			"value": ""
+		},
+		{
+			"key": "accountBalance",
+			"value": ""
+		},
+		{
+			"key": "closedPositions",
 			"value": ""
 		}
 	]

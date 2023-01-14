@@ -3,6 +3,9 @@ package com.trading.journal.entry.api;
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.trade.*;
+import com.trading.journal.entry.entries.trade.aggregate.AggregateTrade;
+import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
+import com.trading.journal.entry.entries.trade.aggregate.AggregatedResult;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -49,5 +52,12 @@ public class TradeController implements TradeApi {
     public ResponseEntity<List<Symbol>> symbols(AccessTokenInfo accessTokenInfo, String journalId) {
         List<Symbol> symbols = tradeService.symbols(accessTokenInfo, journalId);
         return ok(symbols);
+    }
+
+    @Override
+    public ResponseEntity<AggregatedResult> symbols(AccessTokenInfo accessTokenInfo, String journalId, AggregateType aggregation) {
+        AggregateTrade aggregateTrade = AggregateTrade.builder().aggregateType(aggregation).build();
+        AggregatedResult result = tradeService.aggregate(accessTokenInfo, journalId, aggregateTrade);
+        return ok(result);
     }
 }
