@@ -47,6 +47,12 @@ public interface EntryApi {
     @ResponseStatus(HttpStatus.OK)
     ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId);
 
+    @ApiOperation(notes = "Get entry", value = "Get entry")
+    @ApiResponses(@ApiResponse(code = 200, message = "Entry returned"))
+    @GetMapping("/{entry-id}")
+    @ResponseStatus(HttpStatus.OK)
+    ResponseEntity<Entry> get(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId);
+
     @ApiOperation(notes = "Upload Trade image", value = "Upload Trade image")
     @ApiResponses(@ApiResponse(code = 200, message = "Trade image uploaded"))
     @PostMapping("/{entry-id}/image")

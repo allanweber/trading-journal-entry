@@ -55,6 +55,12 @@ public class EntryController implements EntryApi {
     }
 
     @Override
+    public ResponseEntity<Entry> get(AccessTokenInfo accessTokenInfo, String journalId, String entryId) {
+        Entry entry = entryService.getById(accessTokenInfo, journalId, entryId);
+        return ok(entry);
+    }
+
+    @Override
     public ResponseEntity<Void> uploadImage(AccessTokenInfo accessTokenInfo, String journalId, String entryId, UploadType type, MultipartFile file) {
         entryService.uploadImage(accessTokenInfo, journalId, entryId, type, file);
         return ok().build();

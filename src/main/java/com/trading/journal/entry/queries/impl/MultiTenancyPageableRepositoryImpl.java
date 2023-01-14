@@ -9,6 +9,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.repository.query.MongoEntityInformation;
 import org.springframework.data.mongodb.repository.support.SimpleMongoRepository;
@@ -106,5 +107,11 @@ public class MultiTenancyPageableRepositoryImpl<T, I extends Serializable> exten
     public List<String> distinct(String field, CollectionName collectionName) {
         Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
         return mongoOperations.findDistinct(new Query(), field, collectionName.collectionName(metadata), metadata.getJavaType(), String.class);
+    }
+
+    @Override
+    public <U> List<U> aggregate(Aggregation aggregation, CollectionName collectionName, Class<U> clazz) {
+        Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
+        return mongoOperations.aggregate(aggregation, collectionName.collectionName(metadata), clazz).getMappedResults();
     }
 }

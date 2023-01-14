@@ -7,9 +7,9 @@ import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.*;
-import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.journal.Journal;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -553,5 +553,86 @@ class EntryControllerTest {
                 .expectStatus()
                 .isOk().expectBody(EntryImageResponse.class)
                 .value(response -> assertThat(response.getImage()).isNotNull());
+    }
+
+    @DisplayName("Get entry by Id")
+    @Test
+    void getById() {
+        Trade trade = Trade.builder()
+                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                .symbol("USD/EUR")
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(1.1234))
+                .size(BigDecimal.valueOf(500.00))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure("1M")
+                .build();
+
+        AtomicReference<String> entryId = new AtomicReference<>();
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/trade")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(trade)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Entry.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    entryId.set(response.getId());
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/{entry-id}")
+                        .build(journalId, entryId.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(Entry.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    entryId.set(response.getId());
+                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
+                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
+                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
+                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
+                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
+                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
+                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
+
+                    assertThat(response.getProfitPrice()).isNull();
+                    assertThat(response.getLossPrice()).isNull();
+                    assertThat(response.getGrossResult()).isNull();
+                    assertThat(response.getNetResult()).isNull();
+                    assertThat(response.getAccountChange()).isNull();
+                    assertThat(response.getAccountBalance()).isNull();
+                });
+    }
+
+    @DisplayName("Get entry by Id not found")
+    @Test
+    void getByIdNotFound() {
+        ObjectId id = new ObjectId();
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/{entry-id}")
+                        .build(journalId, id.toString()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error")).isEqualTo("Entry not found"));
     }
 }

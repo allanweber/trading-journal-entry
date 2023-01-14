@@ -6,10 +6,9 @@ import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
-import io.swagger.annotations.ApiResponses;
+import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
+import com.trading.journal.entry.entries.trade.aggregate.AggregatedResult;
+import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -48,10 +47,16 @@ public interface TradeApi {
     @GetMapping("/open")
     ResponseEntity<OpenTrades> countOpen(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 
-    //TODO: upgrade and use to get totals by symbol from date range
     @ApiOperation(notes = "Retrieve all symbols", value = "Retrieve all unique symbols ever trades")
     @ApiResponses(@ApiResponse(code = 200, message = "Symbols retrieve"))
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/symbols")
     ResponseEntity<List<Symbol>> symbols(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
+
+    @ApiOperation(notes = "Aggregate trades by period of time", value = "Aggregate trades by period of time")
+    @ApiResponses(@ApiResponse(code = 200, message = "Trades aggregated"))
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/aggregate")
+    ResponseEntity<AggregatedResult> symbols(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
+                                             @ApiParam(name = "aggregation", value = "DAY, WEEK or MONTH") @RequestParam("aggregation") AggregateType aggregation);
 }

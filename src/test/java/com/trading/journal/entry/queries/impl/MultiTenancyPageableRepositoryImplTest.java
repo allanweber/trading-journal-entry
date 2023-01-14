@@ -5,6 +5,9 @@ import com.mongodb.client.result.DeleteResult;
 import com.trading.journal.entry.EntryForTest;
 import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.data.PageableRequest;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
+import org.bson.Document;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,6 +16,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.aggregation.Aggregation;
+import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.repository.query.MongoEntityInformation;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -146,5 +151,27 @@ class MultiTenancyPageableRepositoryImplTest {
                 .thenReturn(asList("A", "b"));
         List<String> distinct = repository.distinct("a", collectionName);
         assertThat(distinct).hasSize(2);
+    }
+
+    @DisplayName("Aggregation")
+    @Test
+    void aggregation() {
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.project("a")
+        );
+        Document document = Document.parse("{}");
+
+        when(mongoOperations.aggregate(aggregation, collection, Aggregated.class))
+                .thenReturn(new AggregationResults<>(asList(new Aggregated("1", "2"), new Aggregated("1", "2")), document));
+
+        List<Aggregated> list = repository.aggregate(aggregation, collectionName, Aggregated.class);
+        assertThat(list).hasSize(2);
+    }
+
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Aggregated {
+        private String field;
+        private String other;
     }
 }
