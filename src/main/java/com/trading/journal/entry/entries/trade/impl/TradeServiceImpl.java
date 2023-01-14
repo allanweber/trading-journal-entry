@@ -82,6 +82,7 @@ public class TradeServiceImpl implements TradeService {
         AggregationOperation group = aggregationOperationContext -> new Document("$group", BasicDBObject.parse(query));
 
         Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(new Criteria("type").is(EntryType.TRADE.name())),
                 group,
                 Aggregation.unwind("$items"),
                 Aggregation.sort(Sort.Direction.DESC, "items.order"),

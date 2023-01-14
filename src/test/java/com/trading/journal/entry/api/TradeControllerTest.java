@@ -443,6 +443,30 @@ class TradeControllerTest {
     @DisplayName("Aggregate by day")
     @Test
     void aggregateDay() {
+
+        //Save deposit, withdrawal and taxes, but they are not considered while aggregating
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .type(EntryType.DEPOSIT)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .type(EntryType.TAXES)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .type(EntryType.WITHDRAWAL)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
         mongoTemplate.save(
                 Entry.builder()
                         .price(BigDecimal.valueOf(10.00))
@@ -531,7 +555,7 @@ class TradeControllerTest {
                     assertThat(response.getItems().get(0).getGroup()).isEqualTo("2022-01-03");
                     assertThat(response.getItems().get(0).getCount()).isEqualTo(3);
                     assertThat(response.getItems().get(0).getItems()).extracting(AggregatedItems::getSymbol)
-                                    .containsExactly("HD", "ABBV", "BMY");
+                            .containsExactly("HD", "ABBV", "BMY");
 
                     assertThat(response.getItems().get(1).getGroup()).isEqualTo("2022-01-02");
                     assertThat(response.getItems().get(1).getCount()).isEqualTo(1);
@@ -548,6 +572,30 @@ class TradeControllerTest {
     @DisplayName("Aggregate by WEEK")
     @Test
     void aggregateWeek() {
+
+        //Save deposit, withdrawal and taxes, but they are not considered while aggregating
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .type(EntryType.DEPOSIT)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .type(EntryType.TAXES)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .type(EntryType.WITHDRAWAL)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
         mongoTemplate.save(
                 Entry.builder()
                         .price(BigDecimal.valueOf(10.00))
@@ -653,6 +701,30 @@ class TradeControllerTest {
     @DisplayName("Aggregate by MONTH")
     @Test
     void aggregateMonth() {
+
+        //Save deposit, withdrawal and taxes, but they are not considered while aggregating
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .type(EntryType.DEPOSIT)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .type(EntryType.TAXES)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .type(EntryType.WITHDRAWAL)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
         mongoTemplate.save(
                 Entry.builder()
                         .price(BigDecimal.valueOf(10.00))
