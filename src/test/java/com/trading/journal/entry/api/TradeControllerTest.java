@@ -15,8 +15,8 @@ import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
-import com.trading.journal.entry.entries.trade.aggregate.AggregatedItems;
-import com.trading.journal.entry.entries.trade.aggregate.AggregatedResult;
+import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregated;
+import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregatedResult;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -440,7 +440,7 @@ class TradeControllerTest {
                 });
     }
 
-    @DisplayName("Aggregate by day")
+    @DisplayName("Aggregate time period day")
     @Test
     void aggregateDay() {
 
@@ -486,8 +486,8 @@ class TradeControllerTest {
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
                         .netResult(BigDecimal.valueOf(100))
-                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
-                        .exitDate(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .date(LocalDateTime.of(2022, 1, 2, 1, 1, 0))
+                        .exitDate(LocalDateTime.of(2022, 1, 2, 1, 1, 0))
                         .build(),
                 entryCollection);
 
@@ -498,8 +498,8 @@ class TradeControllerTest {
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
                         .netResult(BigDecimal.valueOf(100))
-                        .date(LocalDateTime.of(2022, 1, 2, 1, 1, 0))
-                        .exitDate(LocalDateTime.of(2022, 1, 2, 1, 1, 0))
+                        .date(LocalDateTime.of(2022, 2, 2, 1, 1, 0))
+                        .exitDate(LocalDateTime.of(2022, 2, 2, 1, 1, 0))
                         .build(),
                 entryCollection);
 
@@ -510,8 +510,8 @@ class TradeControllerTest {
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
                         .netResult(BigDecimal.valueOf(100))
-                        .date(LocalDateTime.of(2022, 1, 3, 1, 1, 0))
-                        .exitDate(LocalDateTime.of(2022, 1, 3, 1, 1, 0))
+                        .date(LocalDateTime.of(2022, 3, 2, 1, 1, 0))
+                        .exitDate(LocalDateTime.of(2022, 3, 2, 1, 1, 0))
                         .build(),
                 entryCollection);
 
@@ -521,8 +521,9 @@ class TradeControllerTest {
                         .symbol("ABBV")
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
-                        .date(LocalDateTime.of(2022, 1, 3, 2, 1, 0))
-                        .exitDate(LocalDateTime.of(2022, 1, 3, 2, 1, 0))
+                        .netResult(BigDecimal.valueOf(100))
+                        .date(LocalDateTime.of(2022, 3, 2, 2, 1, 0))
+                        .exitDate(LocalDateTime.of(2022, 3, 2, 2, 1, 0))
                         .build(),
                 entryCollection);
 
@@ -532,44 +533,48 @@ class TradeControllerTest {
                         .symbol("HD")
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
-                        .date(LocalDateTime.of(2022, 1, 3, 3, 1, 0))
-                        .exitDate(LocalDateTime.of(2022, 1, 3, 3, 1, 0))
+                        .netResult(BigDecimal.valueOf(100))
+                        .date(LocalDateTime.of(2022, 3, 3, 3, 1, 0))
+                        .exitDate(LocalDateTime.of(2022, 3, 3, 3, 1, 0))
                         .build(),
                 entryCollection);
 
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/aggregate")
+                        .path("/journals/{journal-id}/entries/trade/aggregate/time")
                         .queryParam("aggregation", AggregateType.DAY.name())
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(AggregatedResult.class)
+                .expectBody(new ParameterizedTypeReference<List<PeriodAggregatedResult>>() {
+                })
                 .value(response -> {
-                    assertThat(response.getType()).isEqualTo(AggregateType.DAY);
-                    assertThat(response.getItems()).hasSize(3);
+                    assertThat(response).hasSize(3);
 
-                    assertThat(response.getItems().get(0).getGroup()).isEqualTo("2022-01-03");
-                    assertThat(response.getItems().get(0).getCount()).isEqualTo(3);
-                    assertThat(response.getItems().get(0).getItems()).extracting(AggregatedItems::getSymbol)
-                            .containsExactly("HD", "ABBV", "BMY");
+                    assertThat(response.get(0).getGroup()).isEqualTo("2022-03");
+                    assertThat(response.get(0).getItems()).hasSize(2);
+                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-03-03", "2022-03-02");
+                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L, 2L);
+                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00), BigDecimal.valueOf(200.00));
 
-                    assertThat(response.getItems().get(1).getGroup()).isEqualTo("2022-01-02");
-                    assertThat(response.getItems().get(1).getCount()).isEqualTo(1);
-                    assertThat(response.getItems().get(1).getItems()).extracting(AggregatedItems::getSymbol)
-                            .containsExactly("PPE");
+                    assertThat(response.get(1).getGroup()).isEqualTo("2022-02");
+                    assertThat(response.get(1).getItems()).hasSize(1);
+                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-02-02");
+                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L);
+                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00));
 
-                    assertThat(response.getItems().get(2).getGroup()).isEqualTo("2022-01-01");
-                    assertThat(response.getItems().get(2).getCount()).isEqualTo(2);
-                    assertThat(response.getItems().get(2).getItems()).extracting(AggregatedItems::getSymbol)
-                            .containsExactly("MSFT", "MSFT");
+                    assertThat(response.get(2).getGroup()).isEqualTo("2022-01");
+                    assertThat(response.get(2).getItems()).hasSize(2);
+                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-01-02", "2022-01-01");
+                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L, 1L);
+                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00), BigDecimal.valueOf(100.00));
                 });
     }
 
-    @DisplayName("Aggregate by WEEK")
+    @DisplayName("Aggregate time period by WEEK")
     @Test
     void aggregateWeek() {
 
@@ -650,6 +655,7 @@ class TradeControllerTest {
                         .symbol("ABBV")
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(100))
                         .date(LocalDateTime.of(2022, 10, 4, 2, 1, 0))
                         .exitDate(LocalDateTime.of(2022, 10, 4, 2, 1, 0))
                         .build(),
@@ -661,6 +667,7 @@ class TradeControllerTest {
                         .symbol("HD")
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(100))
                         .date(LocalDateTime.of(2022, 10, 5, 3, 1, 0))
                         .exitDate(LocalDateTime.of(2022, 10, 5, 3, 1, 0))
                         .build(),
@@ -669,36 +676,39 @@ class TradeControllerTest {
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/aggregate")
+                        .path("/journals/{journal-id}/entries/trade/aggregate/time")
                         .queryParam("aggregation", AggregateType.WEEK.name())
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(AggregatedResult.class)
+                .expectBody(new ParameterizedTypeReference<List<PeriodAggregatedResult>>() {
+                })
                 .value(response -> {
-                    assertThat(response.getType()).isEqualTo(AggregateType.WEEK);
-                    assertThat(response.getItems()).hasSize(3);
+                    assertThat(response).hasSize(3);
 
-                    assertThat(response.getItems().get(0).getGroup()).isEqualTo("2022-40");
-                    assertThat(response.getItems().get(0).getCount()).isEqualTo(3);
-                    assertThat(response.getItems().get(0).getItems()).extracting(AggregatedItems::getSymbol)
-                            .containsExactly("HD", "ABBV", "BMY");
+                    assertThat(response.get(0).getGroup()).isEqualTo("2022-10");
+                    assertThat(response.get(0).getItems()).hasSize(1);
+                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-40");
+                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getCount).containsExactly(3L);
+                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(300.00));
 
-                    assertThat(response.getItems().get(1).getGroup()).isEqualTo("2022-31");
-                    assertThat(response.getItems().get(1).getCount()).isEqualTo(1);
-                    assertThat(response.getItems().get(1).getItems()).extracting(AggregatedItems::getSymbol)
-                            .containsExactly("PPE");
+                    assertThat(response.get(1).getGroup()).isEqualTo("2022-08");
+                    assertThat(response.get(1).getItems()).hasSize(1);
+                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-31");
+                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L);
+                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00));
 
-                    assertThat(response.getItems().get(2).getGroup()).isEqualTo("2022-18");
-                    assertThat(response.getItems().get(2).getCount()).isEqualTo(2);
-                    assertThat(response.getItems().get(2).getItems()).extracting(AggregatedItems::getSymbol)
-                            .containsExactly("MSFT", "MSFT");
+                    assertThat(response.get(2).getGroup()).isEqualTo("2022-05");
+                    assertThat(response.get(2).getItems()).hasSize(1);
+                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-18");
+                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getCount).containsExactly(2L);
+                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(200.00));
                 });
     }
 
-    @DisplayName("Aggregate by MONTH")
+    @DisplayName("Aggregate time period by MONTH")
     @Test
     void aggregateMonth() {
 
@@ -768,8 +778,8 @@ class TradeControllerTest {
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
                         .netResult(BigDecimal.valueOf(100))
-                        .date(LocalDateTime.of(2022, 10, 4, 1, 1, 0))
-                        .exitDate(LocalDateTime.of(2022, 10, 4, 1, 1, 0))
+                        .date(LocalDateTime.of(2023, 1, 4, 1, 1, 0))
+                        .exitDate(LocalDateTime.of(2023, 1, 4, 1, 1, 0))
                         .build(),
                 entryCollection);
 
@@ -779,8 +789,9 @@ class TradeControllerTest {
                         .symbol("ABBV")
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
-                        .date(LocalDateTime.of(2022, 10, 4, 2, 1, 0))
-                        .exitDate(LocalDateTime.of(2022, 10, 4, 2, 1, 0))
+                        .netResult(BigDecimal.valueOf(100))
+                        .date(LocalDateTime.of(2023, 2, 4, 2, 1, 0))
+                        .exitDate(LocalDateTime.of(2023, 2, 4, 2, 1, 0))
                         .build(),
                 entryCollection);
 
@@ -790,40 +801,38 @@ class TradeControllerTest {
                         .symbol("HD")
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
-                        .date(LocalDateTime.of(2022, 10, 5, 3, 1, 0))
-                        .exitDate(LocalDateTime.of(2022, 10, 5, 3, 1, 0))
+                        .netResult(BigDecimal.valueOf(100))
+                        .date(LocalDateTime.of(2023, 2, 5, 3, 1, 0))
+                        .exitDate(LocalDateTime.of(2023, 2, 5, 3, 1, 0))
                         .build(),
                 entryCollection);
 
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/aggregate")
+                        .path("/journals/{journal-id}/entries/trade/aggregate/time")
                         .queryParam("aggregation", AggregateType.MONTH.name())
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(AggregatedResult.class)
+                .expectBody(new ParameterizedTypeReference<List<PeriodAggregatedResult>>() {
+                })
                 .value(response -> {
-                    assertThat(response.getType()).isEqualTo(AggregateType.MONTH);
-                    assertThat(response.getItems()).hasSize(3);
+                    assertThat(response).hasSize(2);
 
-                    assertThat(response.getItems().get(0).getGroup()).isEqualTo("2022-10");
-                    assertThat(response.getItems().get(0).getCount()).isEqualTo(3);
-                    assertThat(response.getItems().get(0).getItems()).extracting(AggregatedItems::getSymbol)
-                            .containsExactly("HD", "ABBV", "BMY");
+                    assertThat(response.get(0).getGroup()).isEqualTo("2023");
+                    assertThat(response.get(0).getItems()).hasSize(2);
+                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2023-02", "2023-01");
+                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getCount).containsExactly(2L, 1L);
+                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(200.00), BigDecimal.valueOf(100.00));
 
-                    assertThat(response.getItems().get(1).getGroup()).isEqualTo("2022-08");
-                    assertThat(response.getItems().get(1).getCount()).isEqualTo(1);
-                    assertThat(response.getItems().get(1).getItems()).extracting(AggregatedItems::getSymbol)
-                            .containsExactly("PPE");
-
-                    assertThat(response.getItems().get(2).getGroup()).isEqualTo("2022-05");
-                    assertThat(response.getItems().get(2).getCount()).isEqualTo(2);
-                    assertThat(response.getItems().get(2).getItems()).extracting(AggregatedItems::getSymbol)
-                            .containsExactly("MSFT", "MSFT");
+                    assertThat(response.get(1).getGroup()).isEqualTo("2022");
+                    assertThat(response.get(1).getItems()).hasSize(2);
+                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-08", "2022-05");
+                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L, 2L);
+                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00), BigDecimal.valueOf(200.00));
                 });
     }
 }

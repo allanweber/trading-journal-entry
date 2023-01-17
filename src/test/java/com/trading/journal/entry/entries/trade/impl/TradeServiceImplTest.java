@@ -5,9 +5,6 @@ import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
-import com.trading.journal.entry.entries.trade.aggregate.*;
-import com.trading.journal.entry.journal.Journal;
-import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -15,8 +12,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -28,9 +23,7 @@ import java.util.UUID;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
@@ -48,7 +41,7 @@ class TradeServiceImplTest {
     EntryRepository repository;
 
     @Mock
-    JournalService journalService;
+    TradeCollectionName tradeCollectionName;
 
     @InjectMocks
     TradeServiceImpl tradeService;
@@ -194,7 +187,7 @@ class TradeServiceImplTest {
     void countOpen() {
         Query query = Query.query(new Criteria("type").is(EntryType.TRADE).and("netResult").exists(false));
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(tradeCollectionName.collectionName(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(new CollectionName(ACCESS_TOKEN, "my-journal"));
         when(repository.count(query, collectionName)).thenReturn(1L);
 
         long open = tradeService.countOpen(ACCESS_TOKEN, JOURNAL_ID);
@@ -204,82 +197,10 @@ class TradeServiceImplTest {
     @DisplayName("Distinct Symbols")
     @Test
     void symbols() {
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(tradeCollectionName.collectionName(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(new CollectionName(ACCESS_TOKEN, "my-journal"));
         when(repository.distinct("symbol", collectionName)).thenReturn(asList("A", "b"));
 
         List<Symbol> symbols = tradeService.symbols(ACCESS_TOKEN, JOURNAL_ID);
         assertThat(symbols).extracting(Symbol::getName).containsExactly("A", "b");
-    }
-
-    @DisplayName("Aggregate trades by DAY")
-    @Test
-    void byDay() {
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-
-        List<AggregatedTrades> aggregatedTradesList = singletonList(
-                AggregatedTrades.builder()
-                        .group("group")
-                        .count(1L)
-                        .items(asList(
-                                AggregatedItems.builder().tradeId("1").symbol("A").order("0").date(LocalDateTime.now()).exitDate(LocalDateTime.now().plusMinutes(1)).result(BigDecimal.ZERO).build(),
-                                AggregatedItems.builder().tradeId("2").symbol("B").order("1").date(LocalDateTime.now()).exitDate(LocalDateTime.now().plusMinutes(1)).result(BigDecimal.ZERO).build()
-                        ))
-                        .build()
-        );
-
-        when(repository.aggregate(any(), eq(collectionName), eq(AggregatedTrades.class))).thenReturn(aggregatedTradesList);
-
-        AggregateTrade aggregateTrade = AggregateTrade.builder().aggregateType(AggregateType.DAY).build();
-        AggregatedResult result = tradeService.aggregate(ACCESS_TOKEN, JOURNAL_ID, aggregateTrade);
-        assertThat(result.getType()).isEqualTo(AggregateType.DAY);
-        assertThat(result.getItems()).hasSize(1);
-    }
-
-    @DisplayName("Aggregate trades by WEEK")
-    @Test
-    void byWeek() {
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-
-        List<AggregatedTrades> aggregatedTradesList = singletonList(
-                AggregatedTrades.builder()
-                        .group("group")
-                        .count(1L)
-                        .items(asList(
-                                AggregatedItems.builder().tradeId("1").symbol("A").order("0").date(LocalDateTime.now()).exitDate(LocalDateTime.now().plusMinutes(1)).result(BigDecimal.ZERO).build(),
-                                AggregatedItems.builder().tradeId("2").symbol("B").order("1").date(LocalDateTime.now()).exitDate(LocalDateTime.now().plusMinutes(1)).result(BigDecimal.ZERO).build()
-                        ))
-                        .build()
-        );
-
-        when(repository.aggregate(any(), eq(collectionName), eq(AggregatedTrades.class))).thenReturn(aggregatedTradesList);
-
-        AggregateTrade aggregateTrade = AggregateTrade.builder().aggregateType(AggregateType.WEEK).build();
-        AggregatedResult result = tradeService.aggregate(ACCESS_TOKEN, JOURNAL_ID, aggregateTrade);
-        assertThat(result.getType()).isEqualTo(AggregateType.WEEK);
-        assertThat(result.getItems()).hasSize(1);
-    }
-
-    @DisplayName("Aggregate trades by MONTH")
-    @Test
-    void byMonth() {
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-
-        List<AggregatedTrades> aggregatedTradesList = singletonList(
-                AggregatedTrades.builder()
-                        .group("group")
-                        .count(1L)
-                        .items(asList(
-                                AggregatedItems.builder().tradeId("1").symbol("A").order("0").date(LocalDateTime.now()).exitDate(LocalDateTime.now().plusMinutes(1)).result(BigDecimal.ZERO).build(),
-                                AggregatedItems.builder().tradeId("2").symbol("B").order("1").date(LocalDateTime.now()).exitDate(LocalDateTime.now().plusMinutes(1)).result(BigDecimal.ZERO).build()
-                        ))
-                        .build()
-        );
-
-        when(repository.aggregate(any(), eq(collectionName), eq(AggregatedTrades.class))).thenReturn(aggregatedTradesList);
-
-        AggregateTrade aggregateTrade = AggregateTrade.builder().aggregateType(AggregateType.MONTH).build();
-        AggregatedResult result = tradeService.aggregate(ACCESS_TOKEN, JOURNAL_ID, aggregateTrade);
-        assertThat(result.getType()).isEqualTo(AggregateType.MONTH);
-        assertThat(result.getItems()).hasSize(1);
     }
 }

@@ -11,10 +11,9 @@ import java.util.List;
 @AllArgsConstructor
 @Getter
 @Builder
-public class AggregatedTrades {
+public class PeriodAggregatedResult {
+
     private String group;
 
-    private Long count;
-
-    private List<AggregatedItems> items;
+    private List<PeriodAggregated> items;
 }

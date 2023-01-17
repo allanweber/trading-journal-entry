@@ -5,15 +5,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder
-public class AggregatedResult {
+public class PeriodAggregated {
 
-    private List<AggregatedTrades> items;
+    private BigDecimal result;
 
-    private AggregateType type;
+    private long count;
+
+    private String group;
 }

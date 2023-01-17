@@ -7,7 +7,7 @@ import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
-import com.trading.journal.entry.entries.trade.aggregate.AggregatedResult;
+import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregatedResult;
 import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,7 +56,9 @@ public interface TradeApi {
     @ApiOperation(notes = "Aggregate trades by period of time", value = "Aggregate trades by period of time")
     @ApiResponses(@ApiResponse(code = 200, message = "Trades aggregated"))
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/aggregate")
-    ResponseEntity<AggregatedResult> symbols(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
-                                             @ApiParam(name = "aggregation", value = "DAY, WEEK or MONTH") @RequestParam("aggregation") AggregateType aggregation);
+    @GetMapping("/aggregate/time")
+    ResponseEntity<List<PeriodAggregatedResult>> time(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
+                                                      @ApiParam(name = "aggregation", value = "DAY, WEEK or MONTH") @RequestParam("aggregation") AggregateType aggregation,
+                                                      @RequestParam(value = "page", defaultValue = "0", required = false) Long page,
+                                                      @RequestParam(value = "size", defaultValue = "10", required = false) Long size);
 }
