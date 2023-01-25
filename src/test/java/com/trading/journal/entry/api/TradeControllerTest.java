@@ -15,8 +15,9 @@ import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
-import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregated;
 import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregatedResult;
+import com.trading.journal.entry.entries.trade.aggregate.PeriodItems;
+import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregated;
 import com.trading.journal.entry.journal.Journal;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -549,28 +550,28 @@ class TradeControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<PeriodAggregatedResult>>() {
-                })
+                .expectBody(PeriodAggregatedResult.class)
                 .value(response -> {
-                    assertThat(response).hasSize(3);
+                    assertThat(response.getTotal()).isEqualTo(5);
+                    assertThat(response.getItems()).hasSize(3);
 
-                    assertThat(response.get(0).getGroup()).isEqualTo("2022-03");
-                    assertThat(response.get(0).getItems()).hasSize(2);
-                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-03-03", "2022-03-02");
-                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L, 2L);
-                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00), BigDecimal.valueOf(200.00));
+                    assertThat(response.getItems().get(0).getGroup()).isEqualTo("2022-03");
+                    assertThat(response.getItems().get(0).getItems()).hasSize(2);
+                    assertThat(response.getItems().get(0).getItems()).extracting(PeriodItems::getGroup).containsExactly("2022-03-03", "2022-03-02");
+                    assertThat(response.getItems().get(0).getItems()).extracting(PeriodItems::getCount).containsExactly(1L, 2L);
+                    assertThat(response.getItems().get(0).getItems()).extracting(PeriodItems::getResult).containsExactly(BigDecimal.valueOf(100.00), BigDecimal.valueOf(200.00));
 
-                    assertThat(response.get(1).getGroup()).isEqualTo("2022-02");
-                    assertThat(response.get(1).getItems()).hasSize(1);
-                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-02-02");
-                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L);
-                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00));
+                    assertThat(response.getItems().get(1).getGroup()).isEqualTo("2022-02");
+                    assertThat(response.getItems().get(1).getItems()).hasSize(1);
+                    assertThat(response.getItems().get(1).getItems()).extracting(PeriodItems::getGroup).containsExactly("2022-02-02");
+                    assertThat(response.getItems().get(1).getItems()).extracting(PeriodItems::getCount).containsExactly(1L);
+                    assertThat(response.getItems().get(1).getItems()).extracting(PeriodItems::getResult).containsExactly(BigDecimal.valueOf(100.00));
 
-                    assertThat(response.get(2).getGroup()).isEqualTo("2022-01");
-                    assertThat(response.get(2).getItems()).hasSize(2);
-                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-01-02", "2022-01-01");
-                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L, 1L);
-                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00), BigDecimal.valueOf(100.00));
+                    assertThat(response.getItems().get(2).getGroup()).isEqualTo("2022-01");
+                    assertThat(response.getItems().get(2).getItems()).hasSize(2);
+                    assertThat(response.getItems().get(2).getItems()).extracting(PeriodItems::getGroup).containsExactly("2022-01-02", "2022-01-01");
+                    assertThat(response.getItems().get(2).getItems()).extracting(PeriodItems::getCount).containsExactly(1L, 1L);
+                    assertThat(response.getItems().get(2).getItems()).extracting(PeriodItems::getResult).containsExactly(BigDecimal.valueOf(100.00), BigDecimal.valueOf(100.00));
                 });
     }
 
@@ -683,28 +684,28 @@ class TradeControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<PeriodAggregatedResult>>() {
-                })
+                .expectBody(PeriodAggregatedResult.class)
                 .value(response -> {
-                    assertThat(response).hasSize(3);
+                    assertThat(response.getTotal()).isEqualTo(3);
+                    assertThat(response.getItems()).hasSize(3);
 
-                    assertThat(response.get(0).getGroup()).isEqualTo("2022-10");
-                    assertThat(response.get(0).getItems()).hasSize(1);
-                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-40");
-                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getCount).containsExactly(3L);
-                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(300.00));
+                    assertThat(response.getItems().get(0).getGroup()).isEqualTo("2022-10");
+                    assertThat(response.getItems().get(0).getItems()).hasSize(1);
+                    assertThat(response.getItems().get(0).getItems()).extracting(PeriodItems::getGroup).containsExactly("2022-40");
+                    assertThat(response.getItems().get(0).getItems()).extracting(PeriodItems::getCount).containsExactly(3L);
+                    assertThat(response.getItems().get(0).getItems()).extracting(PeriodItems::getResult).containsExactly(BigDecimal.valueOf(300.00));
 
-                    assertThat(response.get(1).getGroup()).isEqualTo("2022-08");
-                    assertThat(response.get(1).getItems()).hasSize(1);
-                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-31");
-                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L);
-                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00));
+                    assertThat(response.getItems().get(1).getGroup()).isEqualTo("2022-08");
+                    assertThat(response.getItems().get(1).getItems()).hasSize(1);
+                    assertThat(response.getItems().get(1).getItems()).extracting(PeriodItems::getGroup).containsExactly("2022-31");
+                    assertThat(response.getItems().get(1).getItems()).extracting(PeriodItems::getCount).containsExactly(1L);
+                    assertThat(response.getItems().get(1).getItems()).extracting(PeriodItems::getResult).containsExactly(BigDecimal.valueOf(100.00));
 
-                    assertThat(response.get(2).getGroup()).isEqualTo("2022-05");
-                    assertThat(response.get(2).getItems()).hasSize(1);
-                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-18");
-                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getCount).containsExactly(2L);
-                    assertThat(response.get(2).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(200.00));
+                    assertThat(response.getItems().get(2).getGroup()).isEqualTo("2022-05");
+                    assertThat(response.getItems().get(2).getItems()).hasSize(1);
+                    assertThat(response.getItems().get(2).getItems()).extracting(PeriodItems::getGroup).containsExactly("2022-18");
+                    assertThat(response.getItems().get(2).getItems()).extracting(PeriodItems::getCount).containsExactly(2L);
+                    assertThat(response.getItems().get(2).getItems()).extracting(PeriodItems::getResult).containsExactly(BigDecimal.valueOf(200.00));
                 });
     }
 
@@ -817,22 +818,22 @@ class TradeControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<PeriodAggregatedResult>>() {
-                })
+                .expectBody(PeriodAggregatedResult.class)
                 .value(response -> {
-                    assertThat(response).hasSize(2);
+                    assertThat(response.getTotal()).isEqualTo(4);
+                    assertThat(response.getItems()).hasSize(2);
 
-                    assertThat(response.get(0).getGroup()).isEqualTo("2023");
-                    assertThat(response.get(0).getItems()).hasSize(2);
-                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2023-02", "2023-01");
-                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getCount).containsExactly(2L, 1L);
-                    assertThat(response.get(0).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(200.00), BigDecimal.valueOf(100.00));
+                    assertThat(response.getItems().get(0).getGroup()).isEqualTo("2023");
+                    assertThat(response.getItems().get(0).getItems()).hasSize(2);
+                    assertThat(response.getItems().get(0).getItems()).extracting(PeriodItems::getGroup).containsExactly("2023-02", "2023-01");
+                    assertThat(response.getItems().get(0).getItems()).extracting(PeriodItems::getCount).containsExactly(2L, 1L);
+                    assertThat(response.getItems().get(0).getItems()).extracting(PeriodItems::getResult).containsExactly(BigDecimal.valueOf(200.00), BigDecimal.valueOf(100.00));
 
-                    assertThat(response.get(1).getGroup()).isEqualTo("2022");
-                    assertThat(response.get(1).getItems()).hasSize(2);
-                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getGroup).containsExactly("2022-08", "2022-05");
-                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getCount).containsExactly(1L, 2L);
-                    assertThat(response.get(1).getItems()).extracting(PeriodAggregated::getResult).containsExactly(BigDecimal.valueOf(100.00), BigDecimal.valueOf(200.00));
+                    assertThat(response.getItems().get(1).getGroup()).isEqualTo("2022");
+                    assertThat(response.getItems().get(1).getItems()).hasSize(2);
+                    assertThat(response.getItems().get(1).getItems()).extracting(PeriodItems::getGroup).containsExactly("2022-08", "2022-05");
+                    assertThat(response.getItems().get(1).getItems()).extracting(PeriodItems::getCount).containsExactly(1L, 2L);
+                    assertThat(response.getItems().get(1).getItems()).extracting(PeriodItems::getResult).containsExactly(BigDecimal.valueOf(100.00), BigDecimal.valueOf(200.00));
                 });
     }
 }

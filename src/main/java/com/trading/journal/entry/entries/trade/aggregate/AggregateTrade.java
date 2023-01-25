@@ -1,7 +1,14 @@
 package com.trading.journal.entry.entries.trade.aggregate;
 
+import lombok.Getter;
+
+@Getter
 public class AggregateTrade {
-    private final AggregateType aggregateType;
+
+    private String from;
+
+    private String until;
+    private AggregateType aggregateType;
 
     private final Long skip;
 
@@ -13,15 +20,14 @@ public class AggregateTrade {
         this.size = size;
     }
 
-    public AggregateType getAggregateType() {
-        return aggregateType;
+    public AggregateTrade(Long skip, Long size) {
+        this.skip = skip;
+        this.size = size;
     }
 
-    public Long getSkip() {
-        return skip;
-    }
-
-    public Long getSize() {
-        return size;
+    public AggregateTrade(Long page, Long size, String from, String until) {
+        this(page, size);
+        this.from = from;
+        this.until = until;
     }
 }

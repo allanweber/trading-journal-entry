@@ -17,6 +17,8 @@ import org.springframework.stereotype.Service;
 
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.time.temporal.IsoFields;
 import java.time.temporal.TemporalAdjusters;
 import java.util.Comparator;
@@ -33,13 +35,16 @@ public class AggregateService {
     private final EntryRepository repository;
     private final TradeCollectionName tradeCollectionName;
 
-    public List<PeriodAggregatedResult> aggregatePeriod(AccessTokenInfo accessToken, String journalId, AggregateTrade aggregateTrade) {
+    public PeriodAggregatedResult aggregatePeriod(AccessTokenInfo accessToken, String journalId, AggregateTrade aggregateTrade) {
         CollectionName entriesCollection = tradeCollectionName.collectionName(accessToken, journalId);
 
-        String query = "{ _id: { $dateToString: { format: '" + aggregateTrade.getAggregateType().getGroupBy() + "', date: '$date'} }, " +
+        String groupQuery = "{ _id: { $dateToString: { format: '" + aggregateTrade.getAggregateType().getGroupBy() + "', date: '$date'} }, " +
                 "result:{'$sum': {'$toDouble': '$netResult'}}, count: { $sum: 1 }}";
 
-        AggregationOperation group = aggregationOperationContext -> new Document("$group", BasicDBObject.parse(query));
+        String facetQuery = "{ result: [{ $skip: " + aggregateTrade.getSkip() + " }, { $limit: " + aggregateTrade.getSize() + " }], totalCount: [ {$count: 'count'}]}";
+
+        AggregationOperation group = aggregationOperationContext -> new Document("$group", BasicDBObject.parse(groupQuery));
+        AggregationOperation facet = aggregationOperationContext -> new Document("$facet", BasicDBObject.parse(facetQuery));
 
         Aggregation aggregation = Aggregation.newAggregation(
                 Aggregation.match(new Criteria("type").is(EntryType.TRADE.name())),
@@ -49,22 +54,62 @@ public class AggregateService {
                         .and("$_id").as("group")
                         .and(ArithmeticOperators.Round.roundValueOf("$result").place(2)).as("result")
                         .andInclude("count"),
-                Aggregation.skip(aggregateTrade.getSkip()),
-                Aggregation.limit(aggregateTrade.getSize())
+                facet,
+                Aggregation.unwind("$totalCount"),
+                Aggregation.project("result").and("$totalCount.count").as("total")
         );
-        List<PeriodAggregated> unsortedItems = repository.aggregate(aggregation, entriesCollection, PeriodAggregated.class);
 
-        return unsortedItems.stream()
-                .collect(getGroupingBy(aggregateTrade.getAggregateType()))
-                .entrySet()
-                .stream()
-                .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
-                .map(entry -> new PeriodAggregatedResult(entry.getKey(), entry.getValue()))
-                .toList();
+        List<PeriodAggregatedQueryResult> queryResult = repository.aggregate(aggregation, entriesCollection, PeriodAggregatedQueryResult.class);
+
+        return queryResult.stream().findFirst()
+                .map(firstItem -> {
+                    List<PeriodAggregated> items = firstItem.getResult()
+                            .stream()
+                            .collect(getGroupingBy(aggregateTrade.getAggregateType()))
+                            .entrySet()
+                            .stream()
+                            .sorted(Map.Entry.comparingByKey(Comparator.reverseOrder()))
+                            .map(entry -> new PeriodAggregated(entry.getKey(), entry.getValue()))
+                            .toList();
+                    return new PeriodAggregatedResult(items, firstItem.getTotal());
+                }).orElse(null);
     }
 
-    private static Collector<PeriodAggregated, ?, Map<String, List<PeriodAggregated>>> getGroupingBy(AggregateType aggregateType) {
-        Collector<PeriodAggregated, ?, Map<String, List<PeriodAggregated>>> group;
+    public TradeAggregatedResult aggregateTrades(AccessTokenInfo accessToken, String journalId, AggregateTrade aggregateTrade) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        LocalDateTime from = LocalDateTime.parse(aggregateTrade.getFrom(), formatter);
+        LocalDateTime until = LocalDateTime.parse(aggregateTrade.getUntil(), formatter);
+
+        CollectionName entriesCollection = tradeCollectionName.collectionName(accessToken, journalId);
+
+        String groupQuery = "{ _id: { $dateToString: { format: '%Y-%m-%d', date: '$date'} }, " +
+                "items: { $push: {'tradeId':{ $convert: { input: '$_id', to: 'string' } }, 'symbol' : '$symbol', " +
+                "order: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$date'} } , " +
+                "'date':'$date', 'exitDate':'$exitDate', 'result':'$netResult'} } }";
+
+        AggregationOperation group = aggregationOperationContext -> new Document("$group", BasicDBObject.parse(groupQuery));
+
+        Aggregation aggregation = Aggregation.newAggregation(
+                Aggregation.match(new Criteria("type").is(EntryType.TRADE.name())),
+                Aggregation.match(new Criteria("date").gte(from).lte(until)),
+                group,
+                Aggregation.unwind("$items"),
+                Aggregation.sort(Sort.Direction.DESC, "items.order"),
+                Aggregation.group("$_id").push("$items").as("items").count().as("count"),
+                Aggregation.sort(Sort.Direction.DESC, "_id"),
+
+                Aggregation.project().andExclude("_id")
+                        .and("$_id").as("group")
+                        .andInclude("items", "count")
+        );
+
+        List<Object> queryResult = repository.aggregate(aggregation, entriesCollection, Object.class);
+
+        return new TradeAggregatedResult(aggregateTrade.getFrom(), aggregateTrade.getUntil(), 0L);
+    }
+
+    private static Collector<PeriodItems, ?, Map<String, List<PeriodItems>>> getGroupingBy(AggregateType aggregateType) {
+        Collector<PeriodItems, ?, Map<String, List<PeriodItems>>> group;
         if (AggregateType.DAY.equals(aggregateType)) {
             // Group by Month => Day
             // Grab the correspondent Year and Month to group

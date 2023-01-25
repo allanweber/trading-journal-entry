@@ -3,10 +3,7 @@ package com.trading.journal.entry.api;
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.trade.*;
-import com.trading.journal.entry.entries.trade.aggregate.AggregateService;
-import com.trading.journal.entry.entries.trade.aggregate.AggregateTrade;
-import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
-import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregatedResult;
+import com.trading.journal.entry.entries.trade.aggregate.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -58,9 +55,16 @@ public class TradeController implements TradeApi {
     }
 
     @Override
-    public ResponseEntity<List<PeriodAggregatedResult>> time(AccessTokenInfo accessTokenInfo, String journalId, AggregateType aggregation, Long page, Long size) {
+    public ResponseEntity<PeriodAggregatedResult> time(AccessTokenInfo accessTokenInfo, String journalId, AggregateType aggregation, Long page, Long size) {
         AggregateTrade aggregateTrade = new AggregateTrade(aggregation, page, size);
-        List<PeriodAggregatedResult> periods = aggregateService.aggregatePeriod(accessTokenInfo, journalId, aggregateTrade);
+        PeriodAggregatedResult periods = aggregateService.aggregatePeriod(accessTokenInfo, journalId, aggregateTrade);
         return ok(periods);
+    }
+
+    @Override
+    public ResponseEntity<TradeAggregatedResult> trades(AccessTokenInfo accessTokenInfo, String journalId, String from, String until, Long page, Long size) {
+        AggregateTrade aggregateTrade = new AggregateTrade(page, size, from, until);
+        TradeAggregatedResult trades = aggregateService.aggregateTrades(accessTokenInfo, journalId, aggregateTrade);
+        return ok(trades);
     }
 }
