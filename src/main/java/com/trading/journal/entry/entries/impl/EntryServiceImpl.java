@@ -9,7 +9,6 @@ import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.data.Filter;
-import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -37,13 +36,6 @@ public class EntryServiceImpl implements EntryService {
     private final JournalService journalService;
 
     private final BalanceService balanceService;
-
-    @Override
-    public PageResponse<Entry> query(AccessTokenInfo accessToken, String journalId, PageableRequest pageRequest) {
-        CollectionName collectionName = collectionName().apply(accessToken, journalId);
-        Page<Entry> page = repository.findAll(collectionName, pageRequest);
-        return new PageResponse<>(page);
-    }
 
     @Override
     public List<Entry> getAll(GetAll all) {
