@@ -62,9 +62,9 @@ public class TradeController implements TradeApi {
     }
 
     @Override
-    public ResponseEntity<TradeAggregatedResult> trades(AccessTokenInfo accessTokenInfo, String journalId, String from, String until, Long page, Long size) {
-        AggregateTrade aggregateTrade = new AggregateTrade(page, size, from, until);
-        TradeAggregatedResult trades = aggregateService.aggregateTrades(accessTokenInfo, journalId, aggregateTrade);
+    public ResponseEntity<List<TradesAggregated>> trades(AccessTokenInfo accessTokenInfo, String journalId, String from, String until) {
+        AggregateTrade aggregateTrade = new AggregateTrade(from, until);
+        List<TradesAggregated> trades = aggregateService.aggregateTrades(accessTokenInfo, journalId, aggregateTrade);
         return ok(trades);
     }
 }

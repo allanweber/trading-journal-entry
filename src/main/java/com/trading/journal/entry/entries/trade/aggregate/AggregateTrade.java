@@ -10,9 +10,9 @@ public class AggregateTrade {
     private String until;
     private AggregateType aggregateType;
 
-    private final Long skip;
+    private Long skip;
 
-    private final Long size;
+    private Long size;
 
     public AggregateTrade(AggregateType aggregateType, Long page, Long size) {
         this.aggregateType = aggregateType;
@@ -20,13 +20,7 @@ public class AggregateTrade {
         this.size = size;
     }
 
-    public AggregateTrade(Long skip, Long size) {
-        this.skip = skip;
-        this.size = size;
-    }
-
-    public AggregateTrade(Long page, Long size, String from, String until) {
-        this(page, size);
+    public AggregateTrade(String from, String until) {
         this.from = from;
         this.until = until;
     }

@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collector;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.groupingBy;
 
 @Service
@@ -72,10 +73,10 @@ public class AggregateService {
                             .map(entry -> new PeriodAggregated(entry.getKey(), entry.getValue()))
                             .toList();
                     return new PeriodAggregatedResult(items, firstItem.getTotal());
-                }).orElse(null);
+                }).orElse(new PeriodAggregatedResult(emptyList(), 0L));
     }
 
-    public TradeAggregatedResult aggregateTrades(AccessTokenInfo accessToken, String journalId, AggregateTrade aggregateTrade) {
+    public List<TradesAggregated> aggregateTrades(AccessTokenInfo accessToken, String journalId, AggregateTrade aggregateTrade) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime from = LocalDateTime.parse(aggregateTrade.getFrom(), formatter);
         LocalDateTime until = LocalDateTime.parse(aggregateTrade.getUntil(), formatter);
@@ -85,7 +86,7 @@ public class AggregateService {
         String groupQuery = "{ _id: { $dateToString: { format: '%Y-%m-%d', date: '$date'} }, " +
                 "items: { $push: {'tradeId':{ $convert: { input: '$_id', to: 'string' } }, 'symbol' : '$symbol', " +
                 "order: { $dateToString: { format: '%Y-%m-%d %H:%M:%S', date: '$date'} } , " +
-                "'date':'$date', 'exitDate':'$exitDate', 'result':'$netResult'} } }";
+                "'date':'$date', 'exitDate':'$exitDate', 'netResult':'$netResult'} } }";
 
         AggregationOperation group = aggregationOperationContext -> new Document("$group", BasicDBObject.parse(groupQuery));
 
@@ -102,14 +103,11 @@ public class AggregateService {
                         .and("$_id").as("group")
                         .andInclude("items", "count")
         );
-
-        List<Object> queryResult = repository.aggregate(aggregation, entriesCollection, Object.class);
-
-        return new TradeAggregatedResult(aggregateTrade.getFrom(), aggregateTrade.getUntil(), 0L);
+        return repository.aggregate(aggregation, entriesCollection, TradesAggregated.class);
     }
 
-    private static Collector<PeriodItems, ?, Map<String, List<PeriodItems>>> getGroupingBy(AggregateType aggregateType) {
-        Collector<PeriodItems, ?, Map<String, List<PeriodItems>>> group;
+    private static Collector<PeriodItem, ?, Map<String, List<PeriodItem>>> getGroupingBy(AggregateType aggregateType) {
+        Collector<PeriodItem, ?, Map<String, List<PeriodItem>>> group;
         if (AggregateType.DAY.equals(aggregateType)) {
             // Group by Month => Day
             // Grab the correspondent Year and Month to group

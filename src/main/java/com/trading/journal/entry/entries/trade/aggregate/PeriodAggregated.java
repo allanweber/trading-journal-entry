@@ -15,5 +15,5 @@ public class PeriodAggregated {
 
     private String group;
 
-    private List<PeriodItems> items;
+    private List<PeriodItem> items;
 }

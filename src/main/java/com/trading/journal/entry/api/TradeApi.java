@@ -8,7 +8,7 @@ import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
 import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregatedResult;
-import com.trading.journal.entry.entries.trade.aggregate.TradeAggregatedResult;
+import com.trading.journal.entry.entries.trade.aggregate.TradesAggregated;
 import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -67,9 +67,7 @@ public interface TradeApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Trades aggregated"))
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/aggregate/trade")
-    ResponseEntity<TradeAggregatedResult> trades(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
-                                                 @ApiParam(name = "from", value = "Start date for aggregation") @RequestParam("from") String from,
-                                                 @ApiParam(name = "until", value = "End date for aggregation") @RequestParam("until") String until,
-                                                 @RequestParam(value = "page", defaultValue = "0", required = false) Long page,
-                                                 @RequestParam(value = "size", defaultValue = "10", required = false) Long size);
+    ResponseEntity<List<TradesAggregated>> trades(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
+                                                  @ApiParam(name = "from", value = "Start date for aggregation") @RequestParam("from") String from,
+                                                  @ApiParam(name = "until", value = "End date for aggregation") @RequestParam("until") String until);
 }

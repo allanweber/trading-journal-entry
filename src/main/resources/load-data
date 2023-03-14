@@ -2,10 +2,8 @@ package com.trading.journal.entry;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.allanweber.jwttoken.data.JwtProperties;
-import com.trading.journal.entry.entries.EntryDirection;
-import com.trading.journal.entry.entries.EntryResult;
-import com.trading.journal.entry.entries.EntryStatus;
-import com.trading.journal.entry.entries.GraphType;
+import com.trading.journal.entry.entries.*;
+import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.trade.TradeService;
 import com.trading.journal.entry.queries.impl.MultiTenancyPageableRepositoryImpl;
@@ -41,8 +39,8 @@ public class EntryApplication {
 
     @EventListener(ApplicationReadyEvent.class)
     public void load() {
-        AccessTokenInfo accessTokenInfo = new AccessTokenInfo("emailfortestsallan@gmail.com", 191L, "allanweber", asList("ROLE_USER", "TENANCY_ADMIN"));
-        String journalId = "63b726c6bd74737744380f64";
+        AccessTokenInfo accessTokenInfo = new AccessTokenInfo("emailfortestsallan@gmail.com", 1L, "emailfortestsallan", asList("ROLE_USER", "TENANCY_ADMIN"));
+        String journalId = "63fce0f359c14d23cf3b22b1";
         List<String> symbols = asList("AAPL", "MSFT", "GOOG", "GOOGL", "AMZN", "UNH", "JNJ", "XOM", "JPM", "WMT", "TSLA", "PG", "NVDA", "LLY", "CVX", "MA", "HD", "META", "PFE",
                 "ABBV", "MRK", "KO", "BAC", "PEP", "AVGO", "ORCL", "TMO", "COST", "CSCO", "MCD", "DHR", "ABT", "NKE", "ACN", "TMUS", "NEE", "VZ", "LIN",
                 "DIS", "WFC", "ADBE", "PM", "BMY", "UPS", "CMCSA", "SCHW");
@@ -55,7 +53,7 @@ public class EntryApplication {
             EntryResult result = Arrays.stream(EntryResult.values()).toList().get(rand.nextInt(EntryResult.values().length));
 
             EntryStatus status;
-            if(i % 9 == 0){
+            if (i % 9 == 0) {
                 status = EntryStatus.OPEN;
             } else {
                 status = EntryStatus.CLOSED;
@@ -82,7 +80,7 @@ public class EntryApplication {
             }
             costs = price.multiply(BigDecimal.valueOf(0.5)).divide(BigDecimal.valueOf(100), RoundingMode.HALF_EVEN);
 
-            Trade.TradeBuilder tradeBuilder = Trade.builder()
+            Trade trade = Trade.builder()
                     .date(date)
                     .symbol(symbol)
                     .direction(direction)
@@ -91,20 +89,21 @@ public class EntryApplication {
                     .profitPrice(profit)
                     .lossPrice(loss)
                     .costs(costs)
-                    .graphType(graph);
+                    .graphType(graph)
+                    .build();
+            Entry openTrade = tradeService.open(accessTokenInfo, journalId, trade);
 
 
-            if(EntryStatus.CLOSED.equals(status)) {
-                tradeBuilder.exitDate(exitDate);
-                if(EntryResult.WIN.equals(result)) {
-                    tradeBuilder.exitPrice(profit);
+            if (EntryStatus.CLOSED.equals(status)) {
+                CloseTrade.CloseTradeBuilder closeBuilder = CloseTrade.builder().exitDate(exitDate);
+                if (EntryResult.WIN.equals(result)) {
+                    closeBuilder.exitPrice(profit);
                 } else {
-                    tradeBuilder.exitPrice(loss);
+                    closeBuilder.exitPrice(loss);
                 }
+                CloseTrade close = closeBuilder.build();
+                tradeService.close(accessTokenInfo, journalId, openTrade.getId(), close);
             }
-
-            Trade trade = tradeBuilder.build();
-            tradeService.create(accessTokenInfo, journalId, trade);
         }
     }
 

@@ -5,14 +5,17 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.math.BigDecimal;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Builder
-public class PeriodAggregatedQueryResult {
-    private List<PeriodItem> result;
+public class PeriodItem {
 
-    private Long total;
+    private BigDecimal result;
+
+    private long count;
+
+    private String group;
 }
