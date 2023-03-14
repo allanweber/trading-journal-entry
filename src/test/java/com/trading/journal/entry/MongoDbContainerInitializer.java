@@ -12,7 +12,7 @@ public class MongoDbContainerInitializer implements ApplicationContextInitialize
     protected static final MongoDBContainer container;
 
     static {
-        container = new MongoDBContainer("mongo:4.0.10");
+        container = new MongoDBContainer("mongo:5.0.7");
         container.start();
     }
 

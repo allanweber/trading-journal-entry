@@ -7,7 +7,8 @@ import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
-import com.trading.journal.entry.entries.trade.aggregate.AggregatedResult;
+import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregatedResult;
+import com.trading.journal.entry.entries.trade.aggregate.TradesAggregated;
 import io.swagger.annotations.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -53,10 +54,20 @@ public interface TradeApi {
     @GetMapping("/symbols")
     ResponseEntity<List<Symbol>> symbols(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
 
+    @ApiOperation(notes = "Aggregate time periods where there is a trade", value = "Aggregate time periods where there is a trade")
+    @ApiResponses(@ApiResponse(code = 200, message = "Period aggregated"))
+    @ResponseStatus(HttpStatus.OK)
+    @GetMapping("/aggregate/time")
+    ResponseEntity<PeriodAggregatedResult> time(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
+                                                @ApiParam(name = "aggregation", value = "DAY, WEEK or MONTH") @RequestParam("aggregation") AggregateType aggregation,
+                                                @RequestParam(value = "page", defaultValue = "0", required = false) Long page,
+                                                @RequestParam(value = "size", defaultValue = "10", required = false) Long size);
+
     @ApiOperation(notes = "Aggregate trades by period of time", value = "Aggregate trades by period of time")
     @ApiResponses(@ApiResponse(code = 200, message = "Trades aggregated"))
     @ResponseStatus(HttpStatus.OK)
-    @GetMapping("/aggregate")
-    ResponseEntity<AggregatedResult> symbols(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
-                                             @ApiParam(name = "aggregation", value = "DAY, WEEK or MONTH") @RequestParam("aggregation") AggregateType aggregation);
+    @GetMapping("/aggregate/trade")
+    ResponseEntity<List<TradesAggregated>> trades(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
+                                                  @ApiParam(name = "from", value = "Start date for aggregation") @RequestParam("from") String from,
+                                                  @ApiParam(name = "until", value = "End date for aggregation") @RequestParam("until") String until);
 }

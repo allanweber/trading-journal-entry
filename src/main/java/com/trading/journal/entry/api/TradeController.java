@@ -3,9 +3,7 @@ package com.trading.journal.entry.api;
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.trade.*;
-import com.trading.journal.entry.entries.trade.aggregate.AggregateTrade;
-import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
-import com.trading.journal.entry.entries.trade.aggregate.AggregatedResult;
+import com.trading.journal.entry.entries.trade.aggregate.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -22,6 +20,8 @@ import static org.springframework.http.ResponseEntity.ok;
 public class TradeController implements TradeApi {
 
     private final TradeService tradeService;
+
+    private final AggregateService aggregateService;
 
     @Override
     public ResponseEntity<Entry> open(AccessTokenInfo accessTokenInfo, String journalId, Trade trade) {
@@ -55,9 +55,16 @@ public class TradeController implements TradeApi {
     }
 
     @Override
-    public ResponseEntity<AggregatedResult> symbols(AccessTokenInfo accessTokenInfo, String journalId, AggregateType aggregation) {
-        AggregateTrade aggregateTrade = AggregateTrade.builder().aggregateType(aggregation).build();
-        AggregatedResult result = tradeService.aggregate(accessTokenInfo, journalId, aggregateTrade);
-        return ok(result);
+    public ResponseEntity<PeriodAggregatedResult> time(AccessTokenInfo accessTokenInfo, String journalId, AggregateType aggregation, Long page, Long size) {
+        AggregateTrade aggregateTrade = new AggregateTrade(aggregation, page, size);
+        PeriodAggregatedResult periods = aggregateService.aggregatePeriod(accessTokenInfo, journalId, aggregateTrade);
+        return ok(periods);
+    }
+
+    @Override
+    public ResponseEntity<List<TradesAggregated>> trades(AccessTokenInfo accessTokenInfo, String journalId, String from, String until) {
+        AggregateTrade aggregateTrade = new AggregateTrade(from, until);
+        List<TradesAggregated> trades = aggregateService.aggregateTrades(accessTokenInfo, journalId, aggregateTrade);
+        return ok(trades);
     }
 }
