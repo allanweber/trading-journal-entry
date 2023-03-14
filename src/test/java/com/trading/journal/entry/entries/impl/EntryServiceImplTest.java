@@ -10,7 +10,6 @@ import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.data.Filter;
 import com.trading.journal.entry.queries.data.FilterOperation;
-import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -66,40 +65,6 @@ class EntryServiceImplTest {
     @BeforeAll
     static void setUp() {
         collectionName = new CollectionName(ACCESS_TOKEN, "my-journal");
-    }
-
-    @DisplayName("Query entries from a journal")
-    @Test
-    void query() {
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-
-        PageableRequest request = PageableRequest.builder().page(1).build();
-
-        Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
-        when(repository.findAll(collectionName, request)).thenReturn(page);
-
-        PageResponse<Entry> response = entryService.query(ACCESS_TOKEN, JOURNAL_ID, request);
-        assertThat(response.getItems()).isNotEmpty();
-        assertThat(response.getTotalItems()).isPositive();
-    }
-
-    @DisplayName("Query entries from a journal with sort")
-    @Test
-    void queryWithSort() {
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-
-        PageableRequest request = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by("date").ascending())
-                .build();
-
-        Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
-        when(repository.findAll(collectionName, request)).thenReturn(page);
-
-        PageResponse<Entry> response = entryService.query(ACCESS_TOKEN, JOURNAL_ID, request);
-        assertThat(response.getItems()).isNotEmpty();
-        assertThat(response.getTotalItems()).isPositive();
     }
 
     @DisplayName("Get all entries with no filter")
