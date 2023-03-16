@@ -43,5 +43,10 @@ public class StrategyServiceImpl implements StrategyService {
         Strategy strategy = getById(accessToken, strategyId)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Strategy not found"));
         strategyRepository.delete(collectionName, strategy);
+
+        boolean hasItems = strategyRepository.hasItems(collectionName);
+        if (!hasItems) {
+            strategyRepository.drop(collectionName);
+        }
     }
 }

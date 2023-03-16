@@ -21,8 +21,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 class StrategyServiceImplTest {
@@ -92,8 +91,10 @@ class StrategyServiceImplTest {
         String id = "1";
         Strategy strategy = Strategy.builder().id("1").name("ST1").build();
         when(strategyRepository.getById(collectionName, id)).thenReturn(Optional.of(strategy));
+        when(strategyRepository.hasItems(collectionName)).thenReturn(false);
         strategyService.delete(ACCESS_TOKEN, id);
         verify(strategyRepository).delete(collectionName, strategy);
+        verify(strategyRepository).drop(collectionName);
     }
 
     @DisplayName("Delete strategy by id not found, throw an exception")
@@ -105,5 +106,8 @@ class StrategyServiceImplTest {
         ApplicationException exception = assertThrows(ApplicationException.class, () -> strategyService.delete(ACCESS_TOKEN, id));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Strategy not found");
+
+        verify(strategyRepository, never()).delete(any(), any());
+        verify(strategyRepository, never()).drop(any());
     }
 }

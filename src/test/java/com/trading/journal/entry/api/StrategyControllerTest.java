@@ -260,7 +260,7 @@ class StrategyControllerTest {
                 .value(response -> assertThat(response.get("error")).isEqualTo("Strategy not found"));
     }
 
-    @DisplayName("Delete strategy by Id")
+    @DisplayName("Delete strategy by Id, last strategy drop the collection")
     @Test
     void delete() {
         Strategy strategy = mongoTemplate.save(Strategy.builder().name("strategy-1").build(), strategyCollection);
@@ -276,8 +276,31 @@ class StrategyControllerTest {
                 .expectStatus()
                 .isOk();
 
+        boolean collectionExists = mongoTemplate.collectionExists(strategyCollection);
+        assertThat(collectionExists).isFalse();
+    }
+
+    @DisplayName("Delete strategy by Id, but it is not last strategy do not drop the collection")
+    @Test
+    void deleteNoDrop() {
+        Strategy strategy = mongoTemplate.save(Strategy.builder().name("strategy-1").build(), strategyCollection);
+        Strategy strategy2 = mongoTemplate.save(Strategy.builder().name("strategy-2").build(), strategyCollection);
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/strategies")
+                        .pathSegment("{strategy-id}")
+                        .build(strategy.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        boolean collectionExists = mongoTemplate.collectionExists(strategyCollection);
+        assertThat(collectionExists).isTrue();
         List<Strategy> all = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(all).hasSize(0);
+        assertThat(all).hasSize(1);
     }
 
     @DisplayName("Delete strategy by Id not found")
