@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.GraphType;
+import com.trading.journal.entry.strategy.Strategy;
 import lombok.*;
 import org.springframework.format.annotation.NumberFormat;
 
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -56,4 +58,6 @@ public class Trade {
     private BigDecimal costs;
 
     private String notes;
+
+    private List<Strategy> strategies;
 }

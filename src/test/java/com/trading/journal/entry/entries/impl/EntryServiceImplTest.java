@@ -11,6 +11,7 @@ import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.data.Filter;
 import com.trading.journal.entry.queries.data.FilterOperation;
 import com.trading.journal.entry.queries.data.PageableRequest;
+import com.trading.journal.entry.strategy.Strategy;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -58,6 +59,9 @@ class EntryServiceImplTest {
 
     @Mock
     BalanceService balanceService;
+
+    @Mock
+    EntryStrategyService entryStrategyService;
 
     @InjectMocks
     EntryServiceImpl entryService;
@@ -362,6 +366,54 @@ class EntryServiceImplTest {
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
+        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
+
+        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        assertThat(entry).isNotNull();
+
+        verify(balanceService).calculateCurrentBalance(any(), anyString());
+    }
+
+    @DisplayName("Save a TRADE entry with a new strategy")
+    @Test
+    void saveTradeWithST() {
+        Entry toSave = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .type(EntryType.TRADE)
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .profitPrice(BigDecimal.valueOf(240))
+                .lossPrice(BigDecimal.valueOf(180))
+                .exitPrice(BigDecimal.valueOf(240))
+                .costs(BigDecimal.valueOf(5.59))
+                .strategies(asList(Strategy.builder().name("ST1").build(), Strategy.builder().name("ST2").build()))
+                .build();
+
+        Entry calculated = Entry.builder()
+                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
+                .type(EntryType.TRADE)
+                .direction(EntryDirection.LONG)
+                .price(BigDecimal.valueOf(200))
+                .size(BigDecimal.valueOf(2))
+                .profitPrice(BigDecimal.valueOf(240))
+                .lossPrice(BigDecimal.valueOf(180))
+                .accountRisked(BigDecimal.valueOf(0.0400).setScale(4, RoundingMode.HALF_EVEN))
+                .plannedRR(BigDecimal.valueOf(2.00).setScale(2, RoundingMode.HALF_EVEN))
+                .exitPrice(BigDecimal.valueOf(240))
+                .costs(BigDecimal.valueOf(5.59))
+                .grossResult(BigDecimal.valueOf(80.00).setScale(2, RoundingMode.HALF_EVEN))
+                .netResult(BigDecimal.valueOf(74.41))
+                .accountChange(BigDecimal.valueOf(0.0744).setScale(4, RoundingMode.HALF_EVEN))
+                .accountBalance(BigDecimal.valueOf(1074.41).setScale(2, RoundingMode.HALF_EVEN))
+                .strategies(asList(Strategy.builder().id("1").name("ST1").build(), Strategy.builder().id("2").name("ST2").build()))
+                .build();
+
+        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+
+        when(entryStrategyService.saveStrategy(ACCESS_TOKEN, toSave)).thenReturn(asList(Strategy.builder().id("1").name("ST1").build(), Strategy.builder().id("2").name("ST2").build()));
         when(repository.save(collectionName, calculated)).thenReturn(calculated);
         when(repository.findAll(eq(collectionName), any(PageableRequest.class))).thenReturn(new PageImpl<>(emptyList()));
 

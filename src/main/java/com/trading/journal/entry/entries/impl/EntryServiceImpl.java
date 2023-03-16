@@ -10,6 +10,7 @@ import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.data.Filter;
 import com.trading.journal.entry.queries.data.PageableRequest;
+import com.trading.journal.entry.strategy.Strategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -37,6 +38,8 @@ public class EntryServiceImpl implements EntryService {
 
     private final BalanceService balanceService;
 
+    private final EntryStrategyService entryStrategyService;
+
     @Override
     public List<Entry> getAll(GetAll all) {
         CollectionName collectionName = collectionName().apply(all.getAccessTokenInfo(), all.getJournalId());
@@ -55,9 +58,13 @@ public class EntryServiceImpl implements EntryService {
     public Entry save(AccessTokenInfo accessToken, String journalId, Entry entry) {
         Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
 
+        List<Strategy> strategies = entryStrategyService.saveStrategy(accessToken, entry);
+        if(!strategies.isEmpty()){
+            entry.setStrategies(strategies);
+        }
+
         CalculateEntry calculateEntry = new CalculateEntry(entry, balance.getAccountBalance());
         Entry calculated = calculateEntry.calculate();
-
         CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
         Entry saved = repository.save(entriesCollection, calculated);
         if (saved.isFinished()) {
