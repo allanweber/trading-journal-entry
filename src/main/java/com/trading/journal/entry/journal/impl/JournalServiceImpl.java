@@ -7,10 +7,10 @@ import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalRepository;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.Filter;
-import com.trading.journal.entry.queries.data.FilterOperation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -19,8 +19,6 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
-
-import static java.util.Arrays.asList;
 
 @RequiredArgsConstructor
 @Service
@@ -85,11 +83,8 @@ public class JournalServiceImpl implements JournalService {
     }
 
     private boolean hasSameName(AccessTokenInfo accessToken, Journal journal) {
-        List<Filter> filters = asList(
-                Filter.builder().field("name").operation(FilterOperation.EQUAL).value(journal.getName()).build(),
-                Filter.builder().field("id").operation(FilterOperation.NOT_EQUAL).value(journal.getId()).build()
-        );
-        List<Journal> query = journalRepository.query(new CollectionName(accessToken), filters);
-        return !query.isEmpty();
+        Query query = Query.query(Criteria.where("name").is(journal.getName()).and("id").ne(journal.getId()));
+        List<Journal> journals = journalRepository.find(new CollectionName(accessToken), query);
+        return !journals.isEmpty();
     }
 }

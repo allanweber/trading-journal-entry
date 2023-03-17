@@ -24,7 +24,8 @@ public interface EntryApi {
                                        @ApiParam(name = "status", value = "OPEN or CLOSED") @RequestParam(value = "status", required = false) EntryStatus status,
                                        @ApiParam(name = "from", value = "2022-01-01 00:00:00") @RequestParam(value = "from", required = false) String from,
                                        @ApiParam(name = "direction", value = "LONG or SHORT") @RequestParam(value = "direction", required = false) EntryDirection direction,
-                                       @ApiParam(name = "result", value = "WIN or LOSE") @RequestParam(value = "result", required = false) EntryResult result);
+                                       @ApiParam(name = "result", value = "WIN or LOSE") @RequestParam(value = "result", required = false) EntryResult result,
+                                       @ApiParam(name = "strategies", value = "List of Strategies Id") @RequestParam(value = "strategies", required = false) List<String> strategies);
 
     @ApiOperation(notes = "Delete entry", value = "Delete entry")
     @ApiResponses(@ApiResponse(code = 200, message = "Entry deleted"))

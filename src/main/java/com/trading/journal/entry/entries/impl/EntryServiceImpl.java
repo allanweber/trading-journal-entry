@@ -8,13 +8,13 @@ import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.Filter;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import com.trading.journal.entry.strategy.Strategy;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -41,16 +41,15 @@ public class EntryServiceImpl implements EntryService {
     private final EntryStrategyService entryStrategyService;
 
     @Override
-    public List<Entry> getAll(GetAll all) {
-        CollectionName collectionName = collectionName().apply(all.getAccessTokenInfo(), all.getJournalId());
-        List<Filter> filters = all.filterAll();
+    public List<Entry> getAll(EntriesQuery entriesQuery) {
+        CollectionName collectionName = collectionName().apply(entriesQuery.getAccessTokenInfo(), entriesQuery.getJournalId());
         PageableRequest pageableRequest = PageableRequest.builder()
                 .page(0)
                 .size(Integer.MAX_VALUE)
-                .filters(filters)
-                .sort(Sort.by(all.sortBy()).ascending())
+                .sort(Sort.by(entriesQuery.sortBy()).ascending())
                 .build();
-        Page<Entry> entries = repository.findAll(collectionName, pageableRequest);
+        Query query = entriesQuery.buildQuery();
+        Page<Entry> entries = repository.findAll(collectionName, pageableRequest, query);
         return entries.stream().toList();
     }
 

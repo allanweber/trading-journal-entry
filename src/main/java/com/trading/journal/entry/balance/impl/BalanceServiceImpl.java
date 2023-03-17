@@ -9,18 +9,17 @@ import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.Filter;
-import com.trading.journal.entry.queries.data.FilterOperation;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static java.util.Optional.ofNullable;
 
 @RequiredArgsConstructor
@@ -114,11 +113,9 @@ public class BalanceServiceImpl implements BalanceService {
                 .page(0)
                 .size(Integer.MAX_VALUE)
                 .sort(Sort.by("date").ascending())
-                .filters(singletonList(
-                        Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("false").build()
-                ))
                 .build();
-        List<Entry> openedEntries = entryRepository.findAll(collectionName, pageableRequest).get().toList();
+        Query query = new Query(Criteria.where("netResult").exists(false));
+        List<Entry> openedEntries = entryRepository.findAll(collectionName, pageableRequest, query).get().toList();
 
         BigDecimal openedPositions = openedEntries.stream().map(entry -> entry.getPrice().multiply(entry.getSize()))
                 .reduce(BigDecimal::add)

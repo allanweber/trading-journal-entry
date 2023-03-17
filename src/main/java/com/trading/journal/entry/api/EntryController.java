@@ -18,8 +18,8 @@ public class EntryController implements EntryApi {
     private final EntryService entryService;
 
     @Override
-    public ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, String journalId, String symbol, EntryType type, EntryStatus status, String from, EntryDirection direction, EntryResult result) {
-        GetAll getAll = GetAll.builder()
+    public ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, String journalId, String symbol, EntryType type, EntryStatus status, String from, EntryDirection direction, EntryResult result, List<String> strategies) {
+        EntriesQuery entriesQuery = EntriesQuery.builder()
                 .accessTokenInfo(accessTokenInfo)
                 .journalId(journalId)
                 .symbol(symbol)
@@ -28,8 +28,9 @@ public class EntryController implements EntryApi {
                 .from(from)
                 .direction(direction)
                 .result(result)
+                .strategyIds(strategies)
                 .build();
-        List<Entry> entries = entryService.getAll(getAll);
+        List<Entry> entries = entryService.getAll(entriesQuery);
         return ok(entries);
     }
 

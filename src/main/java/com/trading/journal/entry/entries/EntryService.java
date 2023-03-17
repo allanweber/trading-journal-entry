@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface EntryService {
 
-    List<Entry> getAll(GetAll all);
+    List<Entry> getAll(EntriesQuery all);
 
     Entry save(AccessTokenInfo accessToken, String journalId, Entry entry);
 
