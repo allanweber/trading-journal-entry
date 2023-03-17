@@ -4,6 +4,7 @@ import com.allanweber.jwttoken.helper.DateHelper;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.trading.journal.entry.strategy.Strategy;
 import lombok.*;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
@@ -13,6 +14,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 
 @Document(collection = "entries")
@@ -75,6 +77,12 @@ public class Entry {
     private String screenshotAfter;
 
     private String notes;
+
+    @Setter
+    private List<Strategy> strategies;
+
+    @JsonIgnore
+    private List<String> strategyIds;
 
     /**
      * Calculated fields

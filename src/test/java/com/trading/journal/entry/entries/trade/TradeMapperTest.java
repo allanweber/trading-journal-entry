@@ -4,6 +4,7 @@ import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.entries.GraphType;
+import com.trading.journal.entry.strategy.Strategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
@@ -11,6 +12,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class TradeMapperTest {
@@ -60,6 +62,52 @@ class TradeMapperTest {
         assertThat(entry.isFinished()).isFalse();
     }
 
+    @DisplayName("Map Trade to Entry when Creating Entry with strategy")
+    @Test
+    void createWithStrategy() {
+        Trade trade = Trade.builder()
+                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
+                .price(BigDecimal.valueOf(200.21))
+                .symbol("MSFT")
+                .direction(EntryDirection.LONG)
+                .size(BigDecimal.valueOf(2.56))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure("1")
+                .profitPrice(BigDecimal.valueOf(250.12))
+                .lossPrice(BigDecimal.valueOf(180.23))
+                .costs(BigDecimal.valueOf(1.25))
+                .notes("some notes")
+                .strategyIds(asList("1", "2"))
+                .build();
+
+        Entry entry = TradeMapper.INSTANCE.toEntry(trade);
+
+        assertThat(entry.getId()).isNull();
+        assertThat(entry.getType()).isEqualTo(EntryType.TRADE);
+        assertThat(entry.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 20, 15, 30, 50));
+        assertThat(entry.getPrice()).isEqualTo(BigDecimal.valueOf(200.21));
+        assertThat(entry.getSymbol()).isEqualTo("MSFT");
+        assertThat(entry.getDirection()).isEqualTo(EntryDirection.LONG);
+        assertThat(entry.getSize()).isEqualTo(BigDecimal.valueOf(2.56));
+        assertThat(entry.getGraphType()).isEqualTo(GraphType.CANDLESTICK);
+        assertThat(entry.getGraphMeasure()).isEqualTo("1");
+        assertThat(entry.getProfitPrice()).isEqualTo(BigDecimal.valueOf(250.12));
+        assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
+        assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
+        assertThat(entry.getNotes()).isEqualTo("some notes");
+        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1","2");
+        assertThat(entry.getExitDate()).isNull();
+        assertThat(entry.getExitPrice()).isNull();
+        assertThat(entry.getAccountRisked()).isNull();
+        assertThat(entry.getPlannedRR()).isNull();
+        assertThat(entry.getGrossResult()).isNull();
+        assertThat(entry.getNetResult()).isNull();
+        assertThat(entry.getAccountChange()).isNull();
+        assertThat(entry.getAccountBalance()).isNull();
+        assertThat(entry.getScreenshotBefore()).isNull();
+        assertThat(entry.getScreenshotAfter()).isNull();
+        assertThat(entry.isFinished()).isFalse();
+    }
 
     @DisplayName("Map Trade to Entry when Updating Entry")
     @Test
@@ -107,6 +155,54 @@ class TradeMapperTest {
         assertThat(entry.isFinished()).isFalse();
     }
 
+    @DisplayName("Map Trade to Entry when Updating Entry with strategy")
+    @Test
+    void updateWithStrategy() {
+        Trade trade = Trade.builder()
+                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
+                .price(BigDecimal.valueOf(200.21))
+                .symbol("MSFT")
+                .direction(EntryDirection.LONG)
+                .size(BigDecimal.valueOf(2.56))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure("1")
+                .profitPrice(BigDecimal.valueOf(250.12))
+                .lossPrice(BigDecimal.valueOf(180.23))
+                .costs(BigDecimal.valueOf(1.25))
+                .notes("some notes")
+                .strategyIds(asList("1", "2"))
+                .build();
+
+        String id = UUID.randomUUID().toString();
+        Entry entry = TradeMapper.INSTANCE.toEntry(trade, id);
+
+        assertThat(entry.getId()).isEqualTo(id);
+        assertThat(entry.getType()).isEqualTo(EntryType.TRADE);
+        assertThat(entry.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 20, 15, 30, 50));
+        assertThat(entry.getPrice()).isEqualTo(BigDecimal.valueOf(200.21));
+        assertThat(entry.getSymbol()).isEqualTo("MSFT");
+        assertThat(entry.getDirection()).isEqualTo(EntryDirection.LONG);
+        assertThat(entry.getSize()).isEqualTo(BigDecimal.valueOf(2.56));
+        assertThat(entry.getGraphType()).isEqualTo(GraphType.CANDLESTICK);
+        assertThat(entry.getGraphMeasure()).isEqualTo("1");
+        assertThat(entry.getProfitPrice()).isEqualTo(BigDecimal.valueOf(250.12));
+        assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
+        assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
+        assertThat(entry.getNotes()).isEqualTo("some notes");
+        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1","2");
+        assertThat(entry.getExitDate()).isNull();
+        assertThat(entry.getExitPrice()).isNull();
+        assertThat(entry.getAccountRisked()).isNull();
+        assertThat(entry.getPlannedRR()).isNull();
+        assertThat(entry.getGrossResult()).isNull();
+        assertThat(entry.getNetResult()).isNull();
+        assertThat(entry.getAccountChange()).isNull();
+        assertThat(entry.getAccountBalance()).isNull();
+        assertThat(entry.getScreenshotBefore()).isNull();
+        assertThat(entry.getScreenshotAfter()).isNull();
+        assertThat(entry.isFinished()).isFalse();
+    }
+
     @DisplayName("Map Trade to Entry when Closing Entry")
     @Test
     void close() {
@@ -130,6 +226,57 @@ class TradeMapperTest {
                 .exitDate(LocalDateTime.of(2022, 9, 21, 15, 30, 50))
                 .build();
 
+        Entry entry = TradeMapper.INSTANCE.toEntryFromClose(trade, closeTrade);
+
+        assertThat(entry.getId()).isEqualTo(trade.getId());
+        assertThat(entry.getType()).isEqualTo(EntryType.TRADE);
+        assertThat(entry.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 20, 15, 30, 50));
+        assertThat(entry.getPrice()).isEqualTo(BigDecimal.valueOf(200.21));
+        assertThat(entry.getSymbol()).isEqualTo("MSFT");
+        assertThat(entry.getDirection()).isEqualTo(EntryDirection.LONG);
+        assertThat(entry.getSize()).isEqualTo(BigDecimal.valueOf(2.56));
+        assertThat(entry.getGraphType()).isEqualTo(GraphType.CANDLESTICK);
+        assertThat(entry.getGraphMeasure()).isEqualTo("1");
+        assertThat(entry.getProfitPrice()).isEqualTo(BigDecimal.valueOf(250.12));
+        assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
+        assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
+        assertThat(entry.getNotes()).isEqualTo("some notes");
+        assertThat(entry.getExitDate()).isEqualTo(LocalDateTime.of(2022, 9, 21, 15, 30, 50));
+        assertThat(entry.getExitPrice()).isEqualTo(BigDecimal.valueOf(250.31));
+        assertThat(entry.getAccountRisked()).isNull();
+        assertThat(entry.getPlannedRR()).isNull();
+        assertThat(entry.getGrossResult()).isNull();
+        assertThat(entry.getNetResult()).isNull();
+        assertThat(entry.getAccountChange()).isNull();
+        assertThat(entry.getAccountBalance()).isNull();
+        assertThat(entry.getScreenshotBefore()).isNull();
+        assertThat(entry.getScreenshotAfter()).isNull();
+        assertThat(entry.isFinished()).isFalse();
+    }
+
+    @DisplayName("Map Trade to Entry when Closing Entry with strategy")
+    @Test
+    void closeWithStrategy() {
+        Entry trade = Entry.builder()
+                .id(UUID.randomUUID().toString())
+                .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
+                .price(BigDecimal.valueOf(200.21))
+                .symbol("MSFT")
+                .direction(EntryDirection.LONG)
+                .size(BigDecimal.valueOf(2.56))
+                .graphType(GraphType.CANDLESTICK)
+                .graphMeasure("1")
+                .profitPrice(BigDecimal.valueOf(250.12))
+                .lossPrice(BigDecimal.valueOf(180.23))
+                .costs(BigDecimal.valueOf(1.25))
+                .notes("some notes")
+                .strategies(asList(Strategy.builder().id("1").name("ST1").build(), Strategy.builder().id("2").name("ST2").build()))
+                .build();
+
+        CloseTrade closeTrade = CloseTrade.builder()
+                .exitPrice(BigDecimal.valueOf(250.31))
+                .exitDate(LocalDateTime.of(2022, 9, 21, 15, 30, 50))
+                .build();
 
         Entry entry = TradeMapper.INSTANCE.toEntryFromClose(trade, closeTrade);
 
@@ -146,6 +293,8 @@ class TradeMapperTest {
         assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
         assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
         assertThat(entry.getNotes()).isEqualTo("some notes");
+        assertThat(entry.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("1","2");
+        assertThat(entry.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder("ST1","ST2");
         assertThat(entry.getExitDate()).isEqualTo(LocalDateTime.of(2022, 9, 21, 15, 30, 50));
         assertThat(entry.getExitPrice()).isEqualTo(BigDecimal.valueOf(250.31));
         assertThat(entry.getAccountRisked()).isNull();

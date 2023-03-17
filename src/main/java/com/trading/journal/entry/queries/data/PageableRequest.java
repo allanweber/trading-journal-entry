@@ -5,8 +5,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
-import java.util.List;
-
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -22,8 +20,6 @@ public class PageableRequest {
 
     @Builder.Default
     private Sort sort = Sort.by(ID_COLUMN).ascending();
-
-    private List<Filter> filters;
 
     public Pageable pageable() {
         return PageRequest.of(page, size, sort);

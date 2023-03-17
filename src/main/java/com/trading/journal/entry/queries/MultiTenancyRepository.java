@@ -1,6 +1,5 @@
 package com.trading.journal.entry.queries;
 
-import com.trading.journal.entry.queries.data.Filter;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -13,9 +12,9 @@ import java.util.Optional;
 @NoRepositoryBean
 public interface MultiTenancyRepository<T, I extends Serializable> extends MongoRepository<T, I> {
 
-    List<T> getAll(CollectionName collectionName);
+    List<T> find(CollectionName collectionName, Query query);
 
-    List<T> query(CollectionName collectionName, List<Filter> filters);
+    List<T> getAll(CollectionName collectionName);
 
     Optional<T> getById(CollectionName collectionName, I id);
 

@@ -7,8 +7,6 @@ import com.trading.journal.entry.journal.Currency;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalRepository;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.Filter;
-import com.trading.journal.entry.queries.data.FilterOperation;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,6 +14,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -25,7 +25,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -97,11 +96,8 @@ class JournalServiceImplTest {
     void saveSameName() {
         Journal to_save = buildJournal(null, "to save", 1);
 
-        List<Filter> filters = asList(
-                Filter.builder().field("name").operation(FilterOperation.EQUAL).value("to save").build(),
-                Filter.builder().field("id").operation(FilterOperation.NOT_EQUAL).value(null).build()
-        );
-        when(journalRepository.query(collectionName, filters)).thenReturn(singletonList(buildJournal("1", "journal", 1)));
+        Query query = Query.query(Criteria.where("name").is("to save").and("id").ne(null));
+        when(journalRepository.find(collectionName, query)).thenReturn(singletonList(buildJournal("1", "journal", 1)));
 
         ApplicationException exception = assertThrows(ApplicationException.class, () -> journalService.save(accessToken, to_save));
 

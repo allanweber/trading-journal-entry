@@ -8,8 +8,6 @@ import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.Filter;
-import com.trading.journal.entry.queries.data.FilterOperation;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
@@ -20,6 +18,8 @@ import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
+import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.math.BigDecimal;
@@ -29,7 +29,6 @@ import java.util.List;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -223,7 +222,7 @@ class BalanceServiceImplTest {
 
         Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
 
-         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(15100.01));
+        assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(15100.01));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(142.45));
         assertThat(balance.getOpenedPositions()).isEqualTo(BigDecimal.valueOf(7785.85));
         assertThat(balance.getAvailable()).isEqualTo(BigDecimal.valueOf(7314.16));
@@ -240,7 +239,7 @@ class BalanceServiceImplTest {
         Journal journal = Journal.builder()
                 .name("journal")
                 .startBalance(startBalance)
-                .currentBalance( Balance.builder()
+                .currentBalance(Balance.builder()
                         .accountBalance(startBalance)
                         .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
                         .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
@@ -256,9 +255,6 @@ class BalanceServiceImplTest {
                 .page(0)
                 .size(Integer.MAX_VALUE)
                 .sort(Sort.by("date").ascending())
-                .filters(singletonList(
-                        Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("false").build()
-                ))
                 .build();
 
         List<Entry> entries = asList(
@@ -270,7 +266,8 @@ class BalanceServiceImplTest {
         );
 
         Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
-        when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
+        Query query = new Query(Criteria.where("netResult").exists(false));
+        when(entryRepository.findAll(collectionName, pageableRequest, query)).thenReturn(page);
 
         Balance balance = balanceService.calculateAvailableBalance(accessToken, journalId);
 
@@ -291,7 +288,7 @@ class BalanceServiceImplTest {
         Journal journal = Journal.builder()
                 .name("journal")
                 .startBalance(startBalance)
-                .currentBalance( Balance.builder()
+                .currentBalance(Balance.builder()
                         .accountBalance(startBalance)
                         .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
                         .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
@@ -307,9 +304,6 @@ class BalanceServiceImplTest {
                 .page(0)
                 .size(Integer.MAX_VALUE)
                 .sort(Sort.by("date").ascending())
-                .filters(singletonList(
-                        Filter.builder().field("netResult").operation(FilterOperation.EXISTS).value("false").build()
-                ))
                 .build();
 
         List<Entry> entries = asList(
@@ -321,7 +315,8 @@ class BalanceServiceImplTest {
         );
 
         Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
-        when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
+        Query query = new Query(Criteria.where("netResult").exists(false));
+        when(entryRepository.findAll(collectionName, pageableRequest, query)).thenReturn(page);
 
         Balance balance = balanceService.calculateAvailableBalance(accessToken, journalId);
 

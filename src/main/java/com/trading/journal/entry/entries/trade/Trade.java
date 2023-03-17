@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @NoArgsConstructor
 @AllArgsConstructor
@@ -56,4 +57,6 @@ public class Trade {
     private BigDecimal costs;
 
     private String notes;
+
+    private List<String> strategyIds;
 }
