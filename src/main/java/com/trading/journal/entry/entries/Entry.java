@@ -7,7 +7,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.trading.journal.entry.strategy.Strategy;
 import lombok.*;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.format.annotation.NumberFormat;
 
@@ -79,9 +78,11 @@ public class Entry {
 
     private String notes;
 
-    @DBRef
     @Setter
     private List<Strategy> strategies;
+
+    @JsonIgnore
+    private List<String> strategyIds;
 
     /**
      * Calculated fields

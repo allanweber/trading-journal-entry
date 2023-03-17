@@ -77,7 +77,7 @@ class TradeMapperTest {
                 .lossPrice(BigDecimal.valueOf(180.23))
                 .costs(BigDecimal.valueOf(1.25))
                 .notes("some notes")
-                .strategies(asList(Strategy.builder().id("1").name("ST1").build(), Strategy.builder().id("2").name("ST2").build()))
+                .strategyIds(asList("1", "2"))
                 .build();
 
         Entry entry = TradeMapper.INSTANCE.toEntry(trade);
@@ -95,8 +95,7 @@ class TradeMapperTest {
         assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
         assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
         assertThat(entry.getNotes()).isEqualTo("some notes");
-        assertThat(entry.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("1","2");
-        assertThat(entry.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder("ST1","ST2");
+        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1","2");
         assertThat(entry.getExitDate()).isNull();
         assertThat(entry.getExitPrice()).isNull();
         assertThat(entry.getAccountRisked()).isNull();
@@ -171,7 +170,7 @@ class TradeMapperTest {
                 .lossPrice(BigDecimal.valueOf(180.23))
                 .costs(BigDecimal.valueOf(1.25))
                 .notes("some notes")
-                .strategies(asList(Strategy.builder().id("1").name("ST1").build(), Strategy.builder().id("2").name("ST2").build()))
+                .strategyIds(asList("1", "2"))
                 .build();
 
         String id = UUID.randomUUID().toString();
@@ -190,8 +189,7 @@ class TradeMapperTest {
         assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
         assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
         assertThat(entry.getNotes()).isEqualTo("some notes");
-        assertThat(entry.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("1","2");
-        assertThat(entry.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder("ST1","ST2");
+        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1","2");
         assertThat(entry.getExitDate()).isNull();
         assertThat(entry.getExitPrice()).isNull();
         assertThat(entry.getAccountRisked()).isNull();

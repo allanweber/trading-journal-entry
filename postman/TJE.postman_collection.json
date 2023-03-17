@@ -546,7 +546,7 @@
 			"name": "Entries",
 			"item": [
 				{
-					"name": "Create a Trade Entry MSFT LONG 3x 244,01 10 Days ago",
+					"name": "Create a Trade Entry MSFT LONG 3x 244,01 10 Days ago Copy",
 					"event": [
 						{
 							"listen": "prerequest",
@@ -3085,6 +3085,1386 @@
 			]
 		},
 		{
+			"name": "Strategies",
+			"item": [
+				{
+					"name": "Create a Journal",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"var moment = require('moment');\r",
+									"pm.collectionVariables.set(\"journal-date\", moment().format(\"YYYY-MM-DD HH:mm:ss\"));"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"shares-journal\");\r",
+									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
+									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"journal-id\", response.id);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\": \"shares-journal\",\r\n\t\"startBalance\": 15000.00,\r\n\t\"startJournal\": \"{{journal-date}}\",\r\n\t\"currency\":\"DOLLAR\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Strategy 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"strategy-1\");\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"strategy-1\", response.id);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\": \"strategy-1\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/strategies",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Strategy 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"strategy-2-new\");\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"strategy-2\", response.id);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\": \"strategy-2-new\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/strategies",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Strategies return 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update Strategy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).to.equal(pm.collectionVariables.get(\"strategy-2\"));\r",
+									"\tpm.expect(response.name).to.equal(\"strategy-2\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"id\":\"{{strategy-2}}\",\r\n\t\"name\": \"strategy-2\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/strategies",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Strategy 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).to.equal(pm.collectionVariables.get(\"strategy-1\"));\r",
+									"\tpm.expect(response.name).to.equal(\"strategy-1\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies/{{strategy-1}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies",
+								"{{strategy-1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Strategy 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies/{{strategy-2}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies",
+								"{{strategy-2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get Strategy not found",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"  pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.error).to.equal(\"Strategy not found\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies/{{strategy-2}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies",
+								"{{strategy-2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Strategy not found",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 404\", function () {\r",
+									"  pm.response.to.have.status(404);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.error).to.equal(\"Strategy not found\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies/{{strategy-2}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies",
+								"{{strategy-2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Strategies return 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a entry with strategy 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.collectionVariables.set(\"entry1-id\", response.id);\r",
+									"\r",
+									"\tpm.expect(response.strategies.length).to.eql(1);\r",
+									"\tpm.expect(response.strategies[0].id).to.eql(pm.collectionVariables.get(\"strategy-1\"));\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create Strategy 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.expect(response.name).to.equal(\"strategy-2-new\");\r",
+									"\r",
+									"\tpm.collectionVariables.set(\"strategy-2\", response.id);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"name\": \"strategy-2-new\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/strategies",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a entry with Strategy 1 and 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.strategies.length).to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\", \"{{strategy-2}}\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a entry with Strategy 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 201\", function () {\r",
+									"  pm.response.to.have.status(201);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.strategies.length).to.eql(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategyIds\" :[\"{{strategy-2}}\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update first entry with two  strategies",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.strategies.length).to.eql(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\", \"{{strategy-2}}\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/{{entry1-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade",
+								"{{entry1-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create a entry with one invalid strategy id return error",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 400\", function () {\r",
+									"  pm.response.to.have.status(400);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.error).to.equal(\"Invalid Strategy 6413640af797e679b86feb18\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"IBOV\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\",\"6413640af797e679b86feb18\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all Strategies return 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update first entry with only strategy 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.strategies.length).to.eql(1);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\"]\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/{{entry1-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade",
+								"{{entry1-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All entries by Strategy 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(2);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries?strategies={{strategy-1}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries"
+							],
+							"query": [
+								{
+									"key": "strategies",
+									"value": "{{strategy-1}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All entries by Strategy 1 and 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(3);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries?strategies={{strategy-1}}, {{strategy-2}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries"
+							],
+							"query": [
+								{
+									"key": "strategies",
+									"value": "{{strategy-1}}, {{strategy-2}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get All entries by invalid Strategy",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.length).to.equal(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries?strategies=123123132131",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries"
+							],
+							"query": [
+								{
+									"key": "strategies",
+									"value": "123123132131"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Strategy 1",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies/{{strategy-1}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies",
+								"{{strategy-1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Strategy 2",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies/{{strategy-2}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies",
+								"{{strategy-2}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Journal",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
 			"name": "Clean Test",
 			"item": [
 				{
@@ -3306,14 +4686,6 @@
 			"value": ""
 		},
 		{
-			"key": "access-token",
-			"value": ""
-		},
-		{
-			"key": "refresh-token",
-			"value": ""
-		},
-		{
 			"key": "company-name",
 			"value": ""
 		},
@@ -3338,6 +4710,14 @@
 			"value": ""
 		},
 		{
+			"key": "access-token",
+			"value": ""
+		},
+		{
+			"key": "refresh-token",
+			"value": ""
+		},
+		{
 			"key": "journal-date",
 			"value": ""
 		},
@@ -3346,15 +4726,31 @@
 			"value": ""
 		},
 		{
+			"key": "strategy-1",
+			"value": ""
+		},
+		{
+			"key": "strategy-2",
+			"value": ""
+		},
+		{
+			"key": "entry1-id",
+			"value": ""
+		},
+		{
+			"key": "tenancy-id",
+			"value": ""
+		},
+		{
+			"key": "user-id",
+			"value": ""
+		},
+		{
 			"key": "entry1-graph",
 			"value": ""
 		},
 		{
 			"key": "entry1-measure",
-			"value": ""
-		},
-		{
-			"key": "entry1-id",
 			"value": ""
 		},
 		{
@@ -3403,14 +4799,6 @@
 		},
 		{
 			"key": "closedPositions",
-			"value": ""
-		},
-		{
-			"key": "tenancy-id",
-			"value": ""
-		},
-		{
-			"key": "user-id",
 			"value": ""
 		}
 	]

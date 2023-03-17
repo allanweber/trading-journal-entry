@@ -34,8 +34,6 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(initializers = MongoDbContainerInitializer.class)
 @WithCustomMockUser(tenancyName = "paging-tenancy")
 class StrategyControllerTest {
-    public static final AccessTokenInfo TOKEN_INFO = new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER"));
-
     private static String strategyCollection;
 
     @MockBean

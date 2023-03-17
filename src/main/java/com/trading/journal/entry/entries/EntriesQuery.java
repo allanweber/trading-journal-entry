@@ -18,6 +18,7 @@ import static com.trading.journal.entry.entries.EntryResult.LOSE;
 import static com.trading.journal.entry.entries.EntryResult.WIN;
 import static com.trading.journal.entry.entries.EntryStatus.CLOSED;
 import static com.trading.journal.entry.entries.EntryStatus.OPEN;
+import static java.util.Optional.ofNullable;
 
 @AllArgsConstructor
 @Getter
@@ -32,7 +33,7 @@ public class EntriesQuery {
     public static final String NET_RESULT = "netResult";
     public static final String DIRECTION = "direction";
 
-    private static final String STRATEGIES = "strategies.$id";
+    private static final String STRATEGIES = "strategyIds";
 
     private AccessTokenInfo accessTokenInfo;
 
@@ -92,6 +93,8 @@ public class EntriesQuery {
         boolean looseWithNoStatus = LOSE.equals(getResult()) && hasNoStatus();
         queryAppend(query, looseWithNoStatus, () -> Criteria.where(NET_RESULT).lt(BigDecimal.ZERO));
 
+        queryAppend(query, hasStrategyIds(), () -> Criteria.where(STRATEGIES).in(strategyIds));
+
         return query;
     }
 
@@ -123,5 +126,9 @@ public class EntriesQuery {
 
     private boolean hasDirection() {
         return direction != null;
+    }
+
+    private boolean hasStrategyIds() {
+        return ofNullable(strategyIds).map(list -> !list.isEmpty()).orElse(false);
     }
 }

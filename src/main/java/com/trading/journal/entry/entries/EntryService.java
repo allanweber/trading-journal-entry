@@ -9,9 +9,9 @@ public interface EntryService {
 
     List<Entry> getAll(EntriesQuery all);
 
-    Entry save(AccessTokenInfo accessToken, String journalId, Entry entry);
-
     Entry getById(AccessTokenInfo accessToken, String journalId, String entryId);
+
+    Entry save(AccessTokenInfo accessToken, String journalId, Entry entry);
 
     void delete(AccessTokenInfo accessToken, String journalId, String entryId);
 

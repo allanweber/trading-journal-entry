@@ -9,6 +9,7 @@ import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.journal.Journal;
+import com.trading.journal.entry.strategy.Strategy;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,8 +32,10 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -51,6 +54,8 @@ class EntryControllerTest {
 
     private static String entryCollection;
 
+    private static String strategyCollection;
+
     @MockBean
     JwtTokenReader tokenReader;
 
@@ -68,6 +73,7 @@ class EntryControllerTest {
 
         journalCollection = "PagingTenancy_journals";
         entryCollection = "PagingTenancy_JOURNAL-1_entries";
+        strategyCollection = "PagingTenancy_strategies";
 
         Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(100))
                 .currentBalance(
@@ -86,6 +92,7 @@ class EntryControllerTest {
     @AfterAll
     public static void shutDown(@Autowired MongoTemplate mongoTemplate) {
         mongoTemplate.dropCollection(journalCollection);
+        mongoTemplate.dropCollection(strategyCollection);
     }
 
     @AfterEach
@@ -418,6 +425,115 @@ class EntryControllerTest {
                     assertThat(response).hasSize(1);
                     assertThat(response).extracting(Entry::getSymbol).containsExactly("LOSE");
                 });
+    }
+
+    @DisplayName("Get Entries by strategies")
+    @Test
+    void strategies() {
+
+        Strategy strategy1 = mongoTemplate.save(Strategy.builder().name("ST1").build(), strategyCollection);
+        Strategy strategy2 = mongoTemplate.save(Strategy.builder().name("ST2").build(), strategyCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("TRADE_ST1")
+                        .direction(EntryDirection.LONG)
+                        .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(100))
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .strategyIds(singletonList(strategy1.getId()))
+                        .build(),
+                entryCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("TRADE_ST2")
+                        .direction(EntryDirection.SHORT)
+                        .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(-100))
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .strategyIds(singletonList(strategy2.getId()))
+                        .build(),
+                entryCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("TRADE_ST1_ST2")
+                        .direction(EntryDirection.SHORT)
+                        .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(-100))
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .strategyIds(asList(strategy1.getId(), strategy2.getId()))
+                        .build(),
+                entryCollection);
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("strategies", strategy1.getId())
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(2);
+                    assertThat(response).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST1_ST2");
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("strategies", strategy2.getId())
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(2);
+                    assertThat(response).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST2", "TRADE_ST1_ST2");
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("strategies", strategy1.getId(), strategy2.getId())
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(3);
+                    assertThat(response).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST2", "TRADE_ST1_ST2");
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("strategies", singletonList(UUID.randomUUID().toString()))
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                })
+                .value(response -> assertThat(response).hasSize(0));
     }
 
     @DisplayName("Create a new Trade entry and add images to it")

@@ -8,7 +8,9 @@ import org.springframework.data.mongodb.core.query.Query;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class EntriesQueryTest {
@@ -152,6 +154,16 @@ class EntriesQueryTest {
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
                 .addCriteria(Criteria.where("netResult").lt(BigDecimal.ZERO))
+        );
+    }
+
+    @DisplayName("By Strategies")
+    @Test
+    void strategies() {
+        EntriesQuery entriesQuery = EntriesQuery.builder().strategyIds(asList("123456", "456789")).build();
+        Query query = entriesQuery.buildQuery();
+        assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("strategyIds").in(asList("123456", "456789")))
         );
     }
 

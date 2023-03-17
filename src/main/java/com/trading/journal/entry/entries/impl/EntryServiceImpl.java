@@ -10,6 +10,7 @@ import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import com.trading.journal.entry.strategy.Strategy;
+import com.trading.journal.entry.strategy.StrategyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -23,8 +24,11 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.BiFunction;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.ofNullable;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 
 @RequiredArgsConstructor
@@ -38,7 +42,7 @@ public class EntryServiceImpl implements EntryService {
 
     private final BalanceService balanceService;
 
-    private final EntryStrategyService entryStrategyService;
+    private final StrategyService strategyService;
 
     @Override
     public List<Entry> getAll(EntriesQuery entriesQuery) {
@@ -50,18 +54,29 @@ public class EntryServiceImpl implements EntryService {
                 .build();
         Query query = entriesQuery.buildQuery();
         Page<Entry> entries = repository.findAll(collectionName, pageableRequest, query);
-        return entries.stream().toList();
+        return entries.stream()
+                .map(entry -> loadStrategies(entriesQuery.getAccessTokenInfo(), entry))
+                .toList();
+    }
+
+    @Override
+    public Entry getById(AccessTokenInfo accessToken, String journalId, String entryId) {
+        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
+        Entry entry = get(entriesCollection, entryId);
+        return loadStrategies(accessToken, entry);
     }
 
     @Override
     public Entry save(AccessTokenInfo accessToken, String journalId, Entry entry) {
+
+        List<Strategy> strategies = ofNullable(entry.getStrategyIds())
+                .orElse(emptyList())
+                .stream()
+                .map(strategyId -> strategyService.getById(accessToken, strategyId)
+                        .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, String.format("Invalid Strategy %s", strategyId)))
+                ).toList();
+
         Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
-
-        List<Strategy> strategies = entryStrategyService.saveStrategy(accessToken, entry);
-        if(!strategies.isEmpty()){
-            entry.setStrategies(strategies);
-        }
-
         CalculateEntry calculateEntry = new CalculateEntry(entry, balance.getAccountBalance());
         Entry calculated = calculateEntry.calculate();
         CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
@@ -71,13 +86,8 @@ public class EntryServiceImpl implements EntryService {
         } else {
             balanceService.calculateAvailableBalance(accessToken, journalId);
         }
+        saved.setStrategies(strategies);
         return saved;
-    }
-
-    @Override
-    public Entry getById(AccessTokenInfo accessToken, String journalId, String entryId) {
-        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
-        return get(entriesCollection, entryId);
     }
 
     @Override
@@ -135,5 +145,17 @@ public class EntryServiceImpl implements EntryService {
             Journal journal = journalService.get(accessTokenInfo, journalId);
             return new CollectionName(accessTokenInfo, journal.getName());
         };
+    }
+
+    private Entry loadStrategies(AccessTokenInfo accessToken, Entry entry) {
+        List<Strategy> strategies = ofNullable(entry.getStrategyIds())
+                .orElse(emptyList())
+                .stream()
+                .map(id ->
+                        strategyService.getById(accessToken, id).orElse(null)
+                )
+                .filter(Objects::nonNull).toList();
+        entry.setStrategies(strategies);
+        return entry;
     }
 }

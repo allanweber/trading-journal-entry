@@ -237,140 +237,9 @@ class TradeControllerTest {
         assertThat(strategies).isEmpty();
     }
 
-    @DisplayName("Create a new Trade entry with new strategies")
+    @DisplayName("Create a new Trade entry with strategies")
     @Test
-    void createTradeNewST() {
-        Trade trade = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .strategies(asList(Strategy.builder().name("ST1").build(), Strategy.builder().name("ST2").build()))
-                .build();
-
-        AtomicReference<String> entryId = new AtomicReference<>();
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(trade)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("Location")
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    entryId.set(response.getId());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
-
-                    assertThat(response.getProfitPrice()).isNull();
-                    assertThat(response.getLossPrice()).isNull();
-                    assertThat(response.getGrossResult()).isNull();
-                    assertThat(response.getNetResult()).isNull();
-                    assertThat(response.getAccountChange()).isNull();
-                    assertThat(response.getAccountBalance()).isNull();
-                });
-
-        List<Strategy> strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(2);
-        assertThat(strategies).extracting(Strategy::getName).containsExactlyInAnyOrder("ST1", "ST2");
-
-        Trade updateEntry = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .profitPrice(BigDecimal.valueOf(1.2345))
-                .lossPrice(BigDecimal.valueOf(1.009))
-                .costs(BigDecimal.valueOf(2.34))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .build();
-        webTestClient
-                .patch()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(updateEntry)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isEqualTo(entryId.get());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
-                    assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
-
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
-                });
-
-        CloseTrade closeEntry = CloseTrade.builder()
-                .exitPrice(BigDecimal.valueOf(1.2345))
-                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
-                .build();
-        webTestClient
-                .patch()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}/close")
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(closeEntry)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isEqualTo(entryId.get());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
-                    assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
-
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getGrossResult()).isEqualTo(BigDecimal.valueOf(55.55).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(53.21).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5321).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(153.21).setScale(2, RoundingMode.HALF_EVEN));
-                });
-
-        List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
-        assertThat(all).hasSize(1);
-
-        strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(2);
-    }
-
-    @DisplayName("Create a new Trade entry with existing strategies")
-    @Test
-    void createTradeExistingST() {
+    void createTradeWithStrategies() {
 
         Strategy strategy1 = mongoTemplate.save(Strategy.builder().name("Strategy1").build(), strategyCollection);
         Strategy strategy2 = mongoTemplate.save(Strategy.builder().name("Strategy2").build(), strategyCollection);
@@ -383,7 +252,7 @@ class TradeControllerTest {
                 .size(BigDecimal.valueOf(500.00))
                 .graphType(GraphType.CANDLESTICK)
                 .graphMeasure("1M")
-                .strategies(asList(Strategy.builder().id(strategy1.getId()).name(strategy1.getName()).build(), Strategy.builder().id(strategy2.getId()).name(strategy2.getName()).build()))
+                .strategyIds(asList(strategy1.getId(), strategy2.getId()))
                 .build();
 
         AtomicReference<String> entryId = new AtomicReference<>();
@@ -411,6 +280,8 @@ class TradeControllerTest {
                     assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
                     assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
                     assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder(strategy1.getId(), strategy2.getId());
+                    assertThat(response.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder(strategy1.getName(), strategy2.getName());
 
                     assertThat(response.getProfitPrice()).isNull();
                     assertThat(response.getLossPrice()).isNull();
@@ -419,10 +290,6 @@ class TradeControllerTest {
                     assertThat(response.getAccountChange()).isNull();
                     assertThat(response.getAccountBalance()).isNull();
                 });
-
-        List<Strategy> strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(2);
-        assertThat(strategies).containsExactlyInAnyOrder(strategy1, strategy2);
 
         Trade updateEntry = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
@@ -498,20 +365,12 @@ class TradeControllerTest {
 
         List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
         assertThat(all).hasSize(1);
-
-        strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(2);
     }
 
-    @DisplayName("Create a new Trade entry with one existing strategy and one new")
+    @DisplayName("Create a new Trade entry with invalid strategy")
     @Test
-    void createTradeExistingAndNewST() {
-
-        Strategy existingStrategy = mongoTemplate.save(Strategy.builder().name("Strategy2").build(), strategyCollection);
-
-        List<Strategy> strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(1);
-
+    void createTradeWithInvalidStrategies() {
+        String strategyId = UUID.randomUUID().toString();
         Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
                 .symbol("USD/EUR")
@@ -520,10 +379,9 @@ class TradeControllerTest {
                 .size(BigDecimal.valueOf(500.00))
                 .graphType(GraphType.CANDLESTICK)
                 .graphMeasure("1M")
-                .strategies(asList(Strategy.builder().name("Strategy1").build(), Strategy.builder().id(existingStrategy.getId()).name(existingStrategy.getName()).build()))
+                .strategyIds(singletonList(strategyId))
                 .build();
 
-        AtomicReference<String> entryId = new AtomicReference<>();
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
@@ -533,248 +391,10 @@ class TradeControllerTest {
                 .bodyValue(trade)
                 .exchange()
                 .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("Location")
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    entryId.set(response.getId());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
-
-                    assertThat(response.getProfitPrice()).isNull();
-                    assertThat(response.getLossPrice()).isNull();
-                    assertThat(response.getGrossResult()).isNull();
-                    assertThat(response.getNetResult()).isNull();
-                    assertThat(response.getAccountChange()).isNull();
-                    assertThat(response.getAccountBalance()).isNull();
-                });
-
-        strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(2);
-        assertThat(strategies).extracting(Strategy::getName).containsExactlyInAnyOrder("Strategy1", "Strategy2");
-
-        Trade updateEntry = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .profitPrice(BigDecimal.valueOf(1.2345))
-                .lossPrice(BigDecimal.valueOf(1.009))
-                .costs(BigDecimal.valueOf(2.34))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .build();
-        webTestClient
-                .patch()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(updateEntry)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isEqualTo(entryId.get());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
-                    assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
-
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
-                });
-
-        CloseTrade closeEntry = CloseTrade.builder()
-                .exitPrice(BigDecimal.valueOf(1.2345))
-                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
-                .build();
-        webTestClient
-                .patch()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}/close")
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(closeEntry)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isEqualTo(entryId.get());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
-                    assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
-
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getGrossResult()).isEqualTo(BigDecimal.valueOf(55.55).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(53.21).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5321).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(153.21).setScale(2, RoundingMode.HALF_EVEN));
-                });
-
-        List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
-        assertThat(all).hasSize(1);
-
-        strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(2);
-    }
-
-    @DisplayName("Create a new Trade entry with one existing strategy and one new but with id set")
-    @Test
-    void createTradeExistingAndNewSTIdSet() {
-
-        Strategy existingStrategy = mongoTemplate.save(Strategy.builder().name("Strategy2").build(), strategyCollection);
-
-        List<Strategy> strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(1);
-
-        Trade trade = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .strategies(asList(Strategy.builder().id(UUID.randomUUID().toString()).name("Strategy1").build(), Strategy.builder().id(existingStrategy.getId()).name(existingStrategy.getName()).build()))
-                .build();
-
-        AtomicReference<String> entryId = new AtomicReference<>();
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(trade)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("Location")
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    entryId.set(response.getId());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
-
-                    assertThat(response.getProfitPrice()).isNull();
-                    assertThat(response.getLossPrice()).isNull();
-                    assertThat(response.getGrossResult()).isNull();
-                    assertThat(response.getNetResult()).isNull();
-                    assertThat(response.getAccountChange()).isNull();
-                    assertThat(response.getAccountBalance()).isNull();
-                });
-
-        strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(2);
-        assertThat(strategies).extracting(Strategy::getName).containsExactlyInAnyOrder("Strategy1", "Strategy2");
-
-        Trade updateEntry = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .profitPrice(BigDecimal.valueOf(1.2345))
-                .lossPrice(BigDecimal.valueOf(1.009))
-                .costs(BigDecimal.valueOf(2.34))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .build();
-        webTestClient
-                .patch()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}")
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(updateEntry)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isEqualTo(entryId.get());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
-                    assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
-
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
-                });
-
-        CloseTrade closeEntry = CloseTrade.builder()
-                .exitPrice(BigDecimal.valueOf(1.2345))
-                .exitDate(LocalDateTime.of(2022, 9, 1, 18, 35, 59))
-                .build();
-        webTestClient
-                .patch()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade/{trade-id}/close")
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(closeEntry)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isEqualTo(entryId.get());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
-                    assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
-
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getGrossResult()).isEqualTo(BigDecimal.valueOf(55.55).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(53.21).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5321).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(153.21).setScale(2, RoundingMode.HALF_EVEN));
-                });
-
-        List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
-        assertThat(all).hasSize(1);
-
-        strategies = mongoTemplate.findAll(Strategy.class, strategyCollection);
-        assertThat(strategies).hasSize(2);
+                .isBadRequest()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error")).isEqualTo("Invalid Strategy " + strategyId));
     }
 
     @DisplayName("Try to create an invalid Trade entry")
