@@ -974,7 +974,7 @@ class EntryServiceImplTest {
         Entry byId = entryService.getById(ACCESS_TOKEN, JOURNAL_ID, entryId);
 
         assertThat(byId).isEqualTo(entry);
-        assertThat(byId.getStrategies()).isEmpty();
+        assertThat(byId.getStrategies()).isNull();
     }
 
     @DisplayName("Get a entry by id not found return an exception")
