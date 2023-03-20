@@ -21,4 +21,6 @@ public class Strategy {
 
     @NotNull(message = "Name is required")
     private String name;
+
+    private String color;
 }

@@ -117,15 +117,16 @@ class StrategyControllerTest {
                 .expectHeader()
                 .exists("Location")
                 .expectBody(Strategy.class)
-                .value(journal -> {
-                    assertThat(journal.getId()).isNotNull();
-                    assertThat(journal.getName()).isEqualTo("strategy-1");
+                .value(strategyResponse -> {
+                    assertThat(strategyResponse.getId()).isNotNull();
+                    assertThat(strategyResponse.getName()).isEqualTo("strategy-1");
+                    assertThat(strategyResponse.getColor()).isNull();
                 });
 
         List<Strategy> all = mongoTemplate.findAll(Strategy.class, strategyCollection);
         assertThat(all).hasSize(1);
 
-        Strategy strategy2 = Strategy.builder().name("strategy-2").build();
+        Strategy strategy2 = Strategy.builder().name("strategy-2").color("red").build();
 
         webTestClient
                 .post()
@@ -140,9 +141,10 @@ class StrategyControllerTest {
                 .expectHeader()
                 .exists("Location")
                 .expectBody(Strategy.class)
-                .value(journal -> {
-                    assertThat(journal.getId()).isNotNull();
-                    assertThat(journal.getName()).isEqualTo("strategy-2");
+                .value(strategyResponse -> {
+                    assertThat(strategyResponse.getId()).isNotNull();
+                    assertThat(strategyResponse.getName()).isEqualTo("strategy-2");
+                    assertThat(strategyResponse.getColor()).isEqualTo("red");
                 });
 
         all = mongoTemplate.findAll(Strategy.class, strategyCollection);
@@ -153,7 +155,7 @@ class StrategyControllerTest {
     @Test
     void update() {
         Strategy saved = mongoTemplate.save(Strategy.builder().name("strategy-1").build(), strategyCollection);
-        Strategy strategy = Strategy.builder().id(saved.getId()).name("strategy-updated").build();
+        Strategy strategy = Strategy.builder().id(saved.getId()).name("strategy-updated").color("red").build();
 
         webTestClient
                 .post()
@@ -166,9 +168,9 @@ class StrategyControllerTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(Strategy.class)
-                .value(journal -> {
-                    assertThat(journal.getId()).isNotNull();
-                    assertThat(journal.getName()).isEqualTo("strategy-updated");
+                .value(strategyResponse -> {
+                    assertThat(strategyResponse.getId()).isNotNull();
+                    assertThat(strategyResponse.getName()).isEqualTo("strategy-updated");
                 });
 
         List<Strategy> all = mongoTemplate.findAll(Strategy.class, strategyCollection);
@@ -218,9 +220,9 @@ class StrategyControllerTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(Strategy.class)
-                .value(journal -> {
-                    assertThat(journal.getId()).isNotNull();
-                    assertThat(journal.getName()).isEqualTo("strategy-1");
+                .value(strategyResponse -> {
+                    assertThat(strategyResponse.getId()).isNotNull();
+                    assertThat(strategyResponse.getName()).isEqualTo("strategy-1");
                 });
 
         webTestClient
@@ -234,9 +236,9 @@ class StrategyControllerTest {
                 .expectStatus()
                 .isOk()
                 .expectBody(Strategy.class)
-                .value(journal -> {
-                    assertThat(journal.getId()).isNotNull();
-                    assertThat(journal.getName()).isEqualTo("strategy-2");
+                .value(strategyResponse -> {
+                    assertThat(strategyResponse.getId()).isNotNull();
+                    assertThat(strategyResponse.getName()).isEqualTo("strategy-2");
                 });
     }
 
