@@ -86,7 +86,9 @@ public class EntryServiceImpl implements EntryService {
         } else {
             balanceService.calculateAvailableBalance(accessToken, journalId);
         }
-        saved.setStrategies(strategies);
+        if(!strategies.isEmpty()){
+            saved.setStrategies(strategies);
+        }
         return saved;
     }
 
@@ -155,7 +157,9 @@ public class EntryServiceImpl implements EntryService {
                         strategyService.getById(accessToken, id).orElse(null)
                 )
                 .filter(Objects::nonNull).toList();
-        entry.setStrategies(strategies);
+        if(!strategies.isEmpty()){
+            entry.setStrategies(strategies);
+        }
         return entry;
     }
 }
