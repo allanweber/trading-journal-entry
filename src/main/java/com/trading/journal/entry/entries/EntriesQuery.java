@@ -1,9 +1,11 @@
 package com.trading.journal.entry.entries;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.StringUtils;
@@ -12,6 +14,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import static com.trading.journal.entry.entries.EntryResult.LOSE;
@@ -39,6 +42,10 @@ public class EntriesQuery {
 
     private String journalId;
 
+    private int page;
+
+    private int size;
+
     private String symbol;
 
     private EntryType type;
@@ -64,21 +71,21 @@ public class EntriesQuery {
     public Query buildQuery() {
         Query query = new Query();
 
-        queryAppend(query, hasSymbol(), () -> Criteria.where(SYMBOL).is(symbol));
+        queryAppend(query, StringUtils.hasText(symbol), () -> Criteria.where(SYMBOL).is(symbol));
 
-        queryAppend(query, hasType(), () -> Criteria.where(TYPE).is(type.name()));
+        queryAppend(query, Objects.nonNull(type), () -> Criteria.where(TYPE).is(type.name()));
 
-        boolean addFromDate = hasFrom() && (hasNoStatus() || OPEN.equals(getStatus()));
+        boolean addFromDate = StringUtils.hasText(from) && (Objects.isNull(status) || OPEN.equals(getStatus()));
         queryAppend(query, addFromDate, () -> Criteria.where(DATE).gte(LocalDateTime.parse(from, DATE_FORMATTER)));
 
-        boolean addFromExitDate = hasFrom() && CLOSED.equals(getStatus());
+        boolean addFromExitDate = StringUtils.hasText(from) && CLOSED.equals(getStatus());
         queryAppend(query, addFromExitDate, () -> Criteria.where(EXIT_DATE).gte(LocalDateTime.parse(from, DATE_FORMATTER)));
 
-        queryAppend(query, hasDirection(), () -> Criteria.where(DIRECTION).is(direction.name()));
+        queryAppend(query, Objects.nonNull(direction), () -> Criteria.where(DIRECTION).is(direction.name()));
 
         queryAppend(query, OPEN.equals(getStatus()), () -> Criteria.where(NET_RESULT).exists(false));
 
-        boolean closedWithNoResult = CLOSED.equals(getStatus()) && !hasResult();
+        boolean closedWithNoResult = CLOSED.equals(getStatus()) && Objects.isNull(result);
         queryAppend(query, closedWithNoResult, () -> Criteria.where(NET_RESULT).exists(true));
 
         boolean closedWithWinResult = CLOSED.equals(getStatus()) && WIN.equals(getResult());
@@ -87,48 +94,29 @@ public class EntriesQuery {
         boolean closedWithLooseResult = CLOSED.equals(getStatus()) && LOSE.equals(getResult());
         queryAppend(query, closedWithLooseResult, () -> Criteria.where(NET_RESULT).exists(true).lt(BigDecimal.ZERO));
 
-        boolean winWithNoStatus = WIN.equals(getResult()) && hasNoStatus();
+        boolean winWithNoStatus = WIN.equals(getResult()) && Objects.isNull(status);
         queryAppend(query, winWithNoStatus, () -> Criteria.where(NET_RESULT).gte(BigDecimal.ZERO));
 
-        boolean looseWithNoStatus = LOSE.equals(getResult()) && hasNoStatus();
+        boolean looseWithNoStatus = LOSE.equals(getResult()) && Objects.isNull(status);
         queryAppend(query, looseWithNoStatus, () -> Criteria.where(NET_RESULT).lt(BigDecimal.ZERO));
 
-        queryAppend(query, hasStrategyIds(), () -> Criteria.where(STRATEGIES).in(strategyIds));
+        Boolean hasStrategies = ofNullable(strategyIds).map(list -> !list.isEmpty()).orElse(false);
+        queryAppend(query, hasStrategies, () -> Criteria.where(STRATEGIES).in(strategyIds));
 
         return query;
+    }
+
+    public PageableRequest pageable() {
+        return PageableRequest.builder()
+                .page(page)
+                .size(size)
+                .sort(Sort.by(sortBy()).ascending())
+                .build();
     }
 
     private void queryAppend(Query query, boolean predicate, Supplier<Criteria> criteria) {
         if (predicate) {
             query.addCriteria(criteria.get());
         }
-    }
-
-    private boolean hasSymbol() {
-        return StringUtils.hasText(symbol);
-    }
-
-    private boolean hasType() {
-        return type != null;
-    }
-
-    private boolean hasFrom() {
-        return StringUtils.hasText(from);
-    }
-
-    private boolean hasNoStatus() {
-        return status == null;
-    }
-
-    private boolean hasResult() {
-        return result != null;
-    }
-
-    private boolean hasDirection() {
-        return direction != null;
-    }
-
-    private boolean hasStrategyIds() {
-        return ofNullable(strategyIds).map(list -> !list.isEmpty()).orElse(false);
     }
 }

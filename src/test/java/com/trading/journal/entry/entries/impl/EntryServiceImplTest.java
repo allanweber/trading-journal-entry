@@ -8,6 +8,7 @@ import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
+import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyService;
@@ -76,21 +77,24 @@ class EntryServiceImplTest {
     @DisplayName("Get all entries with no filter")
     @Test
     void all() {
-        EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID).build();
+        EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
+                .page(0)
+                .size(10)
+                .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("date").ascending())
                 .build();
 
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, new Query())).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all entries by symbol")
@@ -98,13 +102,15 @@ class EntryServiceImplTest {
     void allBySymbol() {
         EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .symbol("MSFT")
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("date").ascending())
                 .build();
 
@@ -112,8 +118,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all entries by type")
@@ -121,13 +127,15 @@ class EntryServiceImplTest {
     void allByType() {
         EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .type(EntryType.DEPOSIT)
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("date").ascending())
                 .build();
 
@@ -135,8 +143,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all entries by from")
@@ -144,13 +152,15 @@ class EntryServiceImplTest {
     void allByFrom() {
         EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .from("2022-12-01 13:00:00")
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("date").ascending())
                 .build();
 
@@ -158,8 +168,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all entries by OPEN status")
@@ -167,13 +177,15 @@ class EntryServiceImplTest {
     void allByOpen() {
         EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .status(EntryStatus.OPEN)
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("date").ascending())
                 .build();
 
@@ -181,8 +193,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all entries by CLOSED status")
@@ -190,13 +202,15 @@ class EntryServiceImplTest {
     void allByClosed() {
         EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .status(EntryStatus.CLOSED)
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("exitDate").ascending())
                 .build();
 
@@ -204,8 +218,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all entries by LONG Direction")
@@ -213,13 +227,15 @@ class EntryServiceImplTest {
     void allByLong() {
         EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .direction(EntryDirection.LONG)
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("date").ascending())
                 .build();
 
@@ -227,8 +243,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all entries by SHORT Direction")
@@ -236,13 +252,15 @@ class EntryServiceImplTest {
     void allByShort() {
         EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .direction(EntryDirection.SHORT)
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("date").ascending())
                 .build();
 
@@ -250,8 +268,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all WIN Trades")
@@ -259,13 +277,15 @@ class EntryServiceImplTest {
     void allWin() {
         EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .result(EntryResult.WIN)
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("date").ascending())
                 .build();
 
@@ -273,8 +293,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all LOSE Trades")
@@ -282,13 +302,15 @@ class EntryServiceImplTest {
     void allLose() {
         EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
                 .result(EntryResult.LOSE)
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("date").ascending())
                 .build();
 
@@ -296,8 +318,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Get all entries by multiple filter")
@@ -308,13 +330,15 @@ class EntryServiceImplTest {
                 .type(EntryType.DEPOSIT)
                 .from("2022-12-01 13:00:00")
                 .status(EntryStatus.CLOSED)
+                .page(0)
+                .size(10)
                 .build();
 
         when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
         PageableRequest request = PageableRequest.builder()
                 .page(0)
-                .size(Integer.MAX_VALUE)
+                .size(10)
                 .sort(Sort.by("exitDate").ascending())
                 .build();
 
@@ -325,8 +349,8 @@ class EntryServiceImplTest {
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), request.pageable(), 1L);
         when(repository.findAll(collectionName, request, query)).thenReturn(page);
 
-        List<Entry> response = entryService.getAll(entriesQuery);
-        assertThat(response).isNotEmpty();
+        PageResponse<Entry> response = entryService.getAll(entriesQuery);
+        assertThat(response.getItems()).isNotEmpty();
     }
 
     @DisplayName("Save a TRADE entry")

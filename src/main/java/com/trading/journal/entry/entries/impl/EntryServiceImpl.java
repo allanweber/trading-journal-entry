@@ -8,13 +8,13 @@ import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
+import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.queries.data.PageableRequest;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -45,18 +45,15 @@ public class EntryServiceImpl implements EntryService {
     private final StrategyService strategyService;
 
     @Override
-    public List<Entry> getAll(EntriesQuery entriesQuery) {
+    public PageResponse<Entry> getAll(EntriesQuery entriesQuery) {
         CollectionName collectionName = collectionName().apply(entriesQuery.getAccessTokenInfo(), entriesQuery.getJournalId());
-        PageableRequest pageableRequest = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by(entriesQuery.sortBy()).ascending())
-                .build();
+        PageableRequest pageable = entriesQuery.pageable();
         Query query = entriesQuery.buildQuery();
-        Page<Entry> entries = repository.findAll(collectionName, pageableRequest, query);
-        return entries.stream()
+        Page<Entry> page = repository.findAll(collectionName, pageable, query);
+        List<Entry> entries = page.stream()
                 .map(entry -> loadStrategies(entriesQuery.getAccessTokenInfo(), entry))
                 .toList();
+        return new PageResponse<>(page.getTotalElements(),entries, page.getTotalPages(), page.getNumber());
     }
 
     @Override
@@ -86,7 +83,7 @@ public class EntryServiceImpl implements EntryService {
         } else {
             balanceService.calculateAvailableBalance(accessToken, journalId);
         }
-        if(!strategies.isEmpty()){
+        if (!strategies.isEmpty()) {
             saved.setStrategies(strategies);
         }
         return saved;
@@ -157,7 +154,7 @@ public class EntryServiceImpl implements EntryService {
                         strategyService.getById(accessToken, id).orElse(null)
                 )
                 .filter(Objects::nonNull).toList();
-        if(!strategies.isEmpty()){
+        if (!strategies.isEmpty()) {
             entry.setStrategies(strategies);
         }
         return entry;
