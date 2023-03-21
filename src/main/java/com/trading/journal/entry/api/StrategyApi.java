@@ -1,6 +1,7 @@
 package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.strategy.Strategy;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -10,7 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 
 @Api(tags = "Strategy Api")
 @RequestMapping("/strategies")
@@ -21,7 +21,9 @@ public interface StrategyApi {
             @ApiResponse(code = 200, message = "Strategies Returned")
     })
     @GetMapping()
-    ResponseEntity<List<Strategy>> getAll(AccessTokenInfo accessTokenInfo);
+    ResponseEntity<PageResponse<Strategy>> getAll(AccessTokenInfo accessTokenInfo,
+                                                  @RequestParam(value = "page", defaultValue = "0", required = false) int page,
+                                                  @RequestParam(value = "size", defaultValue = "10", required = false) int size);
 
     @ApiOperation(notes = "Create or Update Strategy", value = "Create or Update Strategy")
     @ApiResponses({

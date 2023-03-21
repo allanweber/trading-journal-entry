@@ -3,10 +3,13 @@ package com.trading.journal.entry.strategy.impl;
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.queries.CollectionName;
+import com.trading.journal.entry.queries.data.PageResponse;
+import com.trading.journal.entry.queries.data.PageableRequest;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyRepository;
 import com.trading.journal.entry.strategy.StrategyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -20,9 +23,11 @@ public class StrategyServiceImpl implements StrategyService {
     private final StrategyRepository strategyRepository;
 
     @Override
-    public List<Strategy> getAll(AccessTokenInfo accessToken) {
+    public PageResponse<Strategy> getAll(AccessTokenInfo accessToken, int page, int size) {
         CollectionName collectionName = new StrategyCollectionName(accessToken).collectionName();
-        return strategyRepository.getAll(collectionName);
+        PageableRequest request = PageableRequest.builder().page(page).size(size).build();
+        Page<Strategy> strategies = strategyRepository.findAll(collectionName, request);
+        return new PageResponse<>(strategies);
     }
 
     @Override

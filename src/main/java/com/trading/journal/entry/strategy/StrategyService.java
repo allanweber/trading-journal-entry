@@ -1,12 +1,12 @@
 package com.trading.journal.entry.strategy;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.queries.data.PageResponse;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface StrategyService {
-    List<Strategy> getAll(AccessTokenInfo accessToken);
+    PageResponse<Strategy> getAll(AccessTokenInfo accessToken, int page, int size);
 
     Strategy save(AccessTokenInfo accessToken, Strategy strategy);
 
