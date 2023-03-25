@@ -5,6 +5,7 @@ import com.allanweber.jwttoken.service.JwtResolveToken;
 import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
+import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.strategy.Strategy;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,9 +78,9 @@ class StrategyControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Strategy>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
                 })
-                .value(response -> assertThat(response).isEmpty());
+                .value(response -> assertThat(response.getItems()).isEmpty());
 
         mongoTemplate.save(Strategy.builder().name("strategy-1").build(), strategyCollection);
         mongoTemplate.save(Strategy.builder().name("strategy-2").build(), strategyCollection);
@@ -94,9 +95,117 @@ class StrategyControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Strategy>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
                 })
-                .value(response -> assertThat(response).hasSize(3));
+                .value(response -> assertThat(response.getItems()).hasSize(3));
+    }
+
+    @DisplayName("Get all strategies paginated")
+    @Test
+    void getAllPaging() {
+        for (int i = 1; i <= 25; i++) {
+            mongoTemplate.save(Strategy.builder().name("strategy-" + i).build(), strategyCollection);
+        }
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/strategies")
+                        .queryParam("page", "0")
+                        .queryParam("size", "10")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(10);
+                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getTotalPages()).isEqualTo(3);
+                    assertThat(response.getTotalItems()).isEqualTo(25);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/strategies")
+                        .queryParam("page", "1")
+                        .queryParam("size", "10")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(10);
+                    assertThat(response.getCurrentPage()).isEqualTo(1);
+                    assertThat(response.getTotalPages()).isEqualTo(3);
+                    assertThat(response.getTotalItems()).isEqualTo(25);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/strategies")
+                        .queryParam("page", "2")
+                        .queryParam("size", "10")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(5);
+                    assertThat(response.getCurrentPage()).isEqualTo(2);
+                    assertThat(response.getTotalPages()).isEqualTo(3);
+                    assertThat(response.getTotalItems()).isEqualTo(25);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/strategies")
+                        .queryParam("page", "0")
+                        .queryParam("size", "17")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(17);
+                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getTotalPages()).isEqualTo(2);
+                    assertThat(response.getTotalItems()).isEqualTo(25);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/strategies")
+                        .queryParam("page", "4")
+                        .queryParam("size", "10")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).isEmpty();
+                    assertThat(response.getCurrentPage()).isEqualTo(4);
+                    assertThat(response.getTotalPages()).isEqualTo(3);
+                    assertThat(response.getTotalItems()).isEqualTo(25);
+                });
     }
 
     @DisplayName("Create a new strategy")

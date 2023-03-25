@@ -2,6 +2,7 @@ package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.*;
+import com.trading.journal.entry.queries.data.PageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -18,10 +19,16 @@ public class EntryController implements EntryApi {
     private final EntryService entryService;
 
     @Override
-    public ResponseEntity<List<Entry>> getAll(AccessTokenInfo accessTokenInfo, String journalId, String symbol, EntryType type, EntryStatus status, String from, EntryDirection direction, EntryResult result, List<String> strategies) {
+    public ResponseEntity<PageResponse<Entry>> getAll(
+            AccessTokenInfo accessTokenInfo, String journalId, int page, int size,
+            String symbol, EntryType type, EntryStatus status, String from,
+            EntryDirection direction, EntryResult result, List<String> strategies
+    ) {
         EntriesQuery entriesQuery = EntriesQuery.builder()
                 .accessTokenInfo(accessTokenInfo)
                 .journalId(journalId)
+                .page(page)
+                .size(size)
                 .symbol(symbol)
                 .type(type)
                 .status(status)
@@ -30,7 +37,7 @@ public class EntryController implements EntryApi {
                 .result(result)
                 .strategyIds(strategies)
                 .build();
-        List<Entry> entries = entryService.getAll(entriesQuery);
+        PageResponse<Entry> entries = entryService.getAll(entriesQuery);
         return ok(entries);
     }
 

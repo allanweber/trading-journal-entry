@@ -1,7 +1,9 @@
 package com.trading.journal.entry.entries;
 
+import com.trading.journal.entry.queries.data.PageableRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 
@@ -189,5 +191,25 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().status(EntryStatus.CLOSED).build();
         String sortBy = entriesQuery.sortBy();
         assertThat(sortBy).isEqualTo("exitDate");
+    }
+
+    @DisplayName("Pageable with default sort")
+    @Test
+    void pageable() {
+        EntriesQuery entriesQuery = EntriesQuery.builder().page(1).size(10).build();
+        PageableRequest request = entriesQuery.pageable();
+        assertThat(request.getPage()).isEqualTo(1);
+        assertThat(request.getSize()).isEqualTo(10);
+        assertThat(request.getSort()).isEqualTo(Sort.by("date").ascending());
+    }
+
+    @DisplayName("Pageable by closed")
+    @Test
+    void pageableClosed() {
+        EntriesQuery entriesQuery = EntriesQuery.builder().page(1).size(10).status(EntryStatus.CLOSED).build();
+        PageableRequest request = entriesQuery.pageable();
+        assertThat(request.getPage()).isEqualTo(1);
+        assertThat(request.getSize()).isEqualTo(10);
+        assertThat(request.getSort()).isEqualTo(Sort.by("exitDate").ascending());
     }
 }

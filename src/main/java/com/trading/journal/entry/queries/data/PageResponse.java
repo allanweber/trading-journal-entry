@@ -25,4 +25,11 @@ public class PageResponse<T> {
         this.currentPage = page.getNumber();
         this.totalPages = page.getTotalPages();
     }
+
+    public PageResponse(long totalItems, List<T> items, int totalPages, int currentPage) {
+        this.totalItems = totalItems;
+        this.items = items;
+        this.totalPages = totalPages;
+        this.currentPage = currentPage;
+    }
 }

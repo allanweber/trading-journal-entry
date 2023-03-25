@@ -1,13 +1,12 @@
 package com.trading.journal.entry.entries;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
+import com.trading.journal.entry.queries.data.PageResponse;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 public interface EntryService {
 
-    List<Entry> getAll(EntriesQuery all);
+    PageResponse<Entry> getAll(EntriesQuery all);
 
     Entry getById(AccessTokenInfo accessToken, String journalId, String entryId);
 

@@ -9,6 +9,7 @@ import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.journal.Journal;
+import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.strategy.Strategy;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
@@ -137,16 +138,17 @@ class EntryControllerTest {
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries")
+                        .queryParam("size", 100)
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(18);
-                    assertThat(response).extracting(Entry::getDate)
+                    assertThat(response.getItems()).hasSize(18);
+                    assertThat(response.getItems()).extracting(Entry::getDate)
                             .extracting(LocalDateTime::getDayOfMonth)
                             .containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 1, 1);
                 });
@@ -162,9 +164,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(3));
+                .value(response -> assertThat(response.getItems()).hasSize(3));
 
         //GET BY TYPE TRADE
         webTestClient
@@ -172,14 +174,15 @@ class EntryControllerTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries")
                         .queryParam("type", "TRADE")
+                        .queryParam("size", 100)
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(15));
+                .value(response -> assertThat(response.getItems()).hasSize(15));
 
         //GET BY TYPE DEPOSIT
         webTestClient
@@ -192,9 +195,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(1));
+                .value(response -> assertThat(response.getItems()).hasSize(1));
 
         //GET BY TYPE TAXES
         webTestClient
@@ -207,9 +210,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(1));
+                .value(response -> assertThat(response.getItems()).hasSize(1));
 
         //GET BY TYPE WITHDRAWAL
         webTestClient
@@ -222,9 +225,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(1));
+                .value(response -> assertThat(response.getItems()).hasSize(1));
 
         //GET BY STATUS CLOSED
         webTestClient
@@ -237,9 +240,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(6));
+                .value(response -> assertThat(response.getItems()).hasSize(6));
 
         //GET BY STATUS OPEN
         webTestClient
@@ -247,14 +250,15 @@ class EntryControllerTest {
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries")
                         .queryParam("status", "OPEN")
+                        .queryParam("size", 100)
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(12));
+                .value(response -> assertThat(response.getItems()).hasSize(12));
 
         //GET BY FROM DATE
         webTestClient
@@ -267,9 +271,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(8));
+                .value(response -> assertThat(response.getItems()).hasSize(8));
 
         //GET BY TYPE, SYMBOL AND FROM DATE
         webTestClient
@@ -284,9 +288,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(1));
+                .value(response -> assertThat(response.getItems()).hasSize(1));
 
         //GET BY TYPE, SYMBOL, FROM DATE STATUS CLOSED
         webTestClient
@@ -302,9 +306,153 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(0));
+                .value(response -> assertThat(response.getItems()).hasSize(0));
+    }
+
+    @DisplayName("Get Entries paginating")
+    @Test
+    void pagination() {
+
+        for (int i = 1; i <= 25; i++) {
+            mongoTemplate.save(
+                    Entry.builder()
+                            .price(BigDecimal.valueOf(10.00))
+                            .symbol("ENTRY" + i)
+                            .direction(EntryDirection.LONG)
+                            .type(EntryType.TRADE)
+                            .netResult(BigDecimal.valueOf(100))
+                            .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                            .build(),
+                    entryCollection);
+        }
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(10);
+                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getTotalPages()).isEqualTo(3);
+                    assertThat(response.getTotalItems()).isEqualTo(25);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("page", 1)
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(10);
+                    assertThat(response.getCurrentPage()).isEqualTo(1);
+                    assertThat(response.getTotalPages()).isEqualTo(3);
+                    assertThat(response.getTotalItems()).isEqualTo(25);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("page", 0)
+                        .queryParam("size", 17)
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(17);
+                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getTotalPages()).isEqualTo(2);
+                    assertThat(response.getTotalItems()).isEqualTo(25);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("page", 4)
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(0);
+                    assertThat(response.getCurrentPage()).isEqualTo(4);
+                    assertThat(response.getTotalPages()).isEqualTo(3);
+                    assertThat(response.getTotalItems()).isEqualTo(25);
+                });
+    }
+
+    @DisplayName("Get Entries paginating and filtering")
+    @Test
+    void paginationFilter() {
+
+        for (int i = 1; i <= 10; i++) {
+            mongoTemplate.save(
+                    Entry.builder()
+                            .price(BigDecimal.valueOf(10.00))
+                            .symbol("ENTRY_LONG" + i)
+                            .direction(EntryDirection.LONG)
+                            .type(EntryType.TRADE)
+                            .netResult(BigDecimal.valueOf(100))
+                            .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                            .build(),
+                    entryCollection);
+        }
+
+        for (int i = 1; i <= 10; i++) {
+            mongoTemplate.save(
+                    Entry.builder()
+                            .price(BigDecimal.valueOf(10.00))
+                            .symbol("ENTRY_SHORT" + i)
+                            .direction(EntryDirection.SHORT)
+                            .type(EntryType.TRADE)
+                            .netResult(BigDecimal.valueOf(100))
+                            .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                            .build(),
+                    entryCollection);
+        }
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries")
+                        .queryParam("direction", EntryDirection.LONG)
+                        .build(journalId))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                })
+                .value(response -> {
+                    assertThat(response.getItems()).hasSize(10);
+                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getTotalPages()).isEqualTo(1);
+                    assertThat(response.getTotalItems()).isEqualTo(10);
+                });
     }
 
     @DisplayName("Get Entries by Direction")
@@ -342,11 +490,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(1);
-                    assertThat(response).extracting(Entry::getSymbol).containsExactly("LONG");
+                    assertThat(response.getItems()).hasSize(1);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactly("LONG");
                 });
 
         webTestClient
@@ -359,11 +507,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(1);
-                    assertThat(response).extracting(Entry::getSymbol).containsExactly("SHORT");
+                    assertThat(response.getItems()).hasSize(1);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactly("SHORT");
                 });
     }
 
@@ -402,11 +550,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(1);
-                    assertThat(response).extracting(Entry::getSymbol).containsExactly("WIN");
+                    assertThat(response.getItems()).hasSize(1);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactly("WIN");
                 });
 
         webTestClient
@@ -419,11 +567,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(1);
-                    assertThat(response).extracting(Entry::getSymbol).containsExactly("LOSE");
+                    assertThat(response.getItems()).hasSize(1);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactly("LOSE");
                 });
     }
 
@@ -480,11 +628,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(2);
-                    assertThat(response).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST1_ST2");
+                    assertThat(response.getItems()).hasSize(2);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST1_ST2");
                 });
 
         webTestClient
@@ -497,11 +645,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(2);
-                    assertThat(response).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST2", "TRADE_ST1_ST2");
+                    assertThat(response.getItems()).hasSize(2);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST2", "TRADE_ST1_ST2");
                 });
 
         webTestClient
@@ -514,11 +662,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response).hasSize(3);
-                    assertThat(response).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST2", "TRADE_ST1_ST2");
+                    assertThat(response.getItems()).hasSize(3);
+                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST2", "TRADE_ST1_ST2");
                 });
 
         webTestClient
@@ -531,9 +679,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<List<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
                 })
-                .value(response -> assertThat(response).hasSize(0));
+                .value(response -> assertThat(response.getItems()).hasSize(0));
     }
 
     @DisplayName("Create a new Trade entry and add images to it")
