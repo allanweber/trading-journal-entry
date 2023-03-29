@@ -9,7 +9,6 @@ import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.journal.Journal;
-import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.strategy.Strategy;
 import org.bson.types.ObjectId;
 import org.junit.jupiter.api.*;
@@ -31,6 +30,7 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -144,13 +144,14 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(18);
-                    assertThat(response.getItems()).extracting(Entry::getDate)
-                            .extracting(LocalDateTime::getDayOfMonth)
-                            .containsExactly(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 1, 1, 1);
+                    assertThat(response.getContent()).hasSize(18);
+                    assertThat(response.getContent()).extracting(Entry::getDate)
+                            .extracting(LocalDateTime::getMonth)
+                            .extracting(Month::getValue)
+                            .containsExactly(10,10,10,9,9,9,9,9,8,8,8,8,8,8,8,8,8,8);
                 });
 
         //GET BY SYMBOL
@@ -164,9 +165,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(3));
+                .value(response -> assertThat(response.getContent()).hasSize(3));
 
         //GET BY TYPE TRADE
         webTestClient
@@ -180,9 +181,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(15));
+                .value(response -> assertThat(response.getContent()).hasSize(15));
 
         //GET BY TYPE DEPOSIT
         webTestClient
@@ -195,9 +196,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(1));
+                .value(response -> assertThat(response.getContent()).hasSize(1));
 
         //GET BY TYPE TAXES
         webTestClient
@@ -210,9 +211,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(1));
+                .value(response -> assertThat(response.getContent()).hasSize(1));
 
         //GET BY TYPE WITHDRAWAL
         webTestClient
@@ -225,9 +226,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(1));
+                .value(response -> assertThat(response.getContent()).hasSize(1));
 
         //GET BY STATUS CLOSED
         webTestClient
@@ -240,9 +241,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(6));
+                .value(response -> assertThat(response.getContent()).hasSize(6));
 
         //GET BY STATUS OPEN
         webTestClient
@@ -256,9 +257,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(12));
+                .value(response -> assertThat(response.getContent()).hasSize(12));
 
         //GET BY FROM DATE
         webTestClient
@@ -271,9 +272,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(8));
+                .value(response -> assertThat(response.getContent()).hasSize(8));
 
         //GET BY TYPE, SYMBOL AND FROM DATE
         webTestClient
@@ -288,9 +289,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(1));
+                .value(response -> assertThat(response.getContent()).hasSize(1));
 
         //GET BY TYPE, SYMBOL, FROM DATE STATUS CLOSED
         webTestClient
@@ -306,9 +307,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(0));
+                .value(response -> assertThat(response.getContent()).hasSize(0));
     }
 
     @DisplayName("Get Entries paginating")
@@ -337,13 +338,12 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(10);
-                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getContent()).hasSize(10);
                     assertThat(response.getTotalPages()).isEqualTo(3);
-                    assertThat(response.getTotalItems()).isEqualTo(25);
+                    assertThat(response.getTotal()).isEqualTo(25);
                 });
 
         webTestClient
@@ -356,13 +356,12 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(10);
-                    assertThat(response.getCurrentPage()).isEqualTo(1);
+                    assertThat(response.getContent()).hasSize(10);
                     assertThat(response.getTotalPages()).isEqualTo(3);
-                    assertThat(response.getTotalItems()).isEqualTo(25);
+                    assertThat(response.getTotal()).isEqualTo(25);
                 });
 
         webTestClient
@@ -376,13 +375,12 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(17);
-                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getContent()).hasSize(17);
                     assertThat(response.getTotalPages()).isEqualTo(2);
-                    assertThat(response.getTotalItems()).isEqualTo(25);
+                    assertThat(response.getTotal()).isEqualTo(25);
                 });
 
         webTestClient
@@ -395,13 +393,12 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(0);
-                    assertThat(response.getCurrentPage()).isEqualTo(4);
+                    assertThat(response.getContent()).hasSize(0);
                     assertThat(response.getTotalPages()).isEqualTo(3);
-                    assertThat(response.getTotalItems()).isEqualTo(25);
+                    assertThat(response.getTotal()).isEqualTo(25);
                 });
     }
 
@@ -445,13 +442,12 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(10);
-                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getContent()).hasSize(10);
                     assertThat(response.getTotalPages()).isEqualTo(1);
-                    assertThat(response.getTotalItems()).isEqualTo(10);
+                    assertThat(response.getTotal()).isEqualTo(10);
                 });
     }
 
@@ -490,11 +486,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(1);
-                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactly("LONG");
+                    assertThat(response.getContent()).hasSize(1);
+                    assertThat(response.getContent()).extracting(Entry::getSymbol).containsExactly("LONG");
                 });
 
         webTestClient
@@ -507,11 +503,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(1);
-                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactly("SHORT");
+                    assertThat(response.getContent()).hasSize(1);
+                    assertThat(response.getContent()).extracting(Entry::getSymbol).containsExactly("SHORT");
                 });
     }
 
@@ -550,11 +546,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(1);
-                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactly("WIN");
+                    assertThat(response.getContent()).hasSize(1);
+                    assertThat(response.getContent()).extracting(Entry::getSymbol).containsExactly("WIN");
                 });
 
         webTestClient
@@ -567,11 +563,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(1);
-                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactly("LOSE");
+                    assertThat(response.getContent()).hasSize(1);
+                    assertThat(response.getContent()).extracting(Entry::getSymbol).containsExactly("LOSE");
                 });
     }
 
@@ -628,11 +624,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(2);
-                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST1_ST2");
+                    assertThat(response.getContent()).hasSize(2);
+                    assertThat(response.getContent()).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST1_ST2");
                 });
 
         webTestClient
@@ -645,11 +641,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(2);
-                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST2", "TRADE_ST1_ST2");
+                    assertThat(response.getContent()).hasSize(2);
+                    assertThat(response.getContent()).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST2", "TRADE_ST1_ST2");
                 });
 
         webTestClient
@@ -662,11 +658,11 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(3);
-                    assertThat(response.getItems()).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST2", "TRADE_ST1_ST2");
+                    assertThat(response.getContent()).hasSize(3);
+                    assertThat(response.getContent()).extracting(Entry::getSymbol).containsExactlyInAnyOrder("TRADE_ST1", "TRADE_ST2", "TRADE_ST1_ST2");
                 });
 
         webTestClient
@@ -679,9 +675,9 @@ class EntryControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(0));
+                .value(response -> assertThat(response.getContent()).hasSize(0));
     }
 
     @DisplayName("Create a new Trade entry and add images to it")

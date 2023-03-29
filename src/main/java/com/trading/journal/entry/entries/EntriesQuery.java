@@ -1,11 +1,10 @@
 package com.trading.journal.entry.entries;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
-import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.StringUtils;
@@ -42,10 +41,6 @@ public class EntriesQuery {
 
     private String journalId;
 
-    private int page;
-
-    private int size;
-
     private String symbol;
 
     private EntryType type;
@@ -60,13 +55,7 @@ public class EntriesQuery {
 
     private List<String> strategyIds;
 
-    public String sortBy() {
-        String sort = "date";
-        if (CLOSED.equals(getStatus())) {
-            sort = "exitDate";
-        }
-        return sort;
-    }
+    private Pageable pageable;
 
     public Query buildQuery() {
         Query query = new Query();
@@ -104,14 +93,6 @@ public class EntriesQuery {
         queryAppend(query, hasStrategies, () -> Criteria.where(STRATEGIES).in(strategyIds));
 
         return query;
-    }
-
-    public PageableRequest pageable() {
-        return PageableRequest.builder()
-                .page(page)
-                .size(size)
-                .sort(Sort.by(sortBy()).ascending())
-                .build();
     }
 
     private void queryAppend(Query query, boolean predicate, Supplier<Criteria> criteria) {

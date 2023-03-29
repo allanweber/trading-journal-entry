@@ -3,8 +3,6 @@ package com.trading.journal.entry.strategy.impl;
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.PageResponse;
-import com.trading.journal.entry.queries.data.PageableRequest;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyRepository;
 import org.junit.jupiter.api.BeforeAll;
@@ -13,16 +11,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
-import java.util.List;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static org.assertj.core.api.Assertions.as;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
@@ -48,11 +46,13 @@ class StrategyServiceImplTest {
     @DisplayName("Get strategies")
     @Test
     void all() {
-        PageableRequest request = PageableRequest.builder().page(1).size(1).build();
-        when(strategyRepository.findAll(collectionName, request)).thenReturn(new PageImpl<>(asList(Strategy.builder().build(), Strategy.builder().build()), request.pageable(), 2L));
-        PageResponse<Strategy> all = strategyService.getAll(ACCESS_TOKEN, 1, 1);
-        assertThat(all.getItems()).isNotEmpty();
-        assertThat(all.getTotalItems()).isEqualTo(2L);
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE);
+        when(strategyRepository.findAll(collectionName, pageable)).thenReturn(
+                new PageImpl<>(asList(Strategy.builder().build(), Strategy.builder().build()), pageable, 2L)
+        );
+        Page<Strategy> all = strategyService.getAll(ACCESS_TOKEN, pageable);
+        assertThat(all.get()).isNotEmpty();
+        assertThat(all.getTotalElements()).isEqualTo(2L);
     }
 
     @DisplayName("Save a new strategy")

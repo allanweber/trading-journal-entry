@@ -5,7 +5,6 @@ import com.allanweber.jwttoken.service.JwtResolveToken;
 import com.allanweber.jwttoken.service.JwtTokenReader;
 import com.trading.journal.entry.MongoDbContainerInitializer;
 import com.trading.journal.entry.WithCustomMockUser;
-import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.strategy.Strategy;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -78,9 +77,9 @@ class StrategyControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Strategy>>() {
                 })
-                .value(response -> assertThat(response.getItems()).isEmpty());
+                .value(response -> assertThat(response.getContent()).isEmpty());
 
         mongoTemplate.save(Strategy.builder().name("strategy-1").build(), strategyCollection);
         mongoTemplate.save(Strategy.builder().name("strategy-2").build(), strategyCollection);
@@ -95,9 +94,9 @@ class StrategyControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Strategy>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(3));
+                .value(response -> assertThat(response.getContent()).hasSize(3));
     }
 
     @DisplayName("Get all strategies paginated")
@@ -118,13 +117,12 @@ class StrategyControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Strategy>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(10);
-                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getContent()).hasSize(10);
                     assertThat(response.getTotalPages()).isEqualTo(3);
-                    assertThat(response.getTotalItems()).isEqualTo(25);
+                    assertThat(response.getTotal()).isEqualTo(25);
                 });
 
         webTestClient
@@ -138,13 +136,12 @@ class StrategyControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Strategy>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(10);
-                    assertThat(response.getCurrentPage()).isEqualTo(1);
+                    assertThat(response.getContent()).hasSize(10);
                     assertThat(response.getTotalPages()).isEqualTo(3);
-                    assertThat(response.getTotalItems()).isEqualTo(25);
+                    assertThat(response.getTotal()).isEqualTo(25);
                 });
 
         webTestClient
@@ -158,13 +155,12 @@ class StrategyControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Strategy>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(5);
-                    assertThat(response.getCurrentPage()).isEqualTo(2);
+                    assertThat(response.getContent()).hasSize(5);
                     assertThat(response.getTotalPages()).isEqualTo(3);
-                    assertThat(response.getTotalItems()).isEqualTo(25);
+                    assertThat(response.getTotal()).isEqualTo(25);
                 });
 
         webTestClient
@@ -178,13 +174,12 @@ class StrategyControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Strategy>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(17);
-                    assertThat(response.getCurrentPage()).isEqualTo(0);
+                    assertThat(response.getContent()).hasSize(17);
                     assertThat(response.getTotalPages()).isEqualTo(2);
-                    assertThat(response.getTotalItems()).isEqualTo(25);
+                    assertThat(response.getTotal()).isEqualTo(25);
                 });
 
         webTestClient
@@ -198,13 +193,12 @@ class StrategyControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Strategy>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Strategy>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).isEmpty();
-                    assertThat(response.getCurrentPage()).isEqualTo(4);
+                    assertThat(response.getContent()).isEmpty();
                     assertThat(response.getTotalPages()).isEqualTo(3);
-                    assertThat(response.getTotalItems()).isEqualTo(25);
+                    assertThat(response.getTotal()).isEqualTo(25);
                 });
     }
 
@@ -393,7 +387,7 @@ class StrategyControllerTest {
     @Test
     void deleteNoDrop() {
         Strategy strategy = mongoTemplate.save(Strategy.builder().name("strategy-1").build(), strategyCollection);
-        Strategy strategy2 = mongoTemplate.save(Strategy.builder().name("strategy-2").build(), strategyCollection);
+        mongoTemplate.save(Strategy.builder().name("strategy-2").build(), strategyCollection);
 
         webTestClient
                 .delete()

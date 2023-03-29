@@ -2,8 +2,9 @@ package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.*;
-import com.trading.journal.entry.queries.data.PageResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,16 +20,14 @@ public class EntryController implements EntryApi {
     private final EntryService entryService;
 
     @Override
-    public ResponseEntity<PageResponse<Entry>> getAll(
-            AccessTokenInfo accessTokenInfo, String journalId, int page, int size,
+    public ResponseEntity<PageWrapper<Entry>> getAll(
+            AccessTokenInfo accessTokenInfo, String journalId, Pageable pageable,
             String symbol, EntryType type, EntryStatus status, String from,
             EntryDirection direction, EntryResult result, List<String> strategies
     ) {
         EntriesQuery entriesQuery = EntriesQuery.builder()
                 .accessTokenInfo(accessTokenInfo)
                 .journalId(journalId)
-                .page(page)
-                .size(size)
                 .symbol(symbol)
                 .type(type)
                 .status(status)
@@ -36,9 +35,10 @@ public class EntryController implements EntryApi {
                 .direction(direction)
                 .result(result)
                 .strategyIds(strategies)
+                .pageable(pageable)
                 .build();
-        PageResponse<Entry> entries = entryService.getAll(entriesQuery);
-        return ok(entries);
+        Page<Entry> entries = entryService.getAll(entriesQuery);
+        return ok(new PageWrapper<>(entries));
     }
 
     @Override

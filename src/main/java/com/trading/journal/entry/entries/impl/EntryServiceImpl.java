@@ -8,13 +8,12 @@ import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.PageResponse;
-import com.trading.journal.entry.queries.data.PageableRequest;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -45,15 +44,14 @@ public class EntryServiceImpl implements EntryService {
     private final StrategyService strategyService;
 
     @Override
-    public PageResponse<Entry> getAll(EntriesQuery entriesQuery) {
+    public Page<Entry> getAll(EntriesQuery entriesQuery) {
         CollectionName collectionName = collectionName().apply(entriesQuery.getAccessTokenInfo(), entriesQuery.getJournalId());
-        PageableRequest pageable = entriesQuery.pageable();
         Query query = entriesQuery.buildQuery();
-        Page<Entry> page = repository.findAll(collectionName, pageable, query);
+        Page<Entry> page = repository.findAll(collectionName, entriesQuery.getPageable(), query);
         List<Entry> entries = page.stream()
                 .map(entry -> loadStrategies(entriesQuery.getAccessTokenInfo(), entry))
                 .toList();
-        return new PageResponse<>(page.getTotalElements(),entries, page.getTotalPages(), page.getNumber());
+        return new PageImpl<>(entries, entriesQuery.getPageable(), page.getTotalElements());
     }
 
     @Override
@@ -65,7 +63,6 @@ public class EntryServiceImpl implements EntryService {
 
     @Override
     public Entry save(AccessTokenInfo accessToken, String journalId, Entry entry) {
-
         List<Strategy> strategies = ofNullable(entry.getStrategyIds())
                 .orElse(emptyList())
                 .stream()

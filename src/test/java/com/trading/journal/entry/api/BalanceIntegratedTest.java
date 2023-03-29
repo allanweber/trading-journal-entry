@@ -16,7 +16,6 @@ import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.withdrawal.Withdrawal;
 import com.trading.journal.entry.journal.Journal;
-import com.trading.journal.entry.queries.data.PageResponse;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -286,14 +285,14 @@ class BalanceIntegratedTest {
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(4);
-                    List<Entry> finished = response.getItems().stream().filter(Entry::isFinished).toList();
+                    assertThat(response.getContent()).hasSize(4);
+                    List<Entry> finished = response.getContent().stream().filter(Entry::isFinished).toList();
                     assertThat(finished).isEmpty();
 
-                    List<Entry> notFinished = response.getItems().stream().filter(entry -> !entry.isFinished()).toList();
+                    List<Entry> notFinished = response.getContent().stream().filter(entry -> !entry.isFinished()).toList();
                     assertThat(notFinished).hasSize(4);
                 });
 
@@ -356,15 +355,15 @@ class BalanceIntegratedTest {
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(4);
-                    List<Entry> finished = response.getItems().stream().filter(Entry::isFinished).toList();
+                    assertThat(response.getContent()).hasSize(4);
+                    List<Entry> finished = response.getContent().stream().filter(Entry::isFinished).toList();
                     assertThat(finished).hasSize(1);
                     assertThat(finished).extracting(Entry::getSymbol).containsExactly("APPL");
 
-                    List<Entry> notFinished = response.getItems().stream().filter(entry -> !entry.isFinished()).toList();
+                    List<Entry> notFinished = response.getContent().stream().filter(entry -> !entry.isFinished()).toList();
                     assertThat(notFinished).hasSize(3);
                     assertThat(notFinished).extracting(Entry::getSymbol).containsExactlyInAnyOrder(
                             "MSFT", "NVDA", "TSLA"
@@ -430,17 +429,17 @@ class BalanceIntegratedTest {
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(4);
-                    List<Entry> finished = response.getItems().stream().filter(Entry::isFinished).toList();
+                    assertThat(response.getContent()).hasSize(4);
+                    List<Entry> finished = response.getContent().stream().filter(Entry::isFinished).toList();
                     assertThat(finished).hasSize(2);
                     assertThat(finished).extracting(Entry::getSymbol).containsExactlyInAnyOrder(
                             "APPL", "TSLA"
                     );
 
-                    List<Entry> notFinished = response.getItems().stream().filter(entry -> !entry.isFinished()).toList();
+                    List<Entry> notFinished = response.getContent().stream().filter(entry -> !entry.isFinished()).toList();
                     assertThat(notFinished).hasSize(2);
                     assertThat(notFinished).extracting(Entry::getSymbol).containsExactlyInAnyOrder(
                             "MSFT", "NVDA"
@@ -507,17 +506,17 @@ class BalanceIntegratedTest {
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(4);
-                    List<Entry> finished = response.getItems().stream().filter(Entry::isFinished).toList();
+                    assertThat(response.getContent()).hasSize(4);
+                    List<Entry> finished = response.getContent().stream().filter(Entry::isFinished).toList();
                     assertThat(finished).hasSize(3);
                     assertThat(finished).extracting(Entry::getSymbol).containsExactlyInAnyOrder(
                             "APPL", "NVDA", "TSLA"
                     );
 
-                    List<Entry> notFinished = response.getItems().stream().filter(entry -> !entry.isFinished()).toList();
+                    List<Entry> notFinished = response.getContent().stream().filter(entry -> !entry.isFinished()).toList();
                     assertThat(notFinished).hasSize(1);
                     assertThat(notFinished).extracting(Entry::getSymbol).containsExactly(
                             "MSFT"
@@ -584,20 +583,20 @@ class BalanceIntegratedTest {
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(5);
+                    assertThat(response.getContent()).hasSize(5);
 
-                    List<Entry> finished = response.getItems().stream().filter(Entry::isFinished).toList();
+                    List<Entry> finished = response.getContent().stream().filter(Entry::isFinished).toList();
                     assertThat(finished).hasSize(4);
 
-                    List<Entry> tradesFinished = response.getItems().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> tradesFinished = response.getContent().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(tradesFinished).extracting(Entry::getSymbol).containsExactlyInAnyOrder(
                             "APPL", "NVDA", "TSLA"
                     );
 
-                    List<Entry> notFinished = response.getItems().stream().filter(entry -> !entry.isFinished()).toList();
+                    List<Entry> notFinished = response.getContent().stream().filter(entry -> !entry.isFinished()).toList();
                     assertThat(notFinished).hasSize(1);
                     assertThat(notFinished).extracting(Entry::getSymbol).containsExactly(
                             "MSFT"
@@ -606,7 +605,7 @@ class BalanceIntegratedTest {
                             EntryType.TRADE
                     );
 
-                    List<Entry> withdrawals = response.getItems().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> withdrawals = response.getContent().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(withdrawals).hasSize(1);
                 });
 
@@ -670,20 +669,20 @@ class BalanceIntegratedTest {
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(6);
+                    assertThat(response.getContent()).hasSize(6);
 
-                    List<Entry> finished = response.getItems().stream().filter(Entry::isFinished).toList();
+                    List<Entry> finished = response.getContent().stream().filter(Entry::isFinished).toList();
                     assertThat(finished).hasSize(5);
 
-                    List<Entry> tradesFinished = response.getItems().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> tradesFinished = response.getContent().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(tradesFinished).extracting(Entry::getSymbol).containsExactlyInAnyOrder(
                             "APPL", "NVDA", "TSLA"
                     );
 
-                    List<Entry> notFinished = response.getItems().stream().filter(entry -> !entry.isFinished()).toList();
+                    List<Entry> notFinished = response.getContent().stream().filter(entry -> !entry.isFinished()).toList();
                     assertThat(notFinished).hasSize(1);
                     assertThat(notFinished).extracting(Entry::getSymbol).containsExactly(
                             "MSFT"
@@ -692,10 +691,10 @@ class BalanceIntegratedTest {
                             EntryType.TRADE
                     );
 
-                    List<Entry> withdrawals = response.getItems().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> withdrawals = response.getContent().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(withdrawals).hasSize(1);
 
-                    List<Entry> taxesEntries = response.getItems().stream().filter(entry -> EntryType.TAXES.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> taxesEntries = response.getContent().stream().filter(entry -> EntryType.TAXES.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(taxesEntries).hasSize(1);
                 });
 
@@ -758,26 +757,26 @@ class BalanceIntegratedTest {
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(6);
+                    assertThat(response.getContent()).hasSize(6);
 
-                    List<Entry> finished = response.getItems().stream().filter(Entry::isFinished).toList();
+                    List<Entry> finished = response.getContent().stream().filter(Entry::isFinished).toList();
                     assertThat(finished).hasSize(6);
 
-                    List<Entry> tradesFinished = response.getItems().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> tradesFinished = response.getContent().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(tradesFinished).extracting(Entry::getSymbol).containsExactlyInAnyOrder(
                             "APPL", "NVDA", "TSLA", "MSFT"
                     );
 
-                    List<Entry> notFinished = response.getItems().stream().filter(entry -> !entry.isFinished()).toList();
+                    List<Entry> notFinished = response.getContent().stream().filter(entry -> !entry.isFinished()).toList();
                     assertThat(notFinished).isEmpty();
 
-                    List<Entry> withdrawals = response.getItems().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> withdrawals = response.getContent().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(withdrawals).hasSize(1);
 
-                    List<Entry> taxesEntries = response.getItems().stream().filter(entry -> EntryType.TAXES.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> taxesEntries = response.getContent().stream().filter(entry -> EntryType.TAXES.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(taxesEntries).hasSize(1);
                 });
 
@@ -841,29 +840,29 @@ class BalanceIntegratedTest {
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(7);
+                    assertThat(response.getContent()).hasSize(7);
 
-                    List<Entry> finished = response.getItems().stream().filter(Entry::isFinished).toList();
+                    List<Entry> finished = response.getContent().stream().filter(Entry::isFinished).toList();
                     assertThat(finished).hasSize(7);
 
-                    List<Entry> tradesFinished = response.getItems().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> tradesFinished = response.getContent().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(tradesFinished).extracting(Entry::getSymbol).containsExactlyInAnyOrder(
                             "APPL", "NVDA", "TSLA", "MSFT"
                     );
 
-                    List<Entry> notFinished = response.getItems().stream().filter(entry -> !entry.isFinished()).toList();
+                    List<Entry> notFinished = response.getContent().stream().filter(entry -> !entry.isFinished()).toList();
                     assertThat(notFinished).isEmpty();
 
-                    List<Entry> withdrawals = response.getItems().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> withdrawals = response.getContent().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(withdrawals).hasSize(1);
 
-                    List<Entry> taxesEntries = response.getItems().stream().filter(entry -> EntryType.TAXES.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> taxesEntries = response.getContent().stream().filter(entry -> EntryType.TAXES.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(taxesEntries).hasSize(1);
 
-                    List<Entry> deposits = response.getItems().stream().filter(entry -> EntryType.DEPOSIT.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> deposits = response.getContent().stream().filter(entry -> EntryType.DEPOSIT.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(deposits).hasSize(1);
                 });
 
@@ -910,29 +909,29 @@ class BalanceIntegratedTest {
                         .build(journalId))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
                 .value(response -> {
-                    assertThat(response.getItems()).hasSize(6);
+                    assertThat(response.getContent()).hasSize(6);
 
-                    List<Entry> finished = response.getItems().stream().filter(Entry::isFinished).toList();
+                    List<Entry> finished = response.getContent().stream().filter(Entry::isFinished).toList();
                     assertThat(finished).hasSize(6);
 
-                    List<Entry> tradesFinished = response.getItems().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> tradesFinished = response.getContent().stream().filter(entry -> EntryType.TRADE.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(tradesFinished).extracting(Entry::getSymbol).containsExactlyInAnyOrder(
                             "NVDA", "TSLA", "MSFT"
                     );
 
-                    List<Entry> notFinished = response.getItems().stream().filter(entry -> !entry.isFinished()).toList();
+                    List<Entry> notFinished = response.getContent().stream().filter(entry -> !entry.isFinished()).toList();
                     assertThat(notFinished).isEmpty();
 
-                    List<Entry> withdrawals = response.getItems().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> withdrawals = response.getContent().stream().filter(entry -> EntryType.WITHDRAWAL.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(withdrawals).hasSize(1);
 
-                    List<Entry> taxesEntries = response.getItems().stream().filter(entry -> EntryType.TAXES.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> taxesEntries = response.getContent().stream().filter(entry -> EntryType.TAXES.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(taxesEntries).hasSize(1);
 
-                    List<Entry> deposits = response.getItems().stream().filter(entry -> EntryType.DEPOSIT.equals(entry.getType())).filter(Entry::isFinished).toList();
+                    List<Entry> deposits = response.getContent().stream().filter(entry -> EntryType.DEPOSIT.equals(entry.getType())).filter(Entry::isFinished).toList();
                     assertThat(deposits).hasSize(1);
                 });
     }
