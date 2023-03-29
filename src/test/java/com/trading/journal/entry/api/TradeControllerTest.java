@@ -15,7 +15,6 @@ import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.journal.Journal;
-import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.strategy.Strategy;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -588,9 +587,9 @@ class TradeControllerTest {
                 .exchange()
                 .expectStatus()
                 .isOk()
-                .expectBody(new ParameterizedTypeReference<PageResponse<Entry>>() {
+                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
                 })
-                .value(response -> assertThat(response.getItems()).hasSize(5));
+                .value(response -> assertThat(response.getContent()).hasSize(5));
 
         webTestClient
                 .get()

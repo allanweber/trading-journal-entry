@@ -2,10 +2,11 @@ package com.trading.journal.entry.api;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
-import com.trading.journal.entry.queries.data.PageResponse;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,9 +26,9 @@ public class StrategyController implements StrategyApi {
     private final StrategyService strategyService;
 
     @Override
-    public ResponseEntity<PageResponse<Strategy>> getAll(AccessTokenInfo accessTokenInfo, int page, int size) {
-        PageResponse<Strategy> strategies = strategyService.getAll(accessTokenInfo, page, size);
-        return ok(strategies);
+    public ResponseEntity<PageWrapper<Strategy>> getAll(AccessTokenInfo accessTokenInfo, Pageable pageable) {
+        Page<Strategy> strategies = strategyService.getAll(accessTokenInfo, pageable);
+        return ok(new PageWrapper<>(strategies));
     }
 
     @Override

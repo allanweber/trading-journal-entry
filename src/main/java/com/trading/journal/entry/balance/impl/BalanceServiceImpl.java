@@ -9,8 +9,9 @@ import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -53,13 +54,8 @@ public class BalanceServiceImpl implements BalanceService {
     private Balance calculateBalance(AccessTokenInfo accessToken, String journalId) {
         Journal journal = journalService.get(accessToken, journalId);
         CollectionName collectionName = new CollectionName(accessToken, journal.getName());
-
-        PageableRequest pageableRequest = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by("date").ascending())
-                .build();
-        List<Entry> entries = entryRepository.findAll(collectionName, pageableRequest).get().toList();
+        Pageable page = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
+        List<Entry> entries = entryRepository.findAll(collectionName, page).get().toList();
 
         BigDecimal closedPositions = BigDecimal.ZERO;
         BigDecimal deposits = BigDecimal.ZERO;
@@ -108,14 +104,9 @@ public class BalanceServiceImpl implements BalanceService {
     private Balance calculateAvailable(AccessTokenInfo accessToken, String journalId) {
         Journal journal = journalService.get(accessToken, journalId);
         CollectionName collectionName = new CollectionName(accessToken, journal.getName());
-
-        PageableRequest pageableRequest = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by("date").ascending())
-                .build();
+        Pageable page = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
         Query query = new Query(Criteria.where("netResult").exists(false));
-        List<Entry> openedEntries = entryRepository.findAll(collectionName, pageableRequest, query).get().toList();
+        List<Entry> openedEntries = entryRepository.findAll(collectionName, page, query).get().toList();
 
         BigDecimal openedPositions = openedEntries.stream().map(entry -> entry.getPrice().multiply(entry.getSize()))
                 .reduce(BigDecimal::add)

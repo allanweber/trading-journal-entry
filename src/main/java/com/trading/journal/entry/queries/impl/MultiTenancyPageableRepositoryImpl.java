@@ -2,7 +2,6 @@ package com.trading.journal.entry.queries.impl;
 
 import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.queries.WithFilterPageableRepository;
-import com.trading.journal.entry.queries.data.PageableRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -34,16 +33,15 @@ public class MultiTenancyPageableRepositoryImpl<T, I extends Serializable> exten
     }
 
     @Override
-    public Page<T> findAll(CollectionName collectionName, PageableRequest pageRequest) {
-        return findAll(collectionName, pageRequest, new Query());
+    public Page<T> findAll(CollectionName collectionName, Pageable pageable) {
+        return findAll(collectionName, pageable, new Query());
     }
 
     @Override
-    public Page<T> findAll(CollectionName collectionName, PageableRequest pageRequest, Query query) {
+    public Page<T> findAll(CollectionName collectionName, Pageable pageable, Query query) {
         Assert.notNull(collectionName, COLLECTION_NAME_IS_REQUIRED);
-        Assert.notNull(pageRequest, PAGE_REQUEST_IS_REQUIRED);
+        Assert.notNull(pageable, PAGE_REQUEST_IS_REQUIRED);
         long total = mongoOperations.count(query, metadata.getJavaType(), collectionName.collectionName(metadata));
-        Pageable pageable = pageRequest.pageable();
         List<T> content = mongoOperations.find(query.with(pageable), metadata.getJavaType(), collectionName.collectionName(metadata));
 
         return new PageImpl<T>(content, pageable, total);

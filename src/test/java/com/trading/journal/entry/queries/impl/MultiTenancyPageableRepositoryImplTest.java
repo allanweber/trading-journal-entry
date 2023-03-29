@@ -4,7 +4,6 @@ import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.mongodb.client.result.DeleteResult;
 import com.trading.journal.entry.EntryForTest;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.PageableRequest;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.bson.Document;
@@ -15,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationResults;
@@ -65,11 +65,11 @@ class MultiTenancyPageableRepositoryImplTest {
     @DisplayName("Find all using queries")
     @Test
     void findAll() {
-        PageableRequest pageableRequest = PageableRequest.builder().page(1).build();
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE);
         when(mongoOperations.count(any(), eq(EntryForTest.class), eq(collection))).thenReturn(1L);
         when(mongoOperations.find(any(), eq(EntryForTest.class), eq(collection))).thenReturn(singletonList(new EntryForTest()));
 
-        Page<EntryForTest> all = repository.findAll(collectionName, pageableRequest);
+        Page<EntryForTest> all = repository.findAll(collectionName, pageable);
         assertThat(all.get()).isNotEmpty();
     }
 

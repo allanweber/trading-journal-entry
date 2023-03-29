@@ -1389,7 +1389,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(6);\r",
+									"\tpm.expect(response.content.length).to.equal(6);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1517,7 +1517,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(6);\r",
+									"\tpm.expect(response.content.length).to.equal(6);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1758,7 +1758,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(2);\r",
+									"\tpm.expect(response.content.length).to.equal(2);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -1821,8 +1821,8 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(1);\r",
-									"\tpm.expect(response[0].symbol).to.equal('MSFT');\r",
+									"\tpm.expect(response.content.length).to.equal(1);\r",
+									"\tpm.expect(response.content[0].symbol).to.equal('MSFT');\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2151,8 +2151,8 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(1);\r",
-									"\tpm.expect(response[0].symbol).to.equal('MSFT');\r",
+									"\tpm.expect(response.content.length).to.equal(1);\r",
+									"\tpm.expect(response.content[0].symbol).to.equal('MSFT');\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2211,7 +2211,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(1);\r",
+									"\tpm.expect(response.content.length).to.equal(1);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -2942,7 +2942,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(5);\r",
+									"\tpm.expect(response.content.length).to.equal(5);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -3302,7 +3302,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(2);\r",
+									"\tpm.expect(response.content.length).to.equal(2);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -3617,7 +3617,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(1);\r",
+									"\tpm.expect(response.content.length).to.equal(1);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4053,7 +4053,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(2);\r",
+									"\tpm.expect(response.content.length).to.equal(2);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4169,7 +4169,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(2);\r",
+									"\tpm.expect(response.content.length).to.equal(2);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4228,7 +4228,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(3);\r",
+									"\tpm.expect(response.content.length).to.equal(3);\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4287,7 +4287,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"    \r",
-									"\tpm.expect(response.length).to.equal(0);\r",
+									"\tpm.expect(response.content.length).to.equal(0);\r",
 									"});"
 								],
 								"type": "text/javascript"

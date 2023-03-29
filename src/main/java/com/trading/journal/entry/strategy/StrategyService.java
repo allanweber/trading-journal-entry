@@ -1,12 +1,13 @@
 package com.trading.journal.entry.strategy;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
-import com.trading.journal.entry.queries.data.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.Optional;
 
 public interface StrategyService {
-    PageResponse<Strategy> getAll(AccessTokenInfo accessToken, int page, int size);
+    Page<Strategy> getAll(AccessTokenInfo accessToken, Pageable pageable);
 
     Strategy save(AccessTokenInfo accessToken, Strategy strategy);
 

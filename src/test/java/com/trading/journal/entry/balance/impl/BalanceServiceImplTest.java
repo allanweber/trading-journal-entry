@@ -8,7 +8,6 @@ import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.queries.CollectionName;
-import com.trading.journal.entry.queries.data.PageableRequest;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -17,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
@@ -62,12 +62,6 @@ class BalanceServiceImplTest {
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
 
-        PageableRequest pageableRequest = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by("date").ascending())
-                .build();
-
         List<Entry> entries = asList(
                 //Closed Positions
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(50.31)).build(),
@@ -84,8 +78,9 @@ class BalanceServiceImplTest {
                 Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(45.89)).size(BigDecimal.valueOf(4)).build()
         );
 
-        Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
-        when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
+        Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
+        when(entryRepository.findAll(collectionName, pageable)).thenReturn(page);
 
         Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
 
@@ -106,12 +101,6 @@ class BalanceServiceImplTest {
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
 
-        PageableRequest pageableRequest = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by("date").ascending())
-                .build();
-
         List<Entry> entries = asList(
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(50.31)).build(),
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(-35.59)).build(),
@@ -127,8 +116,9 @@ class BalanceServiceImplTest {
                 Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(45.89)).size(BigDecimal.valueOf(4)).build()
         );
 
-        Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
-        when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
+        Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
+        when(entryRepository.findAll(collectionName, pageable)).thenReturn(page);
 
         Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
 
@@ -148,13 +138,6 @@ class BalanceServiceImplTest {
         BigDecimal startBalance = BigDecimal.valueOf(-100);
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
-
-        PageableRequest pageableRequest = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by("date").ascending())
-                .build();
-
         List<Entry> entries = asList(
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(50.31)).build(),
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(35.59)).build(),
@@ -172,8 +155,9 @@ class BalanceServiceImplTest {
                 Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(45.89)).size(BigDecimal.valueOf(4)).build()
         );
 
-        Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
-        when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
+        Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
+        when(entryRepository.findAll(collectionName, pageable)).thenReturn(page);
 
         Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
 
@@ -194,12 +178,6 @@ class BalanceServiceImplTest {
 
         when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
 
-        PageableRequest pageableRequest = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by("date").ascending())
-                .build();
-
         List<Entry> entries = asList(
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(50.31)).build(),
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(35.59)).build(),
@@ -217,8 +195,9 @@ class BalanceServiceImplTest {
                 Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(45.89)).size(BigDecimal.valueOf(4)).build()
         );
 
-        Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
-        when(entryRepository.findAll(collectionName, pageableRequest)).thenReturn(page);
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
+        Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
+        when(entryRepository.findAll(collectionName, pageable)).thenReturn(page);
 
         Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
 
@@ -251,12 +230,6 @@ class BalanceServiceImplTest {
                 .build();
         when(journalService.get(accessToken, journalId)).thenReturn(journal);
 
-        PageableRequest pageableRequest = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by("date").ascending())
-                .build();
-
         List<Entry> entries = asList(
                 //Opened positions
                 Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(123.45)).size(BigDecimal.valueOf(1.2)).build(),
@@ -265,9 +238,10 @@ class BalanceServiceImplTest {
                 Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(45.89)).size(BigDecimal.valueOf(4)).build()
         );
 
-        Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
+        Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
         Query query = new Query(Criteria.where("netResult").exists(false));
-        when(entryRepository.findAll(collectionName, pageableRequest, query)).thenReturn(page);
+        when(entryRepository.findAll(collectionName, pageable, query)).thenReturn(page);
 
         Balance balance = balanceService.calculateAvailableBalance(accessToken, journalId);
 
@@ -300,12 +274,6 @@ class BalanceServiceImplTest {
                 .build();
         when(journalService.get(accessToken, journalId)).thenReturn(journal);
 
-        PageableRequest pageableRequest = PageableRequest.builder()
-                .page(0)
-                .size(Integer.MAX_VALUE)
-                .sort(Sort.by("date").ascending())
-                .build();
-
         List<Entry> entries = asList(
                 //Opened positions
                 Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(123.45)).size(BigDecimal.valueOf(1.2)).build(),
@@ -314,9 +282,10 @@ class BalanceServiceImplTest {
                 Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(45.89)).size(BigDecimal.valueOf(4)).build()
         );
 
-        Page<Entry> page = new PageImpl<>(entries, pageableRequest.pageable(), 1L);
+        PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
+        Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
         Query query = new Query(Criteria.where("netResult").exists(false));
-        when(entryRepository.findAll(collectionName, pageableRequest, query)).thenReturn(page);
+        when(entryRepository.findAll(collectionName, pageable, query)).thenReturn(page);
 
         Balance balance = balanceService.calculateAvailableBalance(accessToken, journalId);
 
