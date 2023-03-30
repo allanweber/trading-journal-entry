@@ -1,4 +1,4 @@
-package com.trading.journal.entry;
+package tooling;
 
 import com.trading.journal.entry.entries.EntryDirection;
 

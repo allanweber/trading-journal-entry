@@ -1,4 +1,4 @@
-package com.trading.journal.entry;
+package tooling;
 
 import org.springframework.security.test.context.support.WithSecurityContext;
 
