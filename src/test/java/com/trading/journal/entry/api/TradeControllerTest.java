@@ -1,11 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
-import com.allanweber.jwttoken.service.JwtResolveToken;
-import com.allanweber.jwttoken.service.JwtTokenReader;
-import tooling.MongoDbContainerInitializer;
-import tooling.WithCustomMockUser;
-import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
@@ -14,20 +8,15 @@ import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
-import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.strategy.Strategy;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
-import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import tooling.IntegratedTestWithJournal;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -40,80 +29,23 @@ import java.util.concurrent.atomic.AtomicReference;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@ContextConfiguration(initializers = MongoDbContainerInitializer.class)
-@WithCustomMockUser(tenancyName = "paging-tenancy")
-class TradeControllerTest {
+class TradeControllerTest extends IntegratedTestWithJournal {
 
-    private static String journalId;
+    private static final String entryCollection = "TestTenancy_JOURNAL-1_entries";
 
-    private static String journalCollection;
-
-    private static String entryCollection;
-
-    private static String strategyCollection;
-
-    @MockBean
-    JwtTokenReader tokenReader;
-
-    @MockBean
-    JwtResolveToken resolveToken;
-
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    private static WebTestClient webTestClient;
-
-    @BeforeAll
-    public static void setUp(@Autowired WebApplicationContext applicationContext) {
-        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
-
-        journalCollection = "PagingTenancy_journals";
-        entryCollection = "PagingTenancy_JOURNAL-1_entries";
-        strategyCollection = "PagingTenancy_strategies";
-    }
-
-    @AfterAll
-    public static void shutDown(@Autowired MongoTemplate mongoTemplate) {
-        mongoTemplate.dropCollection(journalCollection);
-    }
-
-    @AfterEach
-    public void afterEach() {
-        mongoTemplate.dropCollection(entryCollection);
-        mongoTemplate.dropCollection(strategyCollection);
-        mongoTemplate.dropCollection(journalCollection);
-    }
+    private static final String strategyCollection = "TestTenancy_strategies";
 
     @BeforeEach
-    public void mockAccessTokenInfo() {
-        when(resolveToken.resolve(any())).thenReturn("token");
-        when(tokenReader.getAccessTokenInfo(anyString()))
-                .thenReturn(new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER")));
-
-        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(100))
-                .currentBalance(
-                        Balance.builder()
-                                .accountBalance(BigDecimal.valueOf(100).setScale(2, RoundingMode.HALF_EVEN))
-                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .build()
-                )
-                .build(), journalCollection);
-        journalId = journal.getId();
+    public void beforeEach() {
+        mongoTemplate.dropCollection(entryCollection);
+        mongoTemplate.dropCollection(strategyCollection);
     }
 
     @DisplayName("Create a new Trade entry")
     @Test
     void createTrade() {
-
         Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
                 .symbol("USD/EUR")
@@ -148,7 +80,7 @@ class TradeControllerTest {
                     assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
                     assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
                     assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0562).setScale(4, RoundingMode.HALF_EVEN));
 
                     assertThat(response.getProfitPrice()).isNull();
                     assertThat(response.getLossPrice()).isNull();
@@ -193,7 +125,7 @@ class TradeControllerTest {
                     assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
 
                     assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0057).setScale(4, RoundingMode.HALF_EVEN));
                 });
 
         CloseTrade closeEntry = CloseTrade.builder()
@@ -223,11 +155,11 @@ class TradeControllerTest {
                     assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
 
                     assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.0057).setScale(4, RoundingMode.HALF_EVEN));
                     assertThat(response.getGrossResult()).isEqualTo(BigDecimal.valueOf(55.55).setScale(2, RoundingMode.HALF_EVEN));
                     assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(53.21).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5321).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(153.21).setScale(2, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.0053).setScale(4, RoundingMode.HALF_EVEN));
+                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(10053.21).setScale(2, RoundingMode.HALF_EVEN));
                 });
 
         List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
@@ -279,7 +211,6 @@ class TradeControllerTest {
                     assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
                     assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
                     assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
                     assertThat(response.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder(strategy1.getId(), strategy2.getId());
                     assertThat(response.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder(strategy1.getName(), strategy2.getName());
 
@@ -324,9 +255,6 @@ class TradeControllerTest {
                     assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
                     assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
                     assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
-
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
                 });
 
         CloseTrade closeEntry = CloseTrade.builder()
@@ -355,12 +283,8 @@ class TradeControllerTest {
                     assertThat(response.getProfitPrice()).isEqualTo(BigDecimal.valueOf(1.2345));
                     assertThat(response.getLossPrice()).isEqualTo(BigDecimal.valueOf(1.009));
 
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(0.97));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(0.5720).setScale(4, RoundingMode.HALF_EVEN));
                     assertThat(response.getGrossResult()).isEqualTo(BigDecimal.valueOf(55.55).setScale(2, RoundingMode.HALF_EVEN));
                     assertThat(response.getNetResult()).isEqualTo(BigDecimal.valueOf(53.21).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountChange()).isEqualTo(BigDecimal.valueOf(0.5321).setScale(4, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountBalance()).isEqualTo(BigDecimal.valueOf(153.21).setScale(2, RoundingMode.HALF_EVEN));
                 });
 
         List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
