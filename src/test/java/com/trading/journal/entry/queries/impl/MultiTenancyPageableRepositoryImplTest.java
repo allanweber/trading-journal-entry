@@ -2,7 +2,7 @@ package com.trading.journal.entry.queries.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.mongodb.client.result.DeleteResult;
-import com.trading.journal.entry.EntryForTest;
+import tooling.EntryForTest;
 import com.trading.journal.entry.queries.CollectionName;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;

@@ -1,6 +1,6 @@
 package com.trading.journal.entry.configuration;
 
-import com.trading.journal.entry.MongoDbContainerInitializer;
+import tooling.MongoDbContainerInitializer;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,10 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
-import com.allanweber.jwttoken.service.JwtResolveToken;
-import com.allanweber.jwttoken.service.JwtTokenReader;
-import com.trading.journal.entry.MongoDbContainerInitializer;
-import com.trading.journal.entry.WithCustomMockUser;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
@@ -15,99 +10,51 @@ import com.trading.journal.entry.entries.taxes.Taxes;
 import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.withdrawal.Withdrawal;
-import com.trading.journal.entry.journal.Journal;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
-import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import tooling.IntegratedTestWithJournal;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@ContextConfiguration(initializers = MongoDbContainerInitializer.class)
-@WithCustomMockUser(tenancyName = "paging-tenancy")
-class BalanceIntegratedTest {
-
-    private static String journalId;
-
-    private static String journalCollection;
-
-    private static String entryCollection;
-
-    @MockBean
-    JwtTokenReader tokenReader;
-
-    @MockBean
-    JwtResolveToken resolveToken;
-
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    private static WebTestClient webTestClient;
-
-    @BeforeAll
-    public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired MongoTemplate mongoTemplate) {
-        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
-
-        journalCollection = "PagingTenancy_journals";
-        Journal build = Journal.builder()
-                .name("JOURNAL-1")
-                .startBalance(BigDecimal.valueOf(10000))
-                .startJournal(LocalDateTime.of(2022, 11, 10, 15, 25, 35))
-                .currentBalance(
-                        Balance.builder()
-                                .accountBalance(BigDecimal.valueOf(10000).setScale(2, RoundingMode.HALF_EVEN))
-                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .build()
-                )
-                .build();
-        Journal journal = mongoTemplate.save(build, journalCollection);
-        journalId = journal.getId();
-        entryCollection = "PagingTenancy_JOURNAL-1_entries";
-    }
-
-    @AfterAll
-    public static void shutDown(@Autowired MongoTemplate mongoTemplate) {
-        mongoTemplate.dropCollection(journalCollection);
-    }
-
-    @AfterEach
-    public void afterEach() {
-        mongoTemplate.dropCollection(entryCollection);
-    }
+class BalanceIntegratedTest extends IntegratedTestWithJournal {
 
     @BeforeEach
-    public void mockAccessTokenInfo() {
-        when(resolveToken.resolve(any())).thenReturn("token");
-        when(tokenReader.getAccessTokenInfo(anyString()))
-                .thenReturn(new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER")));
+    public void beforeEach() {
+        mongoTemplate.dropCollection("TestTenancy_JOURNAL-1_entries");
     }
 
-    @DisplayName("Create a new Trade entry")
+    @DisplayName("Get journal balance for a journal not found")
     @Test
-    void createTrade() {
+    void getBalanceNotFound() {
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/balance")
+                        .build(1))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isNotFound()
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error")).isEqualTo("Journal not found"));
+    }
+
+    @DisplayName("Create entries and check for Balance")
+    @Test
+    void balance() {
         //Create an entry
         AtomicReference<String> entryMSFTId = new AtomicReference<>();
         Trade entryMSFT = Trade.builder()

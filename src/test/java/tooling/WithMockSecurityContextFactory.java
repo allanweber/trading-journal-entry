@@ -1,4 +1,4 @@
-package com.trading.journal.entry;
+package tooling;
 
 import com.allanweber.jwttoken.data.ContextUser;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

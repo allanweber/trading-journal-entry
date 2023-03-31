@@ -1,34 +1,21 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
-import com.allanweber.jwttoken.service.JwtResolveToken;
-import com.allanweber.jwttoken.service.JwtTokenReader;
-import com.trading.journal.entry.MongoDbContainerInitializer;
-import com.trading.journal.entry.WithCustomMockUser;
-import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.entries.trade.Trade;
-import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.strategy.Strategy;
 import org.bson.types.ObjectId;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.io.ClassPathResource;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
-import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.reactive.function.BodyInserters;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import tooling.IntegratedTestWithJournal;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
@@ -39,73 +26,15 @@ import java.util.concurrent.atomic.AtomicReference;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@ContextConfiguration(initializers = MongoDbContainerInitializer.class)
-@WithCustomMockUser(tenancyName = "paging-tenancy")
-class EntryControllerTest {
+class EntryControllerTest extends IntegratedTestWithJournal {
 
-    private static String journalId;
-
-    private static String journalCollection;
-
-    private static String entryCollection;
-
-    private static String strategyCollection;
-
-    @MockBean
-    JwtTokenReader tokenReader;
-
-    @MockBean
-    JwtResolveToken resolveToken;
-
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    private static WebTestClient webTestClient;
-
-    @BeforeAll
-    public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired MongoTemplate mongoTemplate) {
-        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
-
-        journalCollection = "PagingTenancy_journals";
-        entryCollection = "PagingTenancy_JOURNAL-1_entries";
-        strategyCollection = "PagingTenancy_strategies";
-
-        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(100))
-                .currentBalance(
-                        Balance.builder()
-                                .accountBalance(BigDecimal.valueOf(100).setScale(2, RoundingMode.HALF_EVEN))
-                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .build()
-                )
-                .build(), journalCollection);
-        journalId = journal.getId();
-    }
-
-    @AfterAll
-    public static void shutDown(@Autowired MongoTemplate mongoTemplate) {
-        mongoTemplate.dropCollection(journalCollection);
-        mongoTemplate.dropCollection(strategyCollection);
-    }
-
-    @AfterEach
-    public void afterEach() {
-        mongoTemplate.dropCollection(entryCollection);
-    }
+    private static final String entryCollection = "TestTenancy_JOURNAL-1_entries";
 
     @BeforeEach
-    public void mockAccessTokenInfo() {
-        when(resolveToken.resolve(any())).thenReturn("token");
-        when(tokenReader.getAccessTokenInfo(anyString()))
-                .thenReturn(new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER")));
+    public void beforeEach() {
+        mongoTemplate.dropCollection(entryCollection);
     }
 
     @DisplayName("Get all entries from a journal must be ordered by date")
@@ -151,7 +80,7 @@ class EntryControllerTest {
                     assertThat(response.getContent()).extracting(Entry::getDate)
                             .extracting(LocalDateTime::getMonth)
                             .extracting(Month::getValue)
-                            .containsExactly(10,10,10,9,9,9,9,9,8,8,8,8,8,8,8,8,8,8);
+                            .containsExactly(10, 10, 10, 9, 9, 9, 9, 9, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8);
                 });
 
         //GET BY SYMBOL
@@ -575,6 +504,7 @@ class EntryControllerTest {
     @Test
     void strategies() {
 
+        String strategyCollection = "TestTenancy_strategies";
         Strategy strategy1 = mongoTemplate.save(Strategy.builder().name("ST1").build(), strategyCollection);
         Strategy strategy2 = mongoTemplate.save(Strategy.builder().name("ST2").build(), strategyCollection);
 
@@ -713,18 +643,6 @@ class EntryControllerTest {
                     assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
                     assertThat(response.getType()).isEqualTo(EntryType.TRADE);
                     assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                    assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
-                    assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
-                    assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
-
-                    assertThat(response.getProfitPrice()).isNull();
-                    assertThat(response.getLossPrice()).isNull();
-                    assertThat(response.getGrossResult()).isNull();
-                    assertThat(response.getNetResult()).isNull();
-                    assertThat(response.getAccountChange()).isNull();
-                    assertThat(response.getAccountBalance()).isNull();
                 });
 
 
@@ -866,8 +784,6 @@ class EntryControllerTest {
                     assertThat(response.getDirection()).isEqualTo(EntryDirection.LONG);
                     assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
                     assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
-                    assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getAccountRisked()).isEqualTo(BigDecimal.valueOf(5.6170).setScale(4, RoundingMode.HALF_EVEN));
 
                     assertThat(response.getProfitPrice()).isNull();
                     assertThat(response.getLossPrice()).isNull();

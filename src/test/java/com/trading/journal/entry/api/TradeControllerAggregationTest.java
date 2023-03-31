@@ -1,11 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
-import com.allanweber.jwttoken.service.JwtResolveToken;
-import com.allanweber.jwttoken.service.JwtTokenReader;
-import com.trading.journal.entry.MongoDbContainerInitializer;
-import com.trading.journal.entry.WithCustomMockUser;
-import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
@@ -13,89 +7,28 @@ import com.trading.journal.entry.entries.trade.aggregate.AggregateType;
 import com.trading.journal.entry.entries.trade.aggregate.PeriodAggregatedResult;
 import com.trading.journal.entry.entries.trade.aggregate.PeriodItem;
 import com.trading.journal.entry.entries.trade.aggregate.TradesAggregated;
-import com.trading.journal.entry.journal.Journal;
-import org.junit.jupiter.api.*;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.reactive.server.WebTestClient;
-import org.springframework.test.web.servlet.client.MockMvcWebTestClient;
-import org.springframework.web.context.WebApplicationContext;
-import org.testcontainers.junit.jupiter.Testcontainers;
+import tooling.IntegratedTestWithJournal;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Testcontainers
-@ContextConfiguration(initializers = MongoDbContainerInitializer.class)
-@WithCustomMockUser(tenancyName = "paging-tenancy")
-class TradeControllerAggregationTest {
-    private static String journalId;
+class TradeControllerAggregationTest extends IntegratedTestWithJournal {
 
-    private static String journalCollection;
-
-    private static String entryCollection;
-
-    @MockBean
-    JwtTokenReader tokenReader;
-
-    @MockBean
-    JwtResolveToken resolveToken;
-
-    @Autowired
-    MongoTemplate mongoTemplate;
-
-    private static WebTestClient webTestClient;
-
-    @BeforeAll
-    public static void setUp(@Autowired WebApplicationContext applicationContext, @Autowired MongoTemplate mongoTemplate) {
-        webTestClient = MockMvcWebTestClient.bindToApplicationContext(applicationContext).build();
-
-        journalCollection = "PagingTenancy_journals";
-        entryCollection = "PagingTenancy_JOURNAL-1_entries";
-
-        Journal journal = mongoTemplate.save(Journal.builder().name("JOURNAL-1").startBalance(BigDecimal.valueOf(100))
-                .currentBalance(
-                        Balance.builder()
-                                .accountBalance(BigDecimal.valueOf(100).setScale(2, RoundingMode.HALF_EVEN))
-                                .taxes(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .withdrawals(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .deposits(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .closedPositions(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
-                                .build()
-                )
-                .build(), journalCollection);
-        journalId = journal.getId();
-    }
-
-    @AfterAll
-    public static void shutDown(@Autowired MongoTemplate mongoTemplate) {
-        mongoTemplate.dropCollection(journalCollection);
-    }
-
-    @AfterEach
-    public void afterEach() {
-        mongoTemplate.dropCollection(entryCollection);
-    }
+    private static final String entryCollection = "TestTenancy_JOURNAL-1_entries";
 
     @BeforeEach
-    public void mockAccessTokenInfo() {
-        when(resolveToken.resolve(any())).thenReturn("token");
-        when(tokenReader.getAccessTokenInfo(anyString()))
-                .thenReturn(new AccessTokenInfo("user", 1L, "Paging-Tenancy", singletonList("ROLE_USER")));
+    public void beforeEach() {
+        mongoTemplate.dropCollection(entryCollection);
     }
 
     @DisplayName("Aggregate time period day")
