@@ -10,6 +10,7 @@ import com.trading.journal.entry.entries.taxes.Taxes;
 import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.entries.withdrawal.Withdrawal;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +29,11 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class BalanceIntegratedTest extends IntegratedTestWithJournal {
+
+    @BeforeEach
+    public void beforeEach() {
+        mongoTemplate.dropCollection("TestTenancy_JOURNAL-1_entries");
+    }
 
     @DisplayName("Get journal balance for a journal not found")
     @Test
