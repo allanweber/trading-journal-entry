@@ -14,6 +14,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Objects;
 
 @RequiredArgsConstructor
 @Component
@@ -28,8 +29,10 @@ public class TokenScopeFilter extends OncePerRequestFilter {
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
             token = bearerToken.replace("Bearer ", "");
         }
-        AccessTokenInfo accessTokenInfo = tokenReader.getAccessTokenInfo(token);
-        TokenRequestScope.set(accessTokenInfo);
+        if (Objects.nonNull(token)) {
+            AccessTokenInfo accessTokenInfo = tokenReader.getAccessTokenInfo(token);
+            TokenRequestScope.set(accessTokenInfo);
+        }
         filterChain.doFilter(request, response);
     }
 }
