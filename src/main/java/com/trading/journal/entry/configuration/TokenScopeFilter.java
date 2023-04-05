@@ -24,7 +24,7 @@ public class TokenScopeFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         String token = resolveTokenHttpHeader.resolve(request);
-        AccessTokenInfo accessTokenInfo = tokenReader.getTokenInfo(token);
+        AccessTokenInfo accessTokenInfo = tokenReader.getAccessTokenInfo(token);
         TokenRequestScope.set(accessTokenInfo);
         filterChain.doFilter(request, response);
     }
