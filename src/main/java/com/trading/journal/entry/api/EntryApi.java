@@ -1,6 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.*;
 import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
@@ -21,7 +20,7 @@ public interface EntryApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Entries retrieved"))
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<PageWrapper<Entry>> getAll(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
+    ResponseEntity<PageWrapper<Entry>> getAll(@PathVariable(name = "journal-id") String journalId,
                                               @SortDefault.SortDefaults({@SortDefault(sort = "date", direction = Sort.Direction.DESC)}) Pageable pageable,
                                               @ApiParam(name = "symbol", value = "MSFT, TSLA, etc") @RequestParam(value = "symbol", required = false) String symbol,
                                               @ApiParam(name = "type", value = "TRADE, TAXES, DEPOSIT, WITHDRAWAL") @RequestParam(value = "type", required = false) EntryType type,
@@ -35,24 +34,24 @@ public interface EntryApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Entry deleted"))
     @DeleteMapping("/{entry-id}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId);
+    ResponseEntity<Void> delete(@PathVariable(name = "entry-id") String entryId);
 
     @ApiOperation(notes = "Get entry", value = "Get entry")
     @ApiResponses(@ApiResponse(code = 200, message = "Entry returned"))
     @GetMapping("/{entry-id}")
     @ResponseStatus(HttpStatus.OK)
-    ResponseEntity<Entry> get(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId);
+    ResponseEntity<Entry> get(@PathVariable(name = "entry-id") String entryId);
 
     @ApiOperation(notes = "Upload Trade image", value = "Upload Trade image")
     @ApiResponses(@ApiResponse(code = 200, message = "Trade image uploaded"))
     @PostMapping("/{entry-id}/image")
-    ResponseEntity<Void> uploadImage(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId,
+    ResponseEntity<Void> uploadImage(@PathVariable(name = "entry-id") String entryId,
                                      @RequestParam("type") UploadType type,
                                      @RequestParam("file") MultipartFile file);
 
     @ApiOperation(notes = "Return Trade image", value = "Return Trade image")
     @ApiResponses(@ApiResponse(code = 200, message = "Trade image returned"))
     @GetMapping("/{entry-id}/image")
-    ResponseEntity<EntryImageResponse> getImage(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "entry-id") String entryId,
+    ResponseEntity<EntryImageResponse> getImage(@PathVariable(name = "entry-id") String entryId,
                                                 @RequestParam("type") UploadType type);
 }

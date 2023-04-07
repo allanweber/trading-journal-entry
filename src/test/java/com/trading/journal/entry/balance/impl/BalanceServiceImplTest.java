@@ -1,14 +1,11 @@
 package com.trading.journal.entry.balance.impl;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryRepository;
 import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
-import com.trading.journal.entry.queries.CollectionName;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,16 +25,11 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class BalanceServiceImplTest {
-
-    private static AccessTokenInfo accessToken;
-
-    private static CollectionName collectionName;
 
     @Mock
     EntryRepository entryRepository;
@@ -48,19 +40,13 @@ class BalanceServiceImplTest {
     @InjectMocks
     BalanceServiceImpl balanceService;
 
-    @BeforeAll
-    static void setUp() {
-        accessToken = new AccessTokenInfo("subject", 1L, "TENANCY", emptyList());
-        collectionName = new CollectionName(accessToken, "journal");
-    }
-
     @DisplayName("Start balance positive and many entries with different net results return a positive balance")
     @Test
     void balancePositive() {
         String journalId = "123456";
         BigDecimal startBalance = BigDecimal.valueOf(100);
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
+        when(journalService.get(journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
 
         List<Entry> entries = asList(
                 //Closed Positions
@@ -80,9 +66,10 @@ class BalanceServiceImplTest {
 
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
         Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
-        when(entryRepository.findAll(collectionName, pageable)).thenReturn(page);
+        Query query = new Query(new Criteria("journalId").is(journalId));
+        when(entryRepository.findAll(pageable, query)).thenReturn(page);
 
-        Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
+        Balance balance = balanceService.calculateCurrentBalance(journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(139.96));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(37.39));
@@ -99,7 +86,7 @@ class BalanceServiceImplTest {
         String journalId = "123456";
         BigDecimal startBalance = BigDecimal.valueOf(100);
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
+        when(journalService.get(journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
 
         List<Entry> entries = asList(
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(50.31)).build(),
@@ -118,9 +105,10 @@ class BalanceServiceImplTest {
 
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
         Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
-        when(entryRepository.findAll(collectionName, pageable)).thenReturn(page);
+        Query query = new Query(new Criteria("journalId").is(journalId));
+        when(entryRepository.findAll(pageable, query)).thenReturn(page);
 
-        Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
+        Balance balance = balanceService.calculateCurrentBalance(journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(-44.14));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(-7.95));
@@ -137,7 +125,7 @@ class BalanceServiceImplTest {
         String journalId = "123456";
         BigDecimal startBalance = BigDecimal.valueOf(-100);
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
+        when(journalService.get(journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
         List<Entry> entries = asList(
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(50.31)).build(),
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(35.59)).build(),
@@ -157,9 +145,10 @@ class BalanceServiceImplTest {
 
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
         Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
-        when(entryRepository.findAll(collectionName, pageable)).thenReturn(page);
+        Query query = new Query(new Criteria("journalId").is(journalId));
+        when(entryRepository.findAll(pageable, query)).thenReturn(page);
 
-        Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
+        Balance balance = balanceService.calculateCurrentBalance(journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(0.01));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(142.45));
@@ -176,7 +165,7 @@ class BalanceServiceImplTest {
         String journalId = "123456";
         BigDecimal startBalance = BigDecimal.valueOf(15000);
 
-        when(journalService.get(accessToken, journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
+        when(journalService.get(journalId)).thenReturn(Journal.builder().name("journal").startBalance(startBalance).build());
 
         List<Entry> entries = asList(
                 Entry.builder().type(EntryType.TRADE).netResult(BigDecimal.valueOf(50.31)).build(),
@@ -197,9 +186,10 @@ class BalanceServiceImplTest {
 
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
         Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
-        when(entryRepository.findAll(collectionName, pageable)).thenReturn(page);
+        Query query = new Query(new Criteria("journalId").is(journalId));
+        when(entryRepository.findAll(pageable, query)).thenReturn(page);
 
-        Balance balance = balanceService.calculateCurrentBalance(accessToken, journalId);
+        Balance balance = balanceService.calculateCurrentBalance(journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(15100.01));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.valueOf(142.45));
@@ -228,7 +218,7 @@ class BalanceServiceImplTest {
                         .available(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
                         .build())
                 .build();
-        when(journalService.get(accessToken, journalId)).thenReturn(journal);
+        when(journalService.get(journalId)).thenReturn(journal);
 
         List<Entry> entries = asList(
                 //Opened positions
@@ -240,10 +230,10 @@ class BalanceServiceImplTest {
 
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
         Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
-        Query query = new Query(Criteria.where("netResult").exists(false));
-        when(entryRepository.findAll(collectionName, pageable, query)).thenReturn(page);
+        Query query = new Query(Criteria.where("journalId").is(journalId).and("netResult").exists(false));
+        when(entryRepository.findAll(pageable, query)).thenReturn(page);
 
-        Balance balance = balanceService.calculateAvailableBalance(accessToken, journalId);
+        Balance balance = balanceService.calculateAvailableBalance(journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(15000.00).setScale(2, RoundingMode.HALF_EVEN));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
@@ -272,7 +262,7 @@ class BalanceServiceImplTest {
                         .available(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN))
                         .build())
                 .build();
-        when(journalService.get(accessToken, journalId)).thenReturn(journal);
+        when(journalService.get(journalId)).thenReturn(journal);
 
         List<Entry> entries = asList(
                 //Opened positions
@@ -284,10 +274,10 @@ class BalanceServiceImplTest {
 
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
         Page<Entry> page = new PageImpl<>(entries, pageable, 1L);
-        Query query = new Query(Criteria.where("netResult").exists(false));
-        when(entryRepository.findAll(collectionName, pageable, query)).thenReturn(page);
+        Query query = new Query(Criteria.where("journalId").is(journalId).and("netResult").exists(false));
+        when(entryRepository.findAll(pageable, query)).thenReturn(page);
 
-        Balance balance = balanceService.calculateAvailableBalance(accessToken, journalId);
+        Balance balance = balanceService.calculateAvailableBalance(journalId);
 
         assertThat(balance.getAccountBalance()).isEqualTo(BigDecimal.valueOf(5000.00).setScale(2, RoundingMode.HALF_EVEN));
         assertThat(balance.getClosedPositions()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
@@ -318,9 +308,9 @@ class BalanceServiceImplTest {
                 .lastBalance(LocalDateTime.now())
                 .currentBalance(balance)
                 .build();
-        when(journalService.get(accessToken, journalId)).thenReturn(journal);
+        when(journalService.get(journalId)).thenReturn(journal);
 
-        Balance currentBalance = balanceService.getCurrentBalance(accessToken, journalId);
+        Balance currentBalance = balanceService.getCurrentBalance(journalId);
         assertThat(currentBalance).isEqualTo(balance);
     }
 }

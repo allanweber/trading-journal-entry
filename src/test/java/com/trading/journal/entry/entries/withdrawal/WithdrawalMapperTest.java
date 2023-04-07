@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,12 +16,14 @@ class WithdrawalMapperTest {
     @DisplayName("Map Withdrawal to Entry when Creating Entry")
     @Test
     void create() {
+        String journalId = UUID.randomUUID().toString();
+
         Withdrawal withdrawal = Withdrawal.builder()
                 .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
                 .price(BigDecimal.valueOf(200.21))
                 .build();
 
-        Entry entry = WithdrawalMapper.INSTANCE.toEntry(withdrawal);
+        Entry entry = WithdrawalMapper.INSTANCE.toEntry(withdrawal, journalId);
 
         assertThat(entry.getId()).isNull();
         assertThat(entry.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 20, 15, 30, 50));
@@ -51,6 +54,7 @@ class WithdrawalMapperTest {
     @DisplayName("Given null return Null")
     @Test
     void nullReturn() {
-        assertThat(WithdrawalMapper.INSTANCE.toEntry(null)).isNull();
+        assertThat(WithdrawalMapper.INSTANCE.toEntry(null, null)).isNull();
+        assertThat(WithdrawalMapper.INSTANCE.toEntry(null, "")).isNotNull();
     }
 }

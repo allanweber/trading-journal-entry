@@ -12,5 +12,6 @@ public interface TaxesMapper {
     TaxesMapper INSTANCE = Mappers.getMapper(TaxesMapper.class);
 
     @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.TAXES)")
-    Entry toEntry(Taxes taxes);
+    @Mapping(target = "journalId", source = "journalId")
+    Entry toEntry(Taxes taxes, String journalId);
 }

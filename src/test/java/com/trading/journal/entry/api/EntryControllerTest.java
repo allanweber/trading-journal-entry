@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class EntryControllerTest extends IntegratedTestWithJournal {
 
-    private static final String entryCollection = "TestTenancy_JOURNAL-1_entries";
+    private static final String entryCollection = "TestTenancy_entries";
 
     @BeforeEach
     public void beforeEach() {
@@ -40,27 +40,27 @@ class EntryControllerTest extends IntegratedTestWithJournal {
     @DisplayName("Get all entries from a journal must be ordered by date")
     @Test
     void all() {
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).symbol("MSFT").type(EntryType.TRADE).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 8, 1, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(20.00)).symbol("AAPL").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 5, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(30.00)).symbol("NVDA").type(EntryType.TRADE).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 8, 10, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(40.00)).symbol("TSLA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 3, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(50.00)).symbol("AMZN").type(EntryType.TRADE).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 8, 2, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(10.00)).symbol("MSFT").type(EntryType.TRADE).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 8, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(20.00)).symbol("AAPL").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 5, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(30.00)).symbol("NVDA").type(EntryType.TRADE).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 8, 10, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(40.00)).symbol("TSLA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 3, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(50.00)).symbol("AMZN").type(EntryType.TRADE).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 8, 2, 18, 23, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(60.00)).symbol("MSFT").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 6, 0, 21, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(70.00)).symbol("AAPL").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 4, 17, 22, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(80.00)).symbol("NVDA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 8, 16, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(90.00)).symbol("TSLA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 9, 15, 24, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(100.00)).symbol("AMZN").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 7, 23, 25, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(60.00)).symbol("MSFT").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 6, 0, 21, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(70.00)).symbol("AAPL").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 4, 17, 22, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(80.00)).symbol("NVDA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 8, 16, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(90.00)).symbol("TSLA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 9, 15, 24, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(100.00)).symbol("AMZN").type(EntryType.TRADE).date(LocalDateTime.of(2022, 8, 7, 23, 25, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(110.00)).symbol("MSFT").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 15, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(120.31)).symbol("AAPL").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 14, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(130.00)).symbol("NVDA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 13, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(140.59)).symbol("TSLA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 12, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(150.00)).symbol("AMZN").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 11, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(110.00)).symbol("MSFT").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 15, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(120.31)).symbol("AAPL").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 14, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(130.00)).symbol("NVDA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 13, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(140.59)).symbol("TSLA").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 12, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(150.00)).symbol("AMZN").type(EntryType.TRADE).date(LocalDateTime.of(2022, 9, 11, 18, 23, 30)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).type(EntryType.DEPOSIT).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 10, 1, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).type(EntryType.TAXES).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 10, 1, 18, 23, 30)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().price(BigDecimal.valueOf(10.00)).type(EntryType.WITHDRAWAL).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 10, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(10.00)).type(EntryType.DEPOSIT).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 10, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(10.00)).type(EntryType.TAXES).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 10, 1, 18, 23, 30)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journalId).price(BigDecimal.valueOf(10.00)).type(EntryType.WITHDRAWAL).netResult(BigDecimal.valueOf(100)).date(LocalDateTime.of(2022, 10, 1, 18, 23, 30)).build(), entryCollection);
 
         //GET ALL RECORDS
         webTestClient
@@ -248,6 +248,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
         for (int i = 1; i <= 25; i++) {
             mongoTemplate.save(
                     Entry.builder()
+                            .journalId(journalId)
                             .price(BigDecimal.valueOf(10.00))
                             .symbol("ENTRY" + i)
                             .direction(EntryDirection.LONG)
@@ -338,6 +339,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
         for (int i = 1; i <= 10; i++) {
             mongoTemplate.save(
                     Entry.builder()
+                            .journalId(journalId)
                             .price(BigDecimal.valueOf(10.00))
                             .symbol("ENTRY_LONG" + i)
                             .direction(EntryDirection.LONG)
@@ -351,6 +353,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
         for (int i = 1; i <= 10; i++) {
             mongoTemplate.save(
                     Entry.builder()
+                            .journalId(journalId)
                             .price(BigDecimal.valueOf(10.00))
                             .symbol("ENTRY_SHORT" + i)
                             .direction(EntryDirection.SHORT)
@@ -385,6 +388,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
     void direction() {
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("LONG")
                         .direction(EntryDirection.LONG)
@@ -396,6 +400,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("SHORT")
                         .direction(EntryDirection.SHORT)
@@ -445,6 +450,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
     void result() {
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("WIN")
                         .direction(EntryDirection.LONG)
@@ -456,6 +462,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("LOSE")
                         .direction(EntryDirection.SHORT)
@@ -510,6 +517,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("TRADE_ST1")
                         .direction(EntryDirection.LONG)
@@ -522,6 +530,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("TRADE_ST2")
                         .direction(EntryDirection.SHORT)
@@ -534,6 +543,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("TRADE_ST1_ST2")
                         .direction(EntryDirection.SHORT)

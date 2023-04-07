@@ -1,6 +1,5 @@
 package com.trading.journal.entry.entries.taxes.impl;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryService;
 import com.trading.journal.entry.entries.EntryType;
@@ -16,14 +15,12 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class TaxesServiceImplTest {
 
-    private static final AccessTokenInfo ACCESS_TOKEN = new AccessTokenInfo("subject", 1L, "TENANCY", emptyList());
     private static final String JOURNAL_ID = UUID.randomUUID().toString();
 
     @Mock
@@ -41,14 +38,15 @@ class TaxesServiceImplTest {
                 .build();
 
         Entry entry = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.TAXES)
                 .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
                 .price(BigDecimal.valueOf(200.21))
                 .build();
 
-        when(entryService.save(ACCESS_TOKEN, JOURNAL_ID, entry)).thenReturn(entry);
+        when(entryService.save(entry)).thenReturn(entry);
 
-        Entry entryCreated = taxesService.create(ACCESS_TOKEN, JOURNAL_ID, taxes);
+        Entry entryCreated = taxesService.create(JOURNAL_ID, taxes);
 
         assertThat(entryCreated).isNotNull();
     }

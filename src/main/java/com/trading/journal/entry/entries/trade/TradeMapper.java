@@ -12,7 +12,8 @@ public interface TradeMapper {
     TradeMapper INSTANCE = Mappers.getMapper(TradeMapper.class);
 
     @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.TRADE)")
-    Entry toEntry(Trade trade);
+    @Mapping(target = "journalId", source = "journalId")
+    Entry toEntry(Trade trade, String journalId);
 
     @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.TRADE)")
     @Mapping(target = "id", source = "entry.id")
@@ -22,5 +23,6 @@ public interface TradeMapper {
 
     @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.TRADE)")
     @Mapping(target = "id", source = "id")
-    Entry toEntry(Trade trade, String id);
+    @Mapping(target = "journalId", source = "journalId")
+    Entry toEditEntry(Trade trade, String journalId, String id);
 }

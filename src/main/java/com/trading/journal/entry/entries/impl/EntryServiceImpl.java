@@ -1,13 +1,10 @@
 package com.trading.journal.entry.entries.impl;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.*;
-import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
-import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyService;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +21,6 @@ import java.io.IOException;
 import java.util.Base64;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.BiFunction;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
@@ -45,40 +41,35 @@ public class EntryServiceImpl implements EntryService {
 
     @Override
     public Page<Entry> getAll(EntriesQuery entriesQuery) {
-        CollectionName collectionName = collectionName().apply(entriesQuery.getAccessTokenInfo(), entriesQuery.getJournalId());
         Query query = entriesQuery.buildQuery();
-        Page<Entry> page = repository.findAll(collectionName, entriesQuery.getPageable(), query);
-        List<Entry> entries = page.stream()
-                .map(entry -> loadStrategies(entriesQuery.getAccessTokenInfo(), entry))
-                .toList();
+        Page<Entry> page = repository.findAll(entriesQuery.getPageable(), query);
+        List<Entry> entries = page.stream().map(this::loadStrategies).toList();
         return new PageImpl<>(entries, entriesQuery.getPageable(), page.getTotalElements());
     }
 
     @Override
-    public Entry getById(AccessTokenInfo accessToken, String journalId, String entryId) {
-        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
-        Entry entry = get(entriesCollection, entryId);
-        return loadStrategies(accessToken, entry);
+    public Entry getById(String entryId) {
+        Entry entry = get(entryId);
+        return loadStrategies(entry);
     }
 
     @Override
-    public Entry save(AccessTokenInfo accessToken, String journalId, Entry entry) {
+    public Entry save(Entry entry) {
         List<Strategy> strategies = ofNullable(entry.getStrategyIds())
                 .orElse(emptyList())
                 .stream()
-                .map(strategyId -> strategyService.getById(accessToken, strategyId)
+                .map(strategyId -> strategyService.getById(strategyId)
                         .orElseThrow(() -> new ApplicationException(HttpStatus.BAD_REQUEST, String.format("Invalid Strategy %s", strategyId)))
                 ).toList();
 
-        Balance balance = balanceService.getCurrentBalance(accessToken, journalId);
+        Balance balance = balanceService.getCurrentBalance(entry.getJournalId());
         CalculateEntry calculateEntry = new CalculateEntry(entry, balance.getAccountBalance());
         Entry calculated = calculateEntry.calculate();
-        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
-        Entry saved = repository.save(entriesCollection, calculated);
+        Entry saved = repository.save(calculated);
         if (saved.isFinished()) {
-            balanceService.calculateCurrentBalance(accessToken, journalId);
+            balanceService.calculateCurrentBalance(entry.getJournalId());
         } else {
-            balanceService.calculateAvailableBalance(accessToken, journalId);
+            balanceService.calculateAvailableBalance(entry.getJournalId());
         }
         if (!strategies.isEmpty()) {
             saved.setStrategies(strategies);
@@ -87,17 +78,16 @@ public class EntryServiceImpl implements EntryService {
     }
 
     @Override
-    public void delete(AccessTokenInfo accessToken, String journalId, String entryId) {
-        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
-        Entry entry = get(entriesCollection, entryId);
-        repository.delete(entriesCollection, entry);
+    public void delete(String entryId) {
+        Entry entry = get(entryId);
+        repository.delete(entry);
         if (entry.isFinished()) {
-            balanceService.calculateCurrentBalance(accessToken, journalId);
+            balanceService.calculateCurrentBalance(entry.getJournalId());
         }
     }
 
     @Override
-    public void uploadImage(AccessTokenInfo accessToken, String journalId, String entryId, UploadType type, MultipartFile file) {
+    public void uploadImage(String entryId, UploadType type, MultipartFile file) {
         String base64File;
         try {
             base64File = Base64.getEncoder().encodeToString(file.getBytes());
@@ -106,21 +96,19 @@ public class EntryServiceImpl implements EntryService {
             throw (HttpClientErrorException) new HttpClientErrorException(INTERNAL_SERVER_ERROR, "There was an unexpected error to save the file.").initCause(e);
         }
 
-        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
-        Entry entry = get(entriesCollection, entryId);
+        Entry entry = get(entryId);
         if (UploadType.IMAGE_BEFORE.equals(type)) {
             entry.setScreenshotBefore(base64File);
         } else {
             entry.setScreenshotAfter(base64File);
         }
 
-        repository.save(entriesCollection, entry);
+        repository.save(entry);
     }
 
     @Override
-    public EntryImageResponse returnImage(AccessTokenInfo accessToken, String journalId, String entryId, UploadType type) {
-        CollectionName entriesCollection = collectionName().apply(accessToken, journalId);
-        Entry entry = get(entriesCollection, entryId);
+    public EntryImageResponse returnImage(String entryId, UploadType type) {
+        Entry entry = get(entryId);
 
         EntryImageResponse response;
         if (UploadType.IMAGE_BEFORE.equals(type)) {
@@ -131,24 +119,17 @@ public class EntryServiceImpl implements EntryService {
         return response;
     }
 
-    private Entry get(CollectionName collectionName, String entryId) {
-        return repository.getById(collectionName, entryId)
+    private Entry get(String entryId) {
+        return repository.getById(entryId)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Entry not found"));
     }
 
-    private BiFunction<AccessTokenInfo, String, CollectionName> collectionName() {
-        return (accessTokenInfo, journalId) -> {
-            Journal journal = journalService.get(accessTokenInfo, journalId);
-            return new CollectionName(accessTokenInfo, journal.getName());
-        };
-    }
-
-    private Entry loadStrategies(AccessTokenInfo accessToken, Entry entry) {
+    private Entry loadStrategies(Entry entry) {
         List<Strategy> strategies = ofNullable(entry.getStrategyIds())
                 .orElse(emptyList())
                 .stream()
                 .map(id ->
-                        strategyService.getById(accessToken, id).orElse(null)
+                        strategyService.getById(id).orElse(null)
                 )
                 .filter(Objects::nonNull).toList();
         if (!strategies.isEmpty()) {

@@ -1,16 +1,13 @@
 package com.trading.journal.entry.entries.impl;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
-import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyService;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,9 +45,6 @@ import static org.mockito.Mockito.*;
 class EntryServiceImplTest {
 
     public static String JOURNAL_ID = "123456";
-    private static final AccessTokenInfo ACCESS_TOKEN = new AccessTokenInfo("subject", 1L, "TENANCY", emptyList());
-
-    private static CollectionName collectionName;
 
     @Mock
     EntryRepository repository;
@@ -67,16 +61,12 @@ class EntryServiceImplTest {
     @InjectMocks
     EntryServiceImpl entryService;
 
-    @BeforeAll
-    static void setUp() {
-        collectionName = new CollectionName(ACCESS_TOKEN, "my-journal");
-    }
-
     @DisplayName("Get all entries with multiple filter")
     @Test
     void all() {
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        EntriesQuery entriesQuery = EntriesQuery.builder().accessTokenInfo(ACCESS_TOKEN).journalId(JOURNAL_ID)
+        EntriesQuery entriesQuery = EntriesQuery.builder().journalId(JOURNAL_ID)
+                .journalId("1")
                 .symbol("MSFT")
                 .type(EntryType.DEPOSIT)
                 .from("2022-12-01 13:00:00")
@@ -84,14 +74,16 @@ class EntryServiceImplTest {
                 .pageable(pageable)
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
-        Query query = new Query().addCriteria(Criteria.where("symbol").is("MSFT"))
+        Query query = new Query()
+                .addCriteria(Criteria.where("journalId").is("1"))
+                .addCriteria(Criteria.where("symbol").is("MSFT"))
                 .addCriteria(Criteria.where("type").is("DEPOSIT"))
                 .addCriteria(Criteria.where("exitDate").gte(LocalDateTime.parse("2022-12-01 13:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))))
                 .addCriteria(Criteria.where("netResult").exists(true));
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), pageable, 1L);
-        when(repository.findAll(collectionName, pageable, query)).thenReturn(page);
+        when(repository.findAll(pageable, query)).thenReturn(page);
 
         Page<Entry> response = entryService.getAll(entriesQuery);
         assertThat(response.get()).isNotEmpty();
@@ -101,6 +93,7 @@ class EntryServiceImplTest {
     @Test
     void saveTrade() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
@@ -113,6 +106,7 @@ class EntryServiceImplTest {
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
@@ -130,22 +124,23 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(1074.41).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
-        when(repository.findAll(eq(collectionName), any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
+        when(repository.save(calculated)).thenReturn(calculated);
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
 
-        verify(balanceService).calculateCurrentBalance(any(), anyString());
+        verify(balanceService).calculateCurrentBalance(anyString());
     }
 
     @DisplayName("Save a TRADE entry with strategies")
     @Test
     void saveTradeWithST() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
@@ -159,6 +154,7 @@ class EntryServiceImplTest {
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
@@ -177,20 +173,20 @@ class EntryServiceImplTest {
                 .strategyIds(asList("ST1", "ST2"))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
-        when(strategyService.getById(ACCESS_TOKEN, "ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
-        when(strategyService.getById(ACCESS_TOKEN, "ST2")).thenReturn(Optional.of(Strategy.builder().id("ST2").name("Strategy 2").build()));
+        when(strategyService.getById("ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
+        when(strategyService.getById("ST2")).thenReturn(Optional.of(Strategy.builder().id("ST2").name("Strategy 2").build()));
 
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
-        when(repository.findAll(eq(collectionName), any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(calculated)).thenReturn(calculated);
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
         assertThat(entry.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder("Strategy 1", "Strategy 2");
 
-        verify(balanceService).calculateCurrentBalance(any(), anyString());
+        verify(balanceService).calculateCurrentBalance(anyString());
     }
 
     @DisplayName("Save a TRADE entry with invalid strategy throw an exception")
@@ -228,22 +224,22 @@ class EntryServiceImplTest {
                 .strategyIds(asList("ST1", "ST2"))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
 
-        when(strategyService.getById(ACCESS_TOKEN, "ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
-        when(strategyService.getById(ACCESS_TOKEN, "ST2")).thenReturn(Optional.empty());
+        when(strategyService.getById("ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
+        when(strategyService.getById("ST2")).thenReturn(Optional.empty());
 
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
-        when(repository.findAll(eq(collectionName), any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(calculated)).thenReturn(calculated);
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.save(toSave));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
         assertThat(exception.getStatusText()).isEqualTo("Invalid Strategy ST2");
 
-        verify(balanceService, never()).getCurrentBalance(any(), anyString());
-        verify(repository, never()).save(any(), any());
-        verify(repository, never()).findAll(eq(collectionName), any(Pageable.class));
+        verify(balanceService, never()).getCurrentBalance(anyString());
+        verify(repository, never()).save(any());
+        verify(repository, never()).findAll(any(Pageable.class));
 
     }
 
@@ -251,6 +247,7 @@ class EntryServiceImplTest {
     @Test
     void saveTradeBalancing() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
@@ -263,6 +260,7 @@ class EntryServiceImplTest {
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
@@ -280,13 +278,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(1394.41).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(calculated)).thenReturn(calculated);
 
-        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1394.41)).build());
+        when(balanceService.calculateCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1394.41)).build());
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
     }
 
@@ -294,12 +292,14 @@ class EntryServiceImplTest {
     @Test
     void createWITHDRAWAL() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.WITHDRAWAL)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.WITHDRAWAL)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
@@ -308,29 +308,31 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(calculated)).thenReturn(calculated);
 
 
-        when(repository.findAll(eq(collectionName), any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
 
-        verify(balanceService).calculateCurrentBalance(any(), anyString());
+        verify(balanceService).calculateCurrentBalance(anyString());
     }
 
     @DisplayName("Create a WITHDRAWAL entry and other entries need balance")
     @Test
     void createWITHDRAWALBalancing() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.WITHDRAWAL)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.WITHDRAWAL)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
@@ -339,13 +341,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(calculated)).thenReturn(calculated);
 
-        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
+        when(balanceService.calculateCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
     }
 
@@ -353,12 +355,14 @@ class EntryServiceImplTest {
     @Test
     void createTAXES() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.TAXES)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.TAXES)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
@@ -367,28 +371,30 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
-        when(repository.findAll(eq(collectionName), any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
+        when(repository.save(calculated)).thenReturn(calculated);
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
 
-        verify(balanceService).calculateCurrentBalance(any(), anyString());
+        verify(balanceService).calculateCurrentBalance(anyString());
     }
 
     @DisplayName("Create a TAXES entry and other entries need balance")
     @Test
     void createTAXESBalancing() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.TAXES)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.TAXES)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
@@ -397,13 +403,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(765.44).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(calculated)).thenReturn(calculated);
 
-        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
+        when(balanceService.calculateCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
     }
 
@@ -411,12 +417,14 @@ class EntryServiceImplTest {
     @Test
     void createDEPOSIT() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.DEPOSIT)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.DEPOSIT)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
@@ -425,28 +433,30 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(1234.56).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
-        when(repository.findAll(eq(collectionName), any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
+        when(repository.save(calculated)).thenReturn(calculated);
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
 
-        verify(balanceService).calculateCurrentBalance(any(), anyString());
+        verify(balanceService).calculateCurrentBalance(anyString());
     }
 
     @DisplayName("Create a DEPOSIT entry and other entries need balance")
     @Test
     void createDEPOSITBalancing() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.DEPOSIT)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.DEPOSIT)
                 .price(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
@@ -455,13 +465,13 @@ class EntryServiceImplTest {
                 .accountBalance(BigDecimal.valueOf(1234.56).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(repository.save(calculated)).thenReturn(calculated);
 
-        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1234.56)).build());
+        when(balanceService.calculateCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1234.56)).build());
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
     }
 
@@ -470,21 +480,22 @@ class EntryServiceImplTest {
     void delete() {
         String entryId = UUID.randomUUID().toString();
         Entry entry = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .type(EntryType.DEPOSIT)
                 .price(BigDecimal.valueOf(234.56))
                 .netResult(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
-        when(repository.findAll(eq(collectionName), any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        entryService.delete(ACCESS_TOKEN, JOURNAL_ID, entryId);
+        entryService.delete(entryId);
 
-        verify(repository).delete(collectionName, entry);
+        verify(repository).delete(entry);
 
-        verify(balanceService).calculateCurrentBalance(any(), anyString());
+        verify(balanceService).calculateCurrentBalance(anyString());
     }
 
     @DisplayName("Delete a entry and other entries need balance")
@@ -498,14 +509,14 @@ class EntryServiceImplTest {
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
 
-        when(balanceService.calculateCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
+        when(balanceService.calculateCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(765.44)).build());
 
-        entryService.delete(ACCESS_TOKEN, JOURNAL_ID, entryId);
+        entryService.delete(entryId);
 
-        verify(repository).delete(collectionName, entry);
+        verify(repository).delete(entry);
     }
 
     @DisplayName("Delete a entry not found return an exception")
@@ -513,14 +524,14 @@ class EntryServiceImplTest {
     void deleteNotFound() {
         String entryId = UUID.randomUUID().toString();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.empty());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.delete(ACCESS_TOKEN, JOURNAL_ID, entryId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.delete(entryId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Entry not found");
 
-        verify(repository, never()).delete(any(), any());
+        verify(repository, never()).delete(any(Entry.class));
     }
 
     @DisplayName("Delete a not finished entry, do not balance other entries")
@@ -533,20 +544,21 @@ class EntryServiceImplTest {
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
 
-        entryService.delete(ACCESS_TOKEN, JOURNAL_ID, entryId);
+        entryService.delete(entryId);
 
-        verify(repository).delete(collectionName, entry);
+        verify(repository).delete(entry);
 
-        verify(balanceService, never()).calculateCurrentBalance(any(), anyString());
+        verify(balanceService, never()).calculateCurrentBalance(anyString());
     }
 
     @DisplayName("Save a not finished entry, do not balance other entries")
     @Test
     void saveNotFinished() {
         Entry toSave = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
@@ -557,6 +569,7 @@ class EntryServiceImplTest {
                 .build();
 
         Entry calculated = Entry.builder()
+                .journalId(JOURNAL_ID)
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .type(EntryType.TRADE)
                 .direction(EntryDirection.LONG)
@@ -568,16 +581,16 @@ class EntryServiceImplTest {
                 .plannedRR(BigDecimal.valueOf(2.00).setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(balanceService.getCurrentBalance(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
 
-        when(repository.save(collectionName, calculated)).thenReturn(calculated);
-        when(repository.findAll(eq(collectionName), any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
+        when(repository.save(calculated)).thenReturn(calculated);
+        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
 
-        Entry entry = entryService.save(ACCESS_TOKEN, JOURNAL_ID, toSave);
+        Entry entry = entryService.save(toSave);
         assertThat(entry).isNotNull();
 
-        verify(balanceService, never()).calculateCurrentBalance(any(), anyString());
+        verify(balanceService, never()).calculateCurrentBalance(anyString());
     }
 
     @DisplayName("Save image before")
@@ -591,12 +604,12 @@ class EntryServiceImplTest {
                 .build();
         MultipartFile file = mock(MultipartFile.class);
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
         when(file.getBytes()).thenReturn(new byte[]{0});
         when(repository.save(argThat(save -> nonNull(entry.getScreenshotBefore()) && isNull(entry.getScreenshotAfter())))).thenReturn(entry);
 
-        entryService.uploadImage(ACCESS_TOKEN, JOURNAL_ID, entryId, UploadType.IMAGE_BEFORE, file);
+        entryService.uploadImage(entryId, UploadType.IMAGE_BEFORE, file);
     }
 
     @DisplayName("Save image after")
@@ -610,12 +623,12 @@ class EntryServiceImplTest {
                 .build();
         MultipartFile file = mock(MultipartFile.class);
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
         when(file.getBytes()).thenReturn(new byte[]{0});
         when(repository.save(argThat(save -> isNull(entry.getScreenshotBefore()) && nonNull(entry.getScreenshotAfter())))).thenReturn(entry);
 
-        entryService.uploadImage(ACCESS_TOKEN, JOURNAL_ID, entryId, UploadType.IMAGE_AFTER, file);
+        entryService.uploadImage(entryId, UploadType.IMAGE_AFTER, file);
     }
 
     @DisplayName("Return image before")
@@ -629,10 +642,10 @@ class EntryServiceImplTest {
                 .screenshotBefore("image")
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
 
-        EntryImageResponse response = entryService.returnImage(ACCESS_TOKEN, JOURNAL_ID, entryId, UploadType.IMAGE_BEFORE);
+        EntryImageResponse response = entryService.returnImage(entryId, UploadType.IMAGE_BEFORE);
         assertThat(response.getImage()).isNotNull();
     }
 
@@ -647,10 +660,10 @@ class EntryServiceImplTest {
                 .screenshotAfter("image")
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
 
-        EntryImageResponse response = entryService.returnImage(ACCESS_TOKEN, JOURNAL_ID, entryId, UploadType.IMAGE_AFTER);
+        EntryImageResponse response = entryService.returnImage(entryId, UploadType.IMAGE_AFTER);
         assertThat(response.getImage()).isNotNull();
     }
 
@@ -665,11 +678,11 @@ class EntryServiceImplTest {
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
 
 
-        Entry byId = entryService.getById(ACCESS_TOKEN, JOURNAL_ID, entryId);
+        Entry byId = entryService.getById(entryId);
 
         assertThat(byId).isEqualTo(entry);
     }
@@ -686,12 +699,12 @@ class EntryServiceImplTest {
                 .strategyIds(asList("ST1", "ST2"))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
-        when(strategyService.getById(ACCESS_TOKEN, "ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
-        when(strategyService.getById(ACCESS_TOKEN, "ST2")).thenReturn(Optional.of(Strategy.builder().id("ST2").name("Strategy 2").build()));
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
+        when(strategyService.getById("ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
+        when(strategyService.getById("ST2")).thenReturn(Optional.of(Strategy.builder().id("ST2").name("Strategy 2").build()));
 
-        Entry byId = entryService.getById(ACCESS_TOKEN, JOURNAL_ID, entryId);
+        Entry byId = entryService.getById(entryId);
 
         assertThat(byId).isEqualTo(entry);
         assertThat(byId.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("ST1", "ST2");
@@ -710,12 +723,12 @@ class EntryServiceImplTest {
                 .strategyIds(asList("ST1", "ST2"))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
-        when(strategyService.getById(ACCESS_TOKEN, "ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
-        when(strategyService.getById(ACCESS_TOKEN, "ST2")).thenReturn(Optional.empty());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
+        when(strategyService.getById("ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
+        when(strategyService.getById("ST2")).thenReturn(Optional.empty());
 
-        Entry byId = entryService.getById(ACCESS_TOKEN, JOURNAL_ID, entryId);
+        Entry byId = entryService.getById(entryId);
 
         assertThat(byId).isEqualTo(entry);
         assertThat(byId.getStrategies()).extracting(Strategy::getId).containsExactly("ST1");
@@ -734,12 +747,12 @@ class EntryServiceImplTest {
                 .strategyIds(asList("ST1", "ST2"))
                 .build();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.of(entry));
-        when(strategyService.getById(ACCESS_TOKEN, "ST1")).thenReturn(Optional.empty());
-        when(strategyService.getById(ACCESS_TOKEN, "ST2")).thenReturn(Optional.empty());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
+        when(strategyService.getById("ST1")).thenReturn(Optional.empty());
+        when(strategyService.getById("ST2")).thenReturn(Optional.empty());
 
-        Entry byId = entryService.getById(ACCESS_TOKEN, JOURNAL_ID, entryId);
+        Entry byId = entryService.getById(entryId);
 
         assertThat(byId).isEqualTo(entry);
         assertThat(byId.getStrategies()).isNull();
@@ -750,10 +763,10 @@ class EntryServiceImplTest {
     void getByIdNotFound() {
         String entryId = UUID.randomUUID().toString();
 
-        when(journalService.get(ACCESS_TOKEN, JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(collectionName, entryId)).thenReturn(Optional.empty());
+        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
+        when(repository.getById(entryId)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.getById(ACCESS_TOKEN, JOURNAL_ID, entryId));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.getById(entryId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Entry not found");
     }

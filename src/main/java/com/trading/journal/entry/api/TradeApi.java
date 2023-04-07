@@ -1,6 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.OpenTrades;
@@ -26,39 +25,39 @@ public interface TradeApi {
             @ApiResponse(code = 201, message = "Trade opened")
     })
     @PostMapping()
-    ResponseEntity<Entry> open(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Trade trade);
+    ResponseEntity<Entry> open(@PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Trade trade);
 
     @ApiOperation(notes = "Update Trade", value = "Update Trade")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Trade updated")
     })
     @PatchMapping("/{trade-id}")
-    ResponseEntity<Entry> update(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "trade-id") String tradeId, @RequestBody @Valid Trade trade);
+    ResponseEntity<Entry> update(@PathVariable(name = "journal-id") String journalId, @PathVariable(name = "trade-id") String tradeId, @RequestBody @Valid Trade trade);
 
     @ApiOperation(notes = "Close Trade", value = "Close Trade")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Trade closed")
     })
     @PatchMapping("/{trade-id}/close")
-    ResponseEntity<Entry> close(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @PathVariable(name = "trade-id") String tradeId, @RequestBody @Valid CloseTrade trade);
+    ResponseEntity<Entry> close(@PathVariable(name = "journal-id") String journalId, @PathVariable(name = "trade-id") String tradeId, @RequestBody @Valid CloseTrade trade);
 
     @ApiOperation(notes = "Count open trades", value = "Retrieve number of open trades")
     @ApiResponses(@ApiResponse(code = 200, message = "Open trades"))
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/open")
-    ResponseEntity<OpenTrades> countOpen(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
+    ResponseEntity<OpenTrades> countOpen(@PathVariable(name = "journal-id") String journalId);
 
     @ApiOperation(notes = "Retrieve all symbols", value = "Retrieve all unique symbols ever trades")
     @ApiResponses(@ApiResponse(code = 200, message = "Symbols retrieve"))
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/symbols")
-    ResponseEntity<List<Symbol>> symbols(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId);
+    ResponseEntity<List<Symbol>> symbols(@PathVariable(name = "journal-id") String journalId);
 
     @ApiOperation(notes = "Aggregate time periods where there is a trade", value = "Aggregate time periods where there is a trade")
     @ApiResponses(@ApiResponse(code = 200, message = "Period aggregated"))
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/aggregate/time")
-    ResponseEntity<PeriodAggregatedResult> time(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
+    ResponseEntity<PeriodAggregatedResult> time(@PathVariable(name = "journal-id") String journalId,
                                                 @ApiParam(name = "aggregation", value = "DAY, WEEK or MONTH") @RequestParam("aggregation") AggregateType aggregation,
                                                 @RequestParam(value = "page", defaultValue = "0", required = false) Long page,
                                                 @RequestParam(value = "size", defaultValue = "10", required = false) Long size);
@@ -67,7 +66,7 @@ public interface TradeApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Trades aggregated"))
     @ResponseStatus(HttpStatus.OK)
     @GetMapping("/aggregate/trade")
-    ResponseEntity<List<TradesAggregated>> trades(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId,
+    ResponseEntity<List<TradesAggregated>> trades(@PathVariable(name = "journal-id") String journalId,
                                                   @ApiParam(name = "from", value = "Start date for aggregation") @RequestParam("from") String from,
                                                   @ApiParam(name = "until", value = "End date for aggregation") @RequestParam("until") String until);
 }

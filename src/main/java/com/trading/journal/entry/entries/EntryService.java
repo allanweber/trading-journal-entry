@@ -1,6 +1,5 @@
 package com.trading.journal.entry.entries;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -8,13 +7,13 @@ public interface EntryService {
 
     Page<Entry> getAll(EntriesQuery all);
 
-    Entry getById(AccessTokenInfo accessToken, String journalId, String entryId);
+    Entry getById(String entryId);
 
-    Entry save(AccessTokenInfo accessToken, String journalId, Entry entry);
+    Entry save(Entry entry);
 
-    void delete(AccessTokenInfo accessToken, String journalId, String entryId);
+    void delete(String entryId);
 
-    void uploadImage(AccessTokenInfo accessToken, String journalId, String entryId, UploadType type, MultipartFile file);
+    void uploadImage(String entryId, UploadType type, MultipartFile file);
 
-    EntryImageResponse returnImage(AccessTokenInfo accessToken, String journalId, String entryId, UploadType type);
+    EntryImageResponse returnImage(String entryId, UploadType type);
 }

@@ -40,6 +40,11 @@
             <property name="maxfields" value="30" />
         </properties>
     </rule>
+    <rule ref="category/java/design.xml/TooManyMethods">
+        <properties>
+            <property name="maxmethods" value="15" />
+        </properties>
+    </rule>
     <rule ref="category/java/documentation.xml">
         <exclude name="UncommentedEmptyConstructor" />
         <exclude name="CommentContent" />

@@ -1,11 +1,8 @@
 package com.trading.journal.entry.entries.trade.aggregate;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.mongodb.BasicDBObject;
 import com.trading.journal.entry.entries.EntryRepository;
 import com.trading.journal.entry.entries.EntryType;
-import com.trading.journal.entry.entries.trade.impl.TradeCollectionName;
-import com.trading.journal.entry.queries.CollectionName;
 import lombok.RequiredArgsConstructor;
 import org.bson.Document;
 import org.springframework.data.domain.Sort;
@@ -34,11 +31,8 @@ import static java.util.stream.Collectors.groupingBy;
 public class AggregateService {
 
     private final EntryRepository repository;
-    private final TradeCollectionName tradeCollectionName;
 
-    public PeriodAggregatedResult aggregatePeriod(AccessTokenInfo accessToken, String journalId, AggregateTrade aggregateTrade) {
-        CollectionName entriesCollection = tradeCollectionName.collectionName(accessToken, journalId);
-
+    public PeriodAggregatedResult aggregatePeriod(String journalId, AggregateTrade aggregateTrade) {
         String groupQuery = "{ _id: { $dateToString: { format: '" + aggregateTrade.getAggregateType().getGroupBy() + "', date: '$date'} }, " +
                 "result:{'$sum': {'$toDouble': '$netResult'}}, count: { $sum: 1 }}";
 
@@ -48,7 +42,7 @@ public class AggregateService {
         AggregationOperation facet = aggregationOperationContext -> new Document("$facet", BasicDBObject.parse(facetQuery));
 
         Aggregation aggregation = Aggregation.newAggregation(
-                Aggregation.match(new Criteria("type").is(EntryType.TRADE.name())),
+                Aggregation.match(new Criteria("journalId").is(journalId).and("type").is(EntryType.TRADE.name())),
                 group,
                 Aggregation.sort(Sort.Direction.DESC, "_id"),
                 Aggregation.project().andExclude("_id")
@@ -60,7 +54,7 @@ public class AggregateService {
                 Aggregation.project("result").and("$totalCount.count").as("total")
         );
 
-        List<PeriodAggregatedQueryResult> queryResult = repository.aggregate(aggregation, entriesCollection, PeriodAggregatedQueryResult.class);
+        List<PeriodAggregatedQueryResult> queryResult = repository.aggregate(aggregation, PeriodAggregatedQueryResult.class);
 
         return queryResult.stream().findFirst()
                 .map(firstItem -> {
@@ -76,12 +70,10 @@ public class AggregateService {
                 }).orElse(new PeriodAggregatedResult(emptyList(), 0L));
     }
 
-    public List<TradesAggregated> aggregateTrades(AccessTokenInfo accessToken, String journalId, AggregateTrade aggregateTrade) {
+    public List<TradesAggregated> aggregateTrades(String journalId, AggregateTrade aggregateTrade) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         LocalDateTime from = LocalDateTime.parse(aggregateTrade.getFrom(), formatter);
         LocalDateTime until = LocalDateTime.parse(aggregateTrade.getUntil(), formatter);
-
-        CollectionName entriesCollection = tradeCollectionName.collectionName(accessToken, journalId);
 
         String groupQuery = "{ _id: { $dateToString: { format: '%Y-%m-%d', date: '$date'} }, " +
                 "items: { $push: {'tradeId':{ $convert: { input: '$_id', to: 'string' } }, 'symbol' : '$symbol', " +
@@ -91,7 +83,7 @@ public class AggregateService {
         AggregationOperation group = aggregationOperationContext -> new Document("$group", BasicDBObject.parse(groupQuery));
 
         Aggregation aggregation = Aggregation.newAggregation(
-                Aggregation.match(new Criteria("type").is(EntryType.TRADE.name())),
+                Aggregation.match(new Criteria("journalId").is(journalId).and("type").is(EntryType.TRADE.name())),
                 Aggregation.match(new Criteria("date").gte(from).lte(until)),
                 group,
                 Aggregation.unwind("$items"),
@@ -103,7 +95,7 @@ public class AggregateService {
                         .and("$_id").as("group")
                         .andInclude("items", "count")
         );
-        return repository.aggregate(aggregation, entriesCollection, TradesAggregated.class);
+        return repository.aggregate(aggregation, TradesAggregated.class);
     }
 
     private static Collector<PeriodItem, ?, Map<String, List<PeriodItem>>> getGroupingBy(AggregateType aggregateType) {

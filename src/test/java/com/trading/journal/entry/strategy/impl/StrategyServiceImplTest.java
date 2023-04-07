@@ -1,11 +1,8 @@
 package com.trading.journal.entry.strategy.impl;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
-import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyRepository;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -20,7 +17,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.*;
@@ -28,29 +24,18 @@ import static org.mockito.Mockito.*;
 @ExtendWith(SpringExtension.class)
 class StrategyServiceImplTest {
 
-    private static final AccessTokenInfo ACCESS_TOKEN = new AccessTokenInfo("subject", 1L, "TENANCY", emptyList());
-
-    private static CollectionName collectionName;
-
     @Mock
     StrategyRepository strategyRepository;
 
     @InjectMocks
     StrategyServiceImpl strategyService;
 
-    @BeforeAll
-    static void setUp() {
-        collectionName = new CollectionName(ACCESS_TOKEN);
-    }
-
     @DisplayName("Get strategies")
     @Test
     void all() {
         PageRequest pageable = PageRequest.of(0, Integer.MAX_VALUE);
-        when(strategyRepository.findAll(collectionName, pageable)).thenReturn(
-                new PageImpl<>(asList(Strategy.builder().build(), Strategy.builder().build()), pageable, 2L)
-        );
-        Page<Strategy> all = strategyService.getAll(ACCESS_TOKEN, pageable);
+        when(strategyRepository.findAll(pageable)).thenReturn(new PageImpl<>(asList(Strategy.builder().build(), Strategy.builder().build()), pageable, 2L));
+        Page<Strategy> all = strategyService.getAll(pageable);
         assertThat(all.get()).isNotEmpty();
         assertThat(all.getTotalElements()).isEqualTo(2L);
     }
@@ -59,8 +44,8 @@ class StrategyServiceImplTest {
     @Test
     void saveNew() {
         Strategy strategy = Strategy.builder().name("ST1").build();
-        when(strategyRepository.save(collectionName, strategy)).thenReturn(Strategy.builder().id("1").name("ST1").build());
-        Strategy saved = strategyService.save(ACCESS_TOKEN, strategy);
+        when(strategyRepository.save(strategy)).thenReturn(Strategy.builder().id("1").name("ST1").build());
+        Strategy saved = strategyService.save(strategy);
         assertThat(saved.getId()).isEqualTo("1");
     }
 
@@ -68,8 +53,8 @@ class StrategyServiceImplTest {
     @Test
     void updated() {
         Strategy strategy = Strategy.builder().id("1").name("ST1").build();
-        when(strategyRepository.save(collectionName, strategy)).thenReturn(Strategy.builder().id("1").name("ST1").build());
-        Strategy saved = strategyService.save(ACCESS_TOKEN, strategy);
+        when(strategyRepository.save(strategy)).thenReturn(Strategy.builder().id("1").name("ST1").build());
+        Strategy saved = strategyService.save(strategy);
         assertThat(saved.getId()).isEqualTo("1");
     }
 
@@ -77,8 +62,8 @@ class StrategyServiceImplTest {
     @Test
     void getById() {
         String id = "1";
-        when(strategyRepository.getById(collectionName, id)).thenReturn(Optional.of(Strategy.builder().id("1").name("ST1").build()));
-        Optional<Strategy> byId = strategyService.getById(ACCESS_TOKEN, id);
+        when(strategyRepository.getById(id)).thenReturn(Optional.of(Strategy.builder().id("1").name("ST1").build()));
+        Optional<Strategy> byId = strategyService.getById(id);
         assertThat(byId).isPresent();
     }
 
@@ -86,8 +71,8 @@ class StrategyServiceImplTest {
     @Test
     void getByIdNotFound() {
         String id = "1";
-        when(strategyRepository.getById(collectionName, id)).thenReturn(Optional.empty());
-        Optional<Strategy> byId = strategyService.getById(ACCESS_TOKEN, id);
+        when(strategyRepository.getById(id)).thenReturn(Optional.empty());
+        Optional<Strategy> byId = strategyService.getById(id);
         assertThat(byId).isNotPresent();
     }
 
@@ -96,24 +81,24 @@ class StrategyServiceImplTest {
     void delete() {
         String id = "1";
         Strategy strategy = Strategy.builder().id("1").name("ST1").build();
-        when(strategyRepository.getById(collectionName, id)).thenReturn(Optional.of(strategy));
-        when(strategyRepository.hasItems(collectionName)).thenReturn(false);
-        strategyService.delete(ACCESS_TOKEN, id);
-        verify(strategyRepository).delete(collectionName, strategy);
-        verify(strategyRepository).drop(collectionName);
+        when(strategyRepository.getById(id)).thenReturn(Optional.of(strategy));
+        when(strategyRepository.hasItems()).thenReturn(false);
+        strategyService.delete(id);
+        verify(strategyRepository).delete(strategy);
+        verify(strategyRepository).drop();
     }
 
     @DisplayName("Delete strategy by id not found, throw an exception")
     @Test
     void deleteNotFound() {
         String id = "1";
-        when(strategyRepository.getById(collectionName, id)).thenReturn(Optional.empty());
+        when(strategyRepository.getById(id)).thenReturn(Optional.empty());
 
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> strategyService.delete(ACCESS_TOKEN, id));
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> strategyService.delete(id));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Strategy not found");
 
-        verify(strategyRepository, never()).delete(any(), any());
-        verify(strategyRepository, never()).drop(any());
+        verify(strategyRepository, never()).delete(any(Strategy.class));
+        verify(strategyRepository, never()).drop();
     }
 }

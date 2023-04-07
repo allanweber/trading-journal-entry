@@ -29,6 +29,9 @@ public class Entry {
     @Id
     private String id;
 
+    @JsonIgnore
+    private String journalId;
+
     @NotNull(message = "Date is required")
     @JsonFormat(pattern = DateHelper.DATE_FORMAT)
     private LocalDateTime date;
