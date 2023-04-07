@@ -1,6 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.withdrawal.Withdrawal;
 import io.swagger.annotations.Api;
@@ -24,5 +23,5 @@ public interface WithdrawalApi {
             @ApiResponse(code = 201, message = "Withdrawal created")
     })
     @PostMapping()
-    ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Withdrawal withdrawal);
+    ResponseEntity<Entry> create(@PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Withdrawal withdrawal);
 }

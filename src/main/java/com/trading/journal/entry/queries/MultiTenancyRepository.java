@@ -12,23 +12,21 @@ import java.util.Optional;
 @NoRepositoryBean
 public interface MultiTenancyRepository<T, I extends Serializable> extends MongoRepository<T, I> {
 
-    List<T> find(CollectionName collectionName, Query query);
+    List<T> find(Query query);
 
-    List<T> getAll(CollectionName collectionName);
+    List<T> getAll();
 
-    Optional<T> getById(CollectionName collectionName, I id);
+    Optional<T> getById(I id);
 
-    T save(CollectionName collectionName, T data);
+    boolean hasItems();
 
-    long delete(CollectionName collectionName, T data);
+    void drop();
 
-    boolean hasItems(CollectionName collectionName);
+    long count(Query query);
 
-    void drop(CollectionName collectionName);
+    long delete(Query query);
 
-    long count(Query query, CollectionName collectionName);
+    List<String> distinct(String field, Query query);
 
-    List<String> distinct(String field, CollectionName collectionName);
-
-    <U> List<U> aggregate(Aggregation aggregation, CollectionName collectionName, Class<U> clazz);
+    <U> List<U> aggregate(Aggregation aggregation, Class<U> clazz);
 }

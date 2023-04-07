@@ -8,8 +8,9 @@ import com.trading.journal.entry.entries.trade.CloseTrade;
 import com.trading.journal.entry.entries.trade.OpenTrades;
 import com.trading.journal.entry.entries.trade.Symbol;
 import com.trading.journal.entry.entries.trade.Trade;
+import com.trading.journal.entry.journal.Currency;
+import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.strategy.Strategy;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -33,7 +34,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class TradeControllerTest extends IntegratedTestWithJournal {
 
-    private static final String entryCollection = "TestTenancy_JOURNAL-1_entries";
+    private static final String entryCollection = "TestTenancy_entries";
 
     private static final String strategyCollection = "TestTenancy_strategies";
 
@@ -404,6 +405,7 @@ class TradeControllerTest extends IntegratedTestWithJournal {
     void open() {
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("CLOSED")
                         .direction(EntryDirection.LONG)
@@ -415,6 +417,7 @@ class TradeControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("OPEN")
                         .direction(EntryDirection.LONG)
@@ -425,11 +428,52 @@ class TradeControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("OPEN")
                         .direction(EntryDirection.LONG)
                         .type(EntryType.TRADE)
                         .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .journalId(journalId)
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("CLOSED")
+                        .direction(EntryDirection.LONG)
+                        .type(EntryType.TRADE)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .exitDate(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .netResult(BigDecimal.valueOf(10.00))
+                        .build(),
+                entryCollection);
+
+        Journal anotherJournal = Journal.builder().name("ANOTHER-JOURNAL").startBalance(BigDecimal.valueOf(100.00)).startJournal(LocalDateTime.now()).currency(Currency.DOLLAR).build();
+        mongoTemplate.save(anotherJournal, journalCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .journalId(anotherJournal.getId())
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("OPEN")
+                        .direction(EntryDirection.LONG)
+                        .type(EntryType.TRADE)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .journalId(anotherJournal.getId())
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("CLOSED")
+                        .direction(EntryDirection.LONG)
+                        .type(EntryType.TRADE)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .exitDate(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .netResult(BigDecimal.valueOf(10.00))
                         .build(),
                 entryCollection);
 
@@ -446,6 +490,20 @@ class TradeControllerTest extends IntegratedTestWithJournal {
                 .value(response ->
                         assertThat(response.getTrades()).isEqualTo(2L)
                 );
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/trade/open")
+                        .build(anotherJournal.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(OpenTrades.class)
+                .value(response ->
+                        assertThat(response.getTrades()).isEqualTo(1L)
+                );
     }
 
     @DisplayName("Get symbols")
@@ -453,6 +511,7 @@ class TradeControllerTest extends IntegratedTestWithJournal {
     void symbols() {
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("MSFT")
                         .direction(EntryDirection.LONG)
@@ -464,6 +523,7 @@ class TradeControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("MSFT")
                         .direction(EntryDirection.LONG)
@@ -474,6 +534,7 @@ class TradeControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("MSFT")
                         .direction(EntryDirection.LONG)
@@ -484,6 +545,7 @@ class TradeControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("TSLA")
                         .direction(EntryDirection.LONG)
@@ -494,6 +556,7 @@ class TradeControllerTest extends IntegratedTestWithJournal {
 
         mongoTemplate.save(
                 Entry.builder()
+                        .journalId(journalId)
                         .price(BigDecimal.valueOf(10.00))
                         .symbol("APPL")
                         .direction(EntryDirection.LONG)
@@ -502,18 +565,30 @@ class TradeControllerTest extends IntegratedTestWithJournal {
                         .build(),
                 entryCollection);
 
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk()
-                .expectBody(new ParameterizedTypeReference<PageWrapper<Entry>>() {
-                })
-                .value(response -> assertThat(response.getContent()).hasSize(5));
+        Journal anotherJournal = Journal.builder().name("ANOTHER-JOURNAL").startBalance(BigDecimal.valueOf(100.00)).startJournal(LocalDateTime.now()).currency(Currency.DOLLAR).build();
+        mongoTemplate.save(anotherJournal, journalCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .journalId(anotherJournal.getId())
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("APPL")
+                        .direction(EntryDirection.LONG)
+                        .type(EntryType.TRADE)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .journalId(anotherJournal.getId())
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("TSLA")
+                        .direction(EntryDirection.LONG)
+                        .type(EntryType.TRADE)
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .build(),
+                entryCollection);
 
         webTestClient
                 .get()
@@ -530,6 +605,23 @@ class TradeControllerTest extends IntegratedTestWithJournal {
                     assertThat(response).hasSize(3);
                     assertThat(response).extracting(Symbol::getName)
                             .containsExactlyInAnyOrder("MSFT", "TSLA", "APPL");
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/trade/symbols")
+                        .build(anotherJournal.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<Symbol>>() {
+                })
+                .value(response -> {
+                    assertThat(response).hasSize(2);
+                    assertThat(response).extracting(Symbol::getName)
+                            .containsExactlyInAnyOrder("TSLA", "APPL");
                 });
     }
 }

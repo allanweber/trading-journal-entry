@@ -1,6 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyService;
@@ -26,15 +25,15 @@ public class StrategyController implements StrategyApi {
     private final StrategyService strategyService;
 
     @Override
-    public ResponseEntity<PageWrapper<Strategy>> getAll(AccessTokenInfo accessTokenInfo, Pageable pageable) {
-        Page<Strategy> strategies = strategyService.getAll(accessTokenInfo, pageable);
+    public ResponseEntity<PageWrapper<Strategy>> getAll(Pageable pageable) {
+        Page<Strategy> strategies = strategyService.getAll(pageable);
         return ok(new PageWrapper<>(strategies));
     }
 
     @Override
-    public ResponseEntity<Strategy> save(AccessTokenInfo accessTokenInfo, Strategy strategy) {
+    public ResponseEntity<Strategy> save(Strategy strategy) {
         boolean isNew = Objects.isNull(strategy.getId());
-        Strategy saved = strategyService.save(accessTokenInfo, strategy);
+        Strategy saved = strategyService.save(strategy);
         ResponseEntity<Strategy> response;
         if (isNew) {
             URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(saved.getId()).toUri();
@@ -46,15 +45,15 @@ public class StrategyController implements StrategyApi {
     }
 
     @Override
-    public ResponseEntity<Strategy> getById(AccessTokenInfo accessTokenInfo, String strategyId) {
-        Optional<Strategy> strategy = strategyService.getById(accessTokenInfo, strategyId);
+    public ResponseEntity<Strategy> getById(String strategyId) {
+        Optional<Strategy> strategy = strategyService.getById(strategyId);
         return strategy.map(ResponseEntity::ok)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Strategy not found"));
     }
 
     @Override
-    public ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, String strategyId) {
-        strategyService.delete(accessTokenInfo, strategyId);
+    public ResponseEntity<Void> delete(String strategyId) {
+        strategyService.delete(strategyId);
         return ok().build();
     }
 }

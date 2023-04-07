@@ -1,8 +1,6 @@
 package com.trading.journal.entry.strategy.impl;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
-import com.trading.journal.entry.queries.CollectionName;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyRepository;
 import com.trading.journal.entry.strategy.StrategyService;
@@ -21,33 +19,29 @@ public class StrategyServiceImpl implements StrategyService {
     private final StrategyRepository strategyRepository;
 
     @Override
-    public Page<Strategy> getAll(AccessTokenInfo accessToken, Pageable pageable) {
-        CollectionName collectionName = new StrategyCollectionName(accessToken).collectionName();
-        return strategyRepository.findAll(collectionName, pageable);
+    public Page<Strategy> getAll(Pageable pageable) {
+        return strategyRepository.findAll(pageable);
     }
 
     @Override
-    public Strategy save(AccessTokenInfo accessToken, Strategy strategy) {
-        CollectionName collectionName = new StrategyCollectionName(accessToken).collectionName();
-        return strategyRepository.save(collectionName, strategy);
+    public Strategy save(Strategy strategy) {
+        return strategyRepository.save(strategy);
     }
 
     @Override
-    public Optional<Strategy> getById(AccessTokenInfo accessToken, String strategyId) {
-        CollectionName collectionName = new StrategyCollectionName(accessToken).collectionName();
-        return strategyRepository.getById(collectionName, strategyId);
+    public Optional<Strategy> getById(String strategyId) {
+        return strategyRepository.getById(strategyId);
     }
 
     @Override
-    public void delete(AccessTokenInfo accessToken, String strategyId) {
-        CollectionName collectionName = new StrategyCollectionName(accessToken).collectionName();
-        Strategy strategy = getById(accessToken, strategyId)
+    public void delete(String strategyId) {
+        Strategy strategy = getById(strategyId)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Strategy not found"));
-        strategyRepository.delete(collectionName, strategy);
+        strategyRepository.delete(strategy);
 
-        boolean hasItems = strategyRepository.hasItems(collectionName);
+        boolean hasItems = strategyRepository.hasItems();
         if (!hasItems) {
-            strategyRepository.drop(collectionName);
+            strategyRepository.drop();
         }
     }
 }

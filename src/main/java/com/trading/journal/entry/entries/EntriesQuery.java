@@ -1,6 +1,5 @@
 package com.trading.journal.entry.entries;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -9,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.util.StringUtils;
 
+import javax.validation.constraints.NotEmpty;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -36,9 +36,9 @@ public class EntriesQuery {
     public static final String DIRECTION = "direction";
 
     private static final String STRATEGIES = "strategyIds";
+    public static final String JOURNAL_ID = "journalId";
 
-    private AccessTokenInfo accessTokenInfo;
-
+    @NotEmpty(message = "Journal Id is required")
     private String journalId;
 
     private String symbol;
@@ -58,7 +58,7 @@ public class EntriesQuery {
     private Pageable pageable;
 
     public Query buildQuery() {
-        Query query = new Query();
+        Query query = new Query(Criteria.where(JOURNAL_ID).is(journalId));
 
         queryAppend(query, StringUtils.hasText(symbol), () -> Criteria.where(SYMBOL).is(symbol));
 

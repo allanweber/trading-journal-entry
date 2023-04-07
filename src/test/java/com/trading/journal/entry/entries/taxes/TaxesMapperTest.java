@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -15,14 +16,17 @@ class TaxesMapperTest {
     @DisplayName("Map Taxes to Entry when Creating Entry")
     @Test
     void create() {
+        String journalId = UUID.randomUUID().toString();
+
         Taxes taxes = Taxes.builder()
                 .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
                 .price(BigDecimal.valueOf(200.21))
                 .build();
 
-        Entry entry = TaxesMapper.INSTANCE.toEntry(taxes);
+        Entry entry = TaxesMapper.INSTANCE.toEntry(taxes, journalId);
 
         assertThat(entry.getId()).isNull();
+        assertThat(entry.getJournalId()).isEqualTo(journalId);
         assertThat(entry.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 20, 15, 30, 50));
         assertThat(entry.getPrice()).isEqualTo(BigDecimal.valueOf(200.21));
         assertThat(entry.getType()).isEqualTo(EntryType.TAXES);
@@ -51,6 +55,7 @@ class TaxesMapperTest {
     @DisplayName("Given null return Null")
     @Test
     void nullReturn() {
-        assertThat(TaxesMapper.INSTANCE.toEntry(null)).isNull();
+        assertThat(TaxesMapper.INSTANCE.toEntry(null, null)).isNull();
+        assertThat(TaxesMapper.INSTANCE.toEntry(null, "")).isNotNull();
     }
 }

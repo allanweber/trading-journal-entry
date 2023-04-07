@@ -1,6 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.deposit.Deposit;
 import io.swagger.annotations.Api;
@@ -24,5 +23,5 @@ public interface DepositApi {
             @ApiResponse(code = 201, message = "Deposit created")
     })
     @PostMapping()
-    ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Deposit deposit);
+    ResponseEntity<Entry> create(@PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Deposit deposit);
 }

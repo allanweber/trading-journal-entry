@@ -10,7 +10,5 @@ import java.io.Serializable;
 @NoRepositoryBean
 public interface WithFilterPageableRepository<T, I extends Serializable> extends MultiTenancyRepository<T, I> {
 
-    Page<T> findAll(CollectionName collectionName, Pageable pageable);
-
-    Page<T> findAll(CollectionName collectionName, Pageable pageable, Query query);
+    Page<T> findAll(Pageable pageable, Query query);
 }

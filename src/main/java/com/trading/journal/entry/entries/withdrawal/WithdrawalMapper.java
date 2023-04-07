@@ -12,5 +12,6 @@ public interface WithdrawalMapper {
     WithdrawalMapper INSTANCE = Mappers.getMapper(WithdrawalMapper.class);
 
     @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.WITHDRAWAL)")
-    Entry toEntry(Withdrawal withdrawal);
+    @Mapping(target = "journalId", source = "journalId")
+    Entry toEntry(Withdrawal withdrawal, String journalId);
 }

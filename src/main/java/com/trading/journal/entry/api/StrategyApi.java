@@ -1,6 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.strategy.Strategy;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -23,9 +22,7 @@ public interface StrategyApi {
             @ApiResponse(code = 200, message = "Strategies Returned")
     })
     @GetMapping()
-    ResponseEntity<PageWrapper<Strategy>> getAll(
-            AccessTokenInfo accessTokenInfo,
-            @SortDefault.SortDefaults({@SortDefault(sort = "name", direction = Sort.Direction.ASC)}) Pageable pageable
+    ResponseEntity<PageWrapper<Strategy>> getAll(@SortDefault.SortDefaults({@SortDefault(sort = "name", direction = Sort.Direction.ASC)}) Pageable pageable
     );
 
     @ApiOperation(notes = "Create or Update Strategy", value = "Create or Update Strategy")
@@ -34,19 +31,19 @@ public interface StrategyApi {
             @ApiResponse(code = 200, message = "Strategy Updated")
     })
     @PostMapping()
-    ResponseEntity<Strategy> save(AccessTokenInfo accessTokenInfo, @RequestBody @Valid Strategy strategy);
+    ResponseEntity<Strategy> save(@RequestBody @Valid Strategy strategy);
 
     @ApiOperation(notes = "Get Strategy by Id", value = "Get Strategy by Id")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Strategy Returned")
     })
     @GetMapping("/{strategy-id}")
-    ResponseEntity<Strategy> getById(AccessTokenInfo accessTokenInfo, @PathVariable(name = "strategy-id") String strategyId);
+    ResponseEntity<Strategy> getById(@PathVariable(name = "strategy-id") String strategyId);
 
     @ApiOperation(notes = "Delete Strategy by Id", value = "Delete Strategy by Id")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Strategy Deleted")
     })
     @DeleteMapping("/{strategy-id}")
-    ResponseEntity<Void> delete(AccessTokenInfo accessTokenInfo, @PathVariable(name = "strategy-id") String strategyId);
+    ResponseEntity<Void> delete(@PathVariable(name = "strategy-id") String strategyId);
 }

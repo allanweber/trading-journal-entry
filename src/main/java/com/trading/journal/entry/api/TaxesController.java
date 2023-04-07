@@ -1,6 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.taxes.Taxes;
 import com.trading.journal.entry.entries.taxes.TaxesService;
@@ -20,8 +19,8 @@ public class TaxesController implements TaxesApi {
     private final TaxesService taxesService;
 
     @Override
-    public ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, String journalId, Taxes taxes) {
-        Entry created = taxesService.create(accessTokenInfo, journalId, taxes);
+    public ResponseEntity<Entry> create(String journalId, Taxes taxes) {
+        Entry created = taxesService.create(journalId, taxes);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
         return created(uri).body(created);
     }

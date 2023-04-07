@@ -2,8 +2,7 @@ package com.trading.journal.entry.queries.impl;
 
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.mongodb.client.result.DeleteResult;
-import tooling.EntryForTest;
-import com.trading.journal.entry.queries.CollectionName;
+import com.trading.journal.entry.queries.TokenRequestScope;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.bson.Document;
@@ -21,12 +20,12 @@ import org.springframework.data.mongodb.core.aggregation.AggregationResults;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.repository.query.MongoEntityInformation;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+import tooling.EntryForTest;
 
 import java.util.List;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -36,8 +35,6 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class MultiTenancyPageableRepositoryImplTest {
-
-    private static CollectionName collectionName;
 
     private static String collection;
 
@@ -51,8 +48,8 @@ class MultiTenancyPageableRepositoryImplTest {
 
     @BeforeAll
     static void setUp() {
-        collectionName = new CollectionName(new AccessTokenInfo("subject", 1L, "TENANCY", emptyList()), "my-journal");
-        collection = "Tenancy_my-journal_entries";
+        TokenRequestScope.set(new AccessTokenInfo("user", 1L, "Test-Tenancy", singletonList("ROLE_USER")));
+        collection = "TestTenancy_entries";
     }
 
     @BeforeEach
@@ -69,7 +66,7 @@ class MultiTenancyPageableRepositoryImplTest {
         when(mongoOperations.count(any(), eq(EntryForTest.class), eq(collection))).thenReturn(1L);
         when(mongoOperations.find(any(), eq(EntryForTest.class), eq(collection))).thenReturn(singletonList(new EntryForTest()));
 
-        Page<EntryForTest> all = repository.findAll(collectionName, pageable);
+        Page<EntryForTest> all = repository.findAll(pageable);
         assertThat(all.get()).isNotEmpty();
     }
 
@@ -78,7 +75,7 @@ class MultiTenancyPageableRepositoryImplTest {
     void findAllSimple() {
         when(mongoOperations.findAll(EntryForTest.class, collection)).thenReturn(singletonList(new EntryForTest()));
 
-        List<EntryForTest> all = repository.getAll(collectionName);
+        List<EntryForTest> all = repository.getAll();
         assertThat(all).isNotEmpty();
     }
 
@@ -87,7 +84,7 @@ class MultiTenancyPageableRepositoryImplTest {
     void getById() {
         when(mongoOperations.findById("123", EntryForTest.class, collection)).thenReturn(new EntryForTest());
 
-        Optional<EntryForTest> byId = repository.getById(collectionName, "123");
+        Optional<EntryForTest> byId = repository.getById("123");
         assertThat(byId).isNotEmpty();
     }
 
@@ -97,7 +94,7 @@ class MultiTenancyPageableRepositoryImplTest {
         EntryForTest save = new EntryForTest();
         when(mongoOperations.save(save, collection)).thenReturn(save);
 
-        EntryForTest saved = repository.save(collectionName, save);
+        EntryForTest saved = repository.save(save);
         assertThat(saved).isNotNull();
     }
 
@@ -107,8 +104,7 @@ class MultiTenancyPageableRepositoryImplTest {
         EntryForTest delete = new EntryForTest();
         when(mongoOperations.remove(delete, collection)).thenReturn(DeleteResult.acknowledged(1L));
 
-        long count = repository.delete(collectionName, delete);
-        assertThat(count).isPositive();
+        repository.delete(delete);
     }
 
     @DisplayName("Has items")
@@ -116,7 +112,7 @@ class MultiTenancyPageableRepositoryImplTest {
     void hasItems() {
         when(mongoOperations.count(any(), eq(EntryForTest.class), eq(collection))).thenReturn(1L);
 
-        boolean hasItems = repository.hasItems(collectionName);
+        boolean hasItems = repository.hasItems();
         assertThat(hasItems).isTrue();
     }
 
@@ -125,14 +121,14 @@ class MultiTenancyPageableRepositoryImplTest {
     void hasNoItems() {
         when(mongoOperations.count(any(), eq(EntryForTest.class), eq(collection))).thenReturn(0L);
 
-        boolean hasItems = repository.hasItems(collectionName);
+        boolean hasItems = repository.hasItems();
         assertThat(hasItems).isFalse();
     }
 
     @DisplayName("Drop collection")
     @Test
     void drop() {
-        repository.drop(collectionName);
+        repository.drop();
         verify(mongoOperations).dropCollection(collection);
     }
 
@@ -140,16 +136,15 @@ class MultiTenancyPageableRepositoryImplTest {
     @Test
     void count() {
         when(mongoOperations.count(any(), eq(collection))).thenReturn(1L);
-        long count = repository.count(new Query(), collectionName);
+        long count = repository.count(new Query());
         assertThat(count).isEqualTo(1L);
     }
 
     @DisplayName("Find distinct")
     @Test
     void distinctQuery() {
-        when(mongoOperations.findDistinct(any(), eq("a"), eq(collection), any(), eq(String.class)))
-                .thenReturn(asList("A", "b"));
-        List<String> distinct = repository.distinct("a", collectionName);
+        when(mongoOperations.findDistinct(any(), eq("a"), eq(collection), any(), eq(String.class))).thenReturn(asList("A", "b"));
+        List<String> distinct = repository.distinct("a", new Query());
         assertThat(distinct).hasSize(2);
     }
 
@@ -164,7 +159,7 @@ class MultiTenancyPageableRepositoryImplTest {
         when(mongoOperations.aggregate(aggregation, collection, Aggregated.class))
                 .thenReturn(new AggregationResults<>(asList(new Aggregated("1", "2"), new Aggregated("1", "2")), document));
 
-        List<Aggregated> list = repository.aggregate(aggregation, collectionName, Aggregated.class);
+        List<Aggregated> list = repository.aggregate(aggregation, Aggregated.class);
         assertThat(list).hasSize(2);
     }
 

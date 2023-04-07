@@ -1,14 +1,12 @@
 package com.trading.journal.entry.journal.impl;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.ApplicationException;
 import com.trading.journal.entry.balance.Balance;
+import com.trading.journal.entry.entries.EntryRepository;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalRepository;
 import com.trading.journal.entry.journal.JournalService;
-import com.trading.journal.entry.queries.CollectionName;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
@@ -26,22 +24,22 @@ public class JournalServiceImpl implements JournalService {
 
     private final JournalRepository journalRepository;
 
-    private final MongoOperations mongoOperations;
+    private final EntryRepository entryRepository;
 
     @Override
-    public List<Journal> getAll(AccessTokenInfo accessToken) {
-        return journalRepository.getAll(new CollectionName(accessToken));
+    public List<Journal> getAll() {
+        return journalRepository.getAll();
     }
 
     @Override
-    public Journal get(AccessTokenInfo accessToken, String journalId) {
-        return journalRepository.getById(new CollectionName(accessToken), journalId)
+    public Journal get(String journalId) {
+        return journalRepository.getById(journalId)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Journal not found"));
     }
 
     @Override
-    public Journal save(AccessTokenInfo accessToken, Journal journal) {
-        if (hasSameName(accessToken, journal)) {
+    public Journal save(Journal journal) {
+        if (hasSameName(journal)) {
             throw new ApplicationException(HttpStatus.CONFLICT, "There is already another journal with the same name");
         }
         Journal saved;
@@ -58,33 +56,28 @@ public class JournalServiceImpl implements JournalService {
             journal.setLastBalance(LocalDateTime.now());
             journal.setCurrentBalance(balance);
         }
-        saved = journalRepository.save(new CollectionName(accessToken), journal);
+        saved = journalRepository.save(journal);
         return saved;
     }
 
     @Override
-    public long delete(AccessTokenInfo accessToken, String journalId) {
-        Journal journal = get(accessToken, journalId);
-        String entryCollectionName = new CollectionName(accessToken, journal.getName()).collectionName("entries");
-        mongoOperations.dropCollection(entryCollectionName);
-        CollectionName journalCollection = new CollectionName(accessToken);
-        long deleted = journalRepository.delete(journalCollection, journal);
-        if (!journalRepository.hasItems(journalCollection)) {
-            journalRepository.drop(journalCollection);
-        }
-        return deleted;
+    public void delete(String journalId) {
+        Journal journal = get(journalId);
+        Query query = new Query(Criteria.where("journalId").is(journalId));
+        entryRepository.delete(query);
+        journalRepository.delete(journal);
     }
 
     @Override
-    public void updateBalance(AccessTokenInfo accessToken, String journalId, Balance balance) {
-        Journal journal = get(accessToken, journalId);
+    public void updateBalance(String journalId, Balance balance) {
+        Journal journal = get(journalId);
         journal.setCurrentBalance(balance);
-        journalRepository.save(new CollectionName(accessToken), journal);
+        journalRepository.save(journal);
     }
 
-    private boolean hasSameName(AccessTokenInfo accessToken, Journal journal) {
+    private boolean hasSameName(Journal journal) {
         Query query = Query.query(Criteria.where("name").is(journal.getName()).and("id").ne(journal.getId()));
-        List<Journal> journals = journalRepository.find(new CollectionName(accessToken), query);
+        List<Journal> journals = journalRepository.find(query);
         return !journals.isEmpty();
     }
 }

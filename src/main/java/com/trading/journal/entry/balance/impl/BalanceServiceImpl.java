@@ -1,6 +1,5 @@
 package com.trading.journal.entry.balance.impl;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.balance.Balance;
 import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.Entry;
@@ -8,7 +7,6 @@ import com.trading.journal.entry.entries.EntryRepository;
 import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
-import com.trading.journal.entry.queries.CollectionName;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -32,13 +30,13 @@ public class BalanceServiceImpl implements BalanceService {
     private final JournalService journalService;
 
     @Override
-    public Balance calculateCurrentBalance(AccessTokenInfo accessToken, String journalId) {
-        return calculateBalance(accessToken, journalId);
+    public Balance calculateCurrentBalance(String journalId) {
+        return calculateBalance(journalId);
     }
 
     @Override
-    public Balance getCurrentBalance(AccessTokenInfo accessToken, String journalId) {
-        Journal journal = journalService.get(accessToken, journalId);
+    public Balance getCurrentBalance(String journalId) {
+        Journal journal = journalService.get(journalId);
         Balance balance = journal.getCurrentBalance();
         balance.setStartBalance(journal.getStartBalance().setScale(2, RoundingMode.HALF_EVEN));
         balance.setCurrency(journal.getCurrency());
@@ -47,15 +45,15 @@ public class BalanceServiceImpl implements BalanceService {
     }
 
     @Override
-    public Balance calculateAvailableBalance(AccessTokenInfo accessToken, String journalId) {
-        return calculateAvailable(accessToken, journalId);
+    public Balance calculateAvailableBalance(String journalId) {
+        return calculateAvailable(journalId);
     }
 
-    private Balance calculateBalance(AccessTokenInfo accessToken, String journalId) {
-        Journal journal = journalService.get(accessToken, journalId);
-        CollectionName collectionName = new CollectionName(accessToken, journal.getName());
+    private Balance calculateBalance(String journalId) {
+        Journal journal = journalService.get(journalId);
         Pageable page = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
-        List<Entry> entries = entryRepository.findAll(collectionName, page).get().toList();
+        Query query = new Query(new Criteria("journalId").is(journalId));
+        List<Entry> entries = entryRepository.findAll(page, query).get().toList();
 
         BigDecimal closedPositions = BigDecimal.ZERO;
         BigDecimal deposits = BigDecimal.ZERO;
@@ -96,17 +94,16 @@ public class BalanceServiceImpl implements BalanceService {
                 .taxes(taxes.setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        journalService.updateBalance(accessToken, journalId, balance);
+        journalService.updateBalance(journalId, balance);
 
         return balance;
     }
 
-    private Balance calculateAvailable(AccessTokenInfo accessToken, String journalId) {
-        Journal journal = journalService.get(accessToken, journalId);
-        CollectionName collectionName = new CollectionName(accessToken, journal.getName());
+    private Balance calculateAvailable(String journalId) {
+        Journal journal = journalService.get(journalId);
         Pageable page = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("date").ascending());
-        Query query = new Query(Criteria.where("netResult").exists(false));
-        List<Entry> openedEntries = entryRepository.findAll(collectionName, page, query).get().toList();
+        Query query = new Query(Criteria.where("journalId").is(journalId).and("netResult").exists(false));
+        List<Entry> openedEntries = entryRepository.findAll(page, query).get().toList();
 
         BigDecimal openedPositions = openedEntries.stream().map(entry -> entry.getPrice().multiply(entry.getSize()))
                 .reduce(BigDecimal::add)
@@ -123,7 +120,7 @@ public class BalanceServiceImpl implements BalanceService {
                 .available(available.setScale(2, RoundingMode.HALF_EVEN))
                 .build();
 
-        journalService.updateBalance(accessToken, journalId, balance);
+        journalService.updateBalance(journalId, balance);
 
         return balance;
     }

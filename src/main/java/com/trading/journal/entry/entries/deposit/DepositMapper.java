@@ -12,5 +12,6 @@ public interface DepositMapper {
     DepositMapper INSTANCE = Mappers.getMapper(DepositMapper.class);
 
     @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.DEPOSIT)")
-    Entry toEntry(Deposit deposit);
+    @Mapping(target = "journalId", source = "journalId")
+    Entry toEntry(Deposit deposit, String journalId);
 }

@@ -32,7 +32,7 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
 
     @BeforeEach
     public void beforeEach() {
-        mongoTemplate.dropCollection("TestTenancy_JOURNAL-1_entries");
+        mongoTemplate.dropCollection("TestTenancy_entries");
     }
 
     @DisplayName("Get journal balance for a journal not found")

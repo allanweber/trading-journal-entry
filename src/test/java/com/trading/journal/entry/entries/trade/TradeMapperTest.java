@@ -20,6 +20,7 @@ class TradeMapperTest {
     @DisplayName("Map Trade to Entry when Creating Entry")
     @Test
     void create() {
+        String journalId = UUID.randomUUID().toString();
         Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
                 .price(BigDecimal.valueOf(200.21))
@@ -34,9 +35,10 @@ class TradeMapperTest {
                 .notes("some notes")
                 .build();
 
-        Entry entry = TradeMapper.INSTANCE.toEntry(trade);
+        Entry entry = TradeMapper.INSTANCE.toEntry(trade, journalId);
 
         assertThat(entry.getId()).isNull();
+        assertThat(entry.getJournalId()).isEqualTo(journalId);
         assertThat(entry.getType()).isEqualTo(EntryType.TRADE);
         assertThat(entry.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 20, 15, 30, 50));
         assertThat(entry.getPrice()).isEqualTo(BigDecimal.valueOf(200.21));
@@ -65,6 +67,8 @@ class TradeMapperTest {
     @DisplayName("Map Trade to Entry when Creating Entry with strategy")
     @Test
     void createWithStrategy() {
+        String journalId = UUID.randomUUID().toString();
+
         Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
                 .price(BigDecimal.valueOf(200.21))
@@ -80,9 +84,10 @@ class TradeMapperTest {
                 .strategyIds(asList("1", "2"))
                 .build();
 
-        Entry entry = TradeMapper.INSTANCE.toEntry(trade);
+        Entry entry = TradeMapper.INSTANCE.toEntry(trade, journalId);
 
         assertThat(entry.getId()).isNull();
+        assertThat(entry.getJournalId()).isEqualTo(journalId);
         assertThat(entry.getType()).isEqualTo(EntryType.TRADE);
         assertThat(entry.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 20, 15, 30, 50));
         assertThat(entry.getPrice()).isEqualTo(BigDecimal.valueOf(200.21));
@@ -95,7 +100,7 @@ class TradeMapperTest {
         assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
         assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
         assertThat(entry.getNotes()).isEqualTo("some notes");
-        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1","2");
+        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1", "2");
         assertThat(entry.getExitDate()).isNull();
         assertThat(entry.getExitPrice()).isNull();
         assertThat(entry.getAccountRisked()).isNull();
@@ -112,6 +117,8 @@ class TradeMapperTest {
     @DisplayName("Map Trade to Entry when Updating Entry")
     @Test
     void update() {
+        String journalId = UUID.randomUUID().toString();
+
         Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
                 .price(BigDecimal.valueOf(200.21))
@@ -127,9 +134,10 @@ class TradeMapperTest {
                 .build();
 
         String id = UUID.randomUUID().toString();
-        Entry entry = TradeMapper.INSTANCE.toEntry(trade, id);
+        Entry entry = TradeMapper.INSTANCE.toEditEntry(trade, journalId, id);
 
         assertThat(entry.getId()).isEqualTo(id);
+        assertThat(entry.getJournalId()).isEqualTo(journalId);
         assertThat(entry.getType()).isEqualTo(EntryType.TRADE);
         assertThat(entry.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 20, 15, 30, 50));
         assertThat(entry.getPrice()).isEqualTo(BigDecimal.valueOf(200.21));
@@ -158,6 +166,8 @@ class TradeMapperTest {
     @DisplayName("Map Trade to Entry when Updating Entry with strategy")
     @Test
     void updateWithStrategy() {
+        String journalId = UUID.randomUUID().toString();
+
         Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 20, 15, 30, 50))
                 .price(BigDecimal.valueOf(200.21))
@@ -174,9 +184,10 @@ class TradeMapperTest {
                 .build();
 
         String id = UUID.randomUUID().toString();
-        Entry entry = TradeMapper.INSTANCE.toEntry(trade, id);
+        Entry entry = TradeMapper.INSTANCE.toEditEntry(trade, journalId, id);
 
         assertThat(entry.getId()).isEqualTo(id);
+        assertThat(entry.getJournalId()).isEqualTo(journalId);
         assertThat(entry.getType()).isEqualTo(EntryType.TRADE);
         assertThat(entry.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 20, 15, 30, 50));
         assertThat(entry.getPrice()).isEqualTo(BigDecimal.valueOf(200.21));
@@ -189,7 +200,7 @@ class TradeMapperTest {
         assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
         assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
         assertThat(entry.getNotes()).isEqualTo("some notes");
-        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1","2");
+        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1", "2");
         assertThat(entry.getExitDate()).isNull();
         assertThat(entry.getExitPrice()).isNull();
         assertThat(entry.getAccountRisked()).isNull();
@@ -293,8 +304,8 @@ class TradeMapperTest {
         assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
         assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
         assertThat(entry.getNotes()).isEqualTo("some notes");
-        assertThat(entry.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("1","2");
-        assertThat(entry.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder("ST1","ST2");
+        assertThat(entry.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("1", "2");
+        assertThat(entry.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder("ST1", "ST2");
         assertThat(entry.getExitDate()).isEqualTo(LocalDateTime.of(2022, 9, 21, 15, 30, 50));
         assertThat(entry.getExitPrice()).isEqualTo(BigDecimal.valueOf(250.31));
         assertThat(entry.getAccountRisked()).isNull();
@@ -311,11 +322,11 @@ class TradeMapperTest {
     @DisplayName("Given null")
     @Test
     void nullTests() {
-        assertThat(TradeMapper.INSTANCE.toEntry(null)).isNull();
-
         assertThat(TradeMapper.INSTANCE.toEntry(null, null)).isNull();
 
-        assertThat(TradeMapper.INSTANCE.toEntry(null, "123")).isNotNull();
+        assertThat(TradeMapper.INSTANCE.toEditEntry(null, null, null)).isNull();
+
+        assertThat(TradeMapper.INSTANCE.toEditEntry(null, null, "123")).isNotNull();
 
         assertThat(TradeMapper.INSTANCE.toEntryFromClose(null, null)).isNull();
 

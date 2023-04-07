@@ -1,6 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.deposit.Deposit;
 import com.trading.journal.entry.entries.deposit.DepositService;
@@ -20,8 +19,8 @@ public class DepositController implements DepositApi {
     private final DepositService depositService;
 
     @Override
-    public ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, String journalId, Deposit deposit) {
-        Entry created = depositService.create(accessTokenInfo, journalId, deposit);
+    public ResponseEntity<Entry> create(String journalId, Deposit deposit) {
+        Entry created = depositService.create(journalId, deposit);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest().path("/{id}").buildAndExpand(created.getId()).toUri();
         return created(uri).body(created);
     }

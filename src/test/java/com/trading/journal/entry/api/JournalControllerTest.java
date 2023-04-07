@@ -5,7 +5,6 @@ import com.trading.journal.entry.balance.BalanceService;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.EntryType;
-import com.trading.journal.entry.entries.GraphType;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.journal.Currency;
 import com.trading.journal.entry.journal.Journal;
@@ -32,7 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 class JournalControllerTest extends IntegratedTest {
     private static final String journalCollection = "TestTenancy_journals";
-    private static final String entryCollection = "TestTenancy_journal-1_entries";
+    private static final String entryCollection = "TestTenancy_entries";
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -185,18 +184,21 @@ class JournalControllerTest extends IntegratedTest {
                 });
     }
 
-    @DisplayName("Create a journal and delete it, should drop entries collection for this journal")
+    @DisplayName("Create a journal and delete it, should delete all entries for this journal")
     @Test
     void delete() {
-        AtomicReference<String> journalId = new AtomicReference<>();
-        Journal body = Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(100.00)).startJournal(LocalDateTime.now()).currency(Currency.DOLLAR).build();
+        AtomicReference<String> journal1Id = new AtomicReference<>();
+        AtomicReference<String> journal2Id = new AtomicReference<>();
+        Journal journal1 = Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(100.00)).startJournal(LocalDateTime.now()).currency(Currency.DOLLAR).build();
+        Journal journal2 = Journal.builder().name("journal-2").startBalance(BigDecimal.valueOf(100.00)).startJournal(LocalDateTime.now()).currency(Currency.DOLLAR).build();
+
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals")
                         .build())
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(body)
+                .bodyValue(journal1)
                 .exchange()
                 .expectStatus()
                 .isCreated()
@@ -206,27 +208,43 @@ class JournalControllerTest extends IntegratedTest {
                 .value(response -> {
                     assertThat(response.getId()).isNotNull();
                     assertThat(response.getName()).isEqualTo("journal-1");
-                    journalId.set(response.getId());
+                    journal1Id.set(response.getId());
                 });
 
-        assertThat(mongoTemplate.findAll(Journal.class, journalCollection)).isNotEmpty();
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(journal2)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Journal.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    assertThat(response.getName()).isEqualTo("journal-2");
+                    journal2Id.set(response.getId());
+                });
 
-        Trade trade = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .build();
+        assertThat(mongoTemplate.findAll(Journal.class, journalCollection)).hasSize(2);
+
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries/trade")
-                        .build(journalId.get()))
+                        .build(journal1Id.get()))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(trade)
+                .bodyValue(Trade.builder()
+                        .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                        .symbol("JOURNAL1-ENTRY")
+                        .direction(EntryDirection.LONG)
+                        .price(BigDecimal.valueOf(1.1234))
+                        .size(BigDecimal.valueOf(500.00))
+                        .build())
                 .exchange()
                 .expectStatus()
                 .isCreated()
@@ -235,54 +253,42 @@ class JournalControllerTest extends IntegratedTest {
                 .expectBody(Entry.class)
                 .value(response -> assertThat(response.getId()).isNotNull());
 
-        assertThat(mongoTemplate.collectionExists(entryCollection)).isTrue();
-
-        webTestClient
-                .delete()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .pathSegment("{journal-id}")
-                        .build(journalId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk();
-
-        body = Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(100.00)).startJournal(LocalDateTime.now()).currency(Currency.DOLLAR).build();
         webTestClient
                 .post()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals")
-                        .build())
+                        .path("/journals/{journal-id}/entries/trade")
+                        .build(journal2Id.get()))
                 .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(body)
+                .bodyValue(Trade.builder()
+                        .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                        .symbol("JOURNAL2-ENTRY")
+                        .direction(EntryDirection.LONG)
+                        .price(BigDecimal.valueOf(1.1234))
+                        .size(BigDecimal.valueOf(500.00))
+                        .build())
                 .exchange()
                 .expectStatus()
                 .isCreated()
                 .expectHeader()
                 .exists("Location")
-                .expectBody(Journal.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    assertThat(response.getName()).isEqualTo("journal-1");
-                    journalId.set(response.getId());
-                });
+                .expectBody(Entry.class)
+                .value(response -> assertThat(response.getId()).isNotNull());
 
-        assertThat(mongoTemplate.collectionExists(journalCollection)).isTrue();
-        assertThat(mongoTemplate.collectionExists(entryCollection)).isFalse();
+        assertThat(mongoTemplate.findAll(Entry.class, entryCollection)).hasSize(2);
 
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals")
                         .pathSegment("{journal-id}")
-                        .build(journalId.get()))
+                        .build(journal1Id.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk();
 
-        assertThat(mongoTemplate.collectionExists(journalCollection)).isFalse();
+        assertThat(mongoTemplate.findAll(Journal.class, journalCollection)).extracting(Journal::getName).containsExactly("journal-2");
+        assertThat(mongoTemplate.findAll(Entry.class, entryCollection)).extracting(Entry::getSymbol).containsExactly("JOURNAL2-ENTRY");
     }
 
 
@@ -311,21 +317,21 @@ class JournalControllerTest extends IntegratedTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(10)).netResult(BigDecimal.valueOf(123.45)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(234.56)).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(8)).netResult(BigDecimal.valueOf(345.67)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(456.78)).date(now.minusDays(7)).netResult(BigDecimal.valueOf(456.78)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(6)).netResult(BigDecimal.valueOf(-567.89)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(5)).netResult(BigDecimal.valueOf(678.91)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(789.12)).date(now.minusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusDays(10)).netResult(BigDecimal.valueOf(123.45)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(234.56)).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusDays(8)).netResult(BigDecimal.valueOf(345.67)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.DEPOSIT).price(BigDecimal.valueOf(456.78)).date(now.minusDays(7)).netResult(BigDecimal.valueOf(456.78)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusDays(6)).netResult(BigDecimal.valueOf(-567.89)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusDays(5)).netResult(BigDecimal.valueOf(678.91)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(789.12)).date(now.minusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusDays(3)).netResult(BigDecimal.valueOf(891.23)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).price(BigDecimal.valueOf(789.12)).size(BigDecimal.valueOf(1)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).size(BigDecimal.valueOf(1)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(912.34)).date(now.plusMinutes(1)).size(BigDecimal.valueOf(1)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.plusDays(4)).price(BigDecimal.valueOf(789.12)).size(BigDecimal.valueOf(1)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).size(BigDecimal.valueOf(1)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).price(BigDecimal.valueOf(912.34)).date(now.plusMinutes(1)).size(BigDecimal.valueOf(1)).build(), entryCollection);
 
-        balanceService.calculateCurrentBalance(TOKEN_INFO, journal.getId());
+        balanceService.calculateCurrentBalance(journal.getId());
 
         webTestClient
                 .get()
@@ -355,21 +361,21 @@ class JournalControllerTest extends IntegratedTest {
 
         LocalDateTime now = LocalDateTime.now();
 
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(10)).netResult(BigDecimal.valueOf(123.45)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TAXES).price(BigDecimal.valueOf(234.56)).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(345.67)).date(now.minusDays(8)).netResult(BigDecimal.valueOf(345.67)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(7)).netResult(BigDecimal.valueOf(456.78)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(6)).netResult(BigDecimal.valueOf(-567.89)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(678.91)).date(now.minusDays(5)).netResult(BigDecimal.valueOf(-678.91)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.minusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(891.23)).date(now.minusDays(3)).netResult(BigDecimal.valueOf(-891.23)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.DEPOSIT).price(BigDecimal.valueOf(912.34)).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusDays(10)).netResult(BigDecimal.valueOf(123.45)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TAXES).price(BigDecimal.valueOf(234.56)).date(now.minusDays(9)).netResult(BigDecimal.valueOf(-234.56)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.DEPOSIT).price(BigDecimal.valueOf(345.67)).date(now.minusDays(8)).netResult(BigDecimal.valueOf(345.67)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusDays(7)).netResult(BigDecimal.valueOf(456.78)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusDays(6)).netResult(BigDecimal.valueOf(-567.89)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(678.91)).date(now.minusDays(5)).netResult(BigDecimal.valueOf(-678.91)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.minusDays(4)).netResult(BigDecimal.valueOf(-789.12)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.WITHDRAWAL).price(BigDecimal.valueOf(891.23)).date(now.minusDays(3)).netResult(BigDecimal.valueOf(-891.23)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.DEPOSIT).price(BigDecimal.valueOf(912.34)).date(now.minusSeconds(1)).netResult(BigDecimal.valueOf(912.34)).build(), entryCollection);
 
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).date(now.plusDays(4)).price(BigDecimal.valueOf(789.12)).size(BigDecimal.valueOf(1)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).size(BigDecimal.valueOf(1)).build(), entryCollection);
-        mongoTemplate.save(Entry.builder().type(EntryType.TRADE).price(BigDecimal.valueOf(912.34)).date(now.plusMinutes(1)).size(BigDecimal.valueOf(1)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).date(now.plusDays(4)).price(BigDecimal.valueOf(789.12)).size(BigDecimal.valueOf(1)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).price(BigDecimal.valueOf(891.23)).date(now.plusMinutes(3)).size(BigDecimal.valueOf(1)).build(), entryCollection);
+        mongoTemplate.save(Entry.builder().journalId(journal.getId()).type(EntryType.TRADE).price(BigDecimal.valueOf(912.34)).date(now.plusMinutes(1)).size(BigDecimal.valueOf(1)).build(), entryCollection);
 
-        balanceService.calculateCurrentBalance(TOKEN_INFO, journal.getId());
+        balanceService.calculateCurrentBalance(journal.getId());
 
         webTestClient
                 .get()

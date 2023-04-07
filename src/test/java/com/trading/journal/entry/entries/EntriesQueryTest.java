@@ -16,12 +16,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class EntriesQueryTest {
 
+    @DisplayName("Journal filter")
+    @Test
+    void journal() {
+        EntriesQuery entriesQuery = EntriesQuery.builder().journalId("123").build();
+        Query query = entriesQuery.buildQuery();
+        assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is("123"))
+        );
+    }
+
     @DisplayName("Symbol filter")
     @Test
     void symbol() {
         EntriesQuery entriesQuery = EntriesQuery.builder().symbol("MSFT").build();
         Query query = entriesQuery.buildQuery();
-        assertThat(query).isEqualTo(new Query().addCriteria(Criteria.where("symbol").is("MSFT")));
+        assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
+                .addCriteria(Criteria.where("symbol").is("MSFT"))
+        );
     }
 
     @DisplayName("Type filter")
@@ -29,7 +42,10 @@ class EntriesQueryTest {
     void type() {
         EntriesQuery entriesQuery = EntriesQuery.builder().type(EntryType.DEPOSIT).build();
         Query query = entriesQuery.buildQuery();
-        assertThat(query).isEqualTo(new Query().addCriteria(Criteria.where("type").is("DEPOSIT")));
+        assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
+                .addCriteria(Criteria.where("type").is("DEPOSIT"))
+        );
     }
 
     @DisplayName("From when status null")
@@ -37,7 +53,9 @@ class EntriesQueryTest {
     void fromNullStatus() {
         EntriesQuery entriesQuery = EntriesQuery.builder().from("2022-01-01 00:00:00").build();
         Query query = entriesQuery.buildQuery();
-        assertThat(query).isEqualTo(new Query().addCriteria(Criteria.where("date").gte(LocalDateTime.parse("2022-01-01 00:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))));
+        assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
+                .addCriteria(Criteria.where("date").gte(LocalDateTime.parse("2022-01-01 00:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))));
     }
 
     @DisplayName("From when status open")
@@ -46,6 +64,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().status(EntryStatus.OPEN).from("2022-01-01 00:00:00").build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("date").gte(LocalDateTime.parse("2022-01-01 00:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))))
                 .addCriteria(Criteria.where("netResult").exists(false))
         );
@@ -57,6 +76,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().status(EntryStatus.CLOSED).from("2022-01-01 00:00:00").build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("exitDate").gte(LocalDateTime.parse("2022-01-01 00:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))))
                 .addCriteria(Criteria.where("netResult").exists(true))
         );
@@ -68,6 +88,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().status(EntryStatus.OPEN).build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("netResult").exists(false))
         );
     }
@@ -78,6 +99,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().status(EntryStatus.CLOSED).build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("netResult").exists(true))
         );
     }
@@ -88,6 +110,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().direction(EntryDirection.LONG).build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("direction").is("LONG"))
         );
     }
@@ -98,6 +121,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().direction(EntryDirection.SHORT).build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("direction").is("SHORT"))
         );
     }
@@ -108,6 +132,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().status(EntryStatus.CLOSED).result(EntryResult.WIN).build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("netResult").exists(true).gte(BigDecimal.ZERO))
         );
     }
@@ -118,6 +143,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().status(EntryStatus.CLOSED).result(EntryResult.LOSE).build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("netResult").exists(true).lt(BigDecimal.ZERO))
         );
     }
@@ -128,12 +154,14 @@ class EntriesQueryTest {
         EntriesQuery open = EntriesQuery.builder().status(EntryStatus.OPEN).result(EntryResult.LOSE).build();
         Query openQuery = open.buildQuery();
         assertThat(openQuery).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("netResult").exists(false))
         );
 
         EntriesQuery loose = EntriesQuery.builder().status(EntryStatus.OPEN).result(EntryResult.LOSE).build();
         Query looseQuery = loose.buildQuery();
         assertThat(looseQuery).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("netResult").exists(false))
         );
     }
@@ -144,6 +172,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().result(EntryResult.WIN).build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("netResult").gte(BigDecimal.ZERO))
         );
     }
@@ -154,6 +183,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().result(EntryResult.LOSE).build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("netResult").lt(BigDecimal.ZERO))
         );
     }
@@ -164,6 +194,7 @@ class EntriesQueryTest {
         EntriesQuery entriesQuery = EntriesQuery.builder().strategyIds(asList("123456", "456789")).build();
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
+                .addCriteria(Criteria.where("journalId").is(null))
                 .addCriteria(Criteria.where("strategyIds").in(asList("123456", "456789")))
         );
     }

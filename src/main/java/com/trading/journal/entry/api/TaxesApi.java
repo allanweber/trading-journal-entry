@@ -1,6 +1,5 @@
 package com.trading.journal.entry.api;
 
-import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.taxes.Taxes;
 import io.swagger.annotations.Api;
@@ -24,5 +23,5 @@ public interface TaxesApi {
             @ApiResponse(code = 201, message = "Taxes created")
     })
     @PostMapping()
-    ResponseEntity<Entry> create(AccessTokenInfo accessTokenInfo, @PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Taxes taxes);
+    ResponseEntity<Entry> create(@PathVariable(name = "journal-id") String journalId, @RequestBody @Valid Taxes taxes);
 }
