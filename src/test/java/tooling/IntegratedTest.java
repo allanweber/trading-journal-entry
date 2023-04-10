@@ -3,8 +3,6 @@ package tooling;
 import com.allanweber.jwttoken.data.AccessTokenInfo;
 import com.allanweber.jwttoken.service.JwtResolveToken;
 import com.allanweber.jwttoken.service.JwtTokenReader;
-import com.allanweber.jwttoken.service.impl.JwtResolveTokenHttpHeader;
-import com.trading.journal.entry.configuration.TokenScopeFilter;
 import com.trading.journal.entry.queries.TokenRequestScope;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
