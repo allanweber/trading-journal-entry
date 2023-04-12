@@ -1,6 +1,7 @@
 package com.trading.journal.entry.api;
 
 import com.trading.journal.entry.entries.*;
+import com.trading.journal.entry.entries.image.data.EntryImageResponse;
 import io.swagger.annotations.*;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -46,12 +47,16 @@ public interface EntryApi {
     @ApiResponses(@ApiResponse(code = 200, message = "Trade image uploaded"))
     @PostMapping("/{entry-id}/image")
     ResponseEntity<Void> uploadImage(@PathVariable(name = "entry-id") String entryId,
-                                     @RequestParam("type") UploadType type,
                                      @RequestParam("file") MultipartFile file);
 
     @ApiOperation(notes = "Return Trade image", value = "Return Trade image")
     @ApiResponses(@ApiResponse(code = 200, message = "Trade image returned"))
-    @GetMapping("/{entry-id}/image")
-    ResponseEntity<EntryImageResponse> getImage(@PathVariable(name = "entry-id") String entryId,
-                                                @RequestParam("type") UploadType type);
+    @GetMapping("/{entry-id}/images")
+    ResponseEntity<List<EntryImageResponse>> getImages(@PathVariable(name = "entry-id") String entryId);
+
+    @ApiOperation(notes = "Return Trade image", value = "Return Trade image")
+    @ApiResponses(@ApiResponse(code = 200, message = "Trade image returned"))
+    @DeleteMapping("/{entry-id}/image/{image-name}")
+    ResponseEntity<Void> deleteImage(@PathVariable(name = "entry-id") String entryId,
+                                     @PathVariable(name = "image-name") String imageName);
 }

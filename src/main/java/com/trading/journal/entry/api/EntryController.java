@@ -1,6 +1,8 @@
 package com.trading.journal.entry.api;
 
 import com.trading.journal.entry.entries.*;
+import com.trading.journal.entry.entries.image.EntryImageService;
+import com.trading.journal.entry.entries.image.data.EntryImageResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,8 @@ import static org.springframework.http.ResponseEntity.ok;
 public class EntryController implements EntryApi {
 
     private final EntryService entryService;
+
+    private final EntryImageService entryImageService;
 
     @Override
     public ResponseEntity<PageWrapper<Entry>> getAll(
@@ -52,16 +56,20 @@ public class EntryController implements EntryApi {
     }
 
     @Override
-    public ResponseEntity<Void> uploadImage(String entryId, UploadType type, MultipartFile file) {
-        entryService.uploadImage(entryId, type, file);
+    public ResponseEntity<Void> uploadImage(String entryId, MultipartFile file) {
+        entryImageService.uploadImage(entryId, file);
         return ok().build();
     }
 
     @Override
-    public ResponseEntity<EntryImageResponse> getImage(String entryId, UploadType type) {
-        EntryImageResponse image = entryService.returnImage(entryId, type);
-        return ok(image);
+    public ResponseEntity<List<EntryImageResponse>> getImages(String entryId) {
+        List<EntryImageResponse> images = entryImageService.returnImages(entryId);
+        return ok(images);
     }
 
-
+    @Override
+    public ResponseEntity<Void> deleteImage(String entryId, String imageName) {
+        entryImageService.deleteImage(entryId, imageName);
+        return ok().build();
+    }
 }

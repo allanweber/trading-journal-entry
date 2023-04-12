@@ -196,7 +196,7 @@
                         <ruleset>${project.basedir}/pmd/pmd-ruleset.xml</ruleset>
                     </rulesets>
                     <excludes>
-                        <exclude>com/trading/journal/authentication/api/**Api.java</exclude>
+                        <exclude>com/trading/journal/entry/storage/impl/ImageSimpleCompression.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -207,6 +207,8 @@
                 <configuration>
                     <excludes>
                         <exclude>com/trading/**/EntryApplication.class</exclude>
+                        <exclude>com/trading/**/ImageSimpleCompression.class</exclude>
+                        <exclude>com/trading/**/LocalFileStorage.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>

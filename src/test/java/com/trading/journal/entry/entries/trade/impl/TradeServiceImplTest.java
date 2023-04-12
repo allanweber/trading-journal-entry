@@ -111,9 +111,10 @@ class TradeServiceImplTest {
                 .notes("some notes")
                 .build();
 
+        when(entryService.getById(entryId)).thenReturn(entry);
         when(entryService.save(entry)).thenReturn(entry);
 
-        Entry entryCreated = tradeService.update(JOURNAL_ID, entryId, trade);
+        Entry entryCreated = tradeService.update(entryId, trade);
 
         assertThat(entryCreated).isNotNull();
     }
@@ -166,7 +167,7 @@ class TradeServiceImplTest {
         when(entryService.getById(entryId)).thenReturn(entryGetById);
         when(entryService.save(entryToClose)).thenReturn(entryToClose);
 
-        Entry entryCreated = tradeService.close(JOURNAL_ID, entryId, trade);
+        Entry entryCreated = tradeService.close(entryId, trade);
 
         assertThat(entryCreated).isNotNull();
     }

@@ -21,8 +21,20 @@ public interface TradeMapper {
     @Mapping(target = "exitDate", source = "closeTrade.exitDate")
     Entry toEntryFromClose(Entry entry, CloseTrade closeTrade);
 
+    @Mapping(target = "id", source = "entry.id")
+    @Mapping(target = "journalId", source = "entry.journalId")
     @Mapping(target = "type", expression = "java(com.trading.journal.entry.entries.EntryType.TRADE)")
-    @Mapping(target = "id", source = "id")
-    @Mapping(target = "journalId", source = "journalId")
-    Entry toEditEntry(Trade trade, String journalId, String id);
+    @Mapping(target = "date", source = "trade.date")
+    @Mapping(target = "price", source = "trade.price")
+    @Mapping(target = "graphType", source = "trade.graphType")
+    @Mapping(target = "graphMeasure", source = "trade.graphMeasure")
+    @Mapping(target = "symbol", source = "trade.symbol")
+    @Mapping(target = "direction", source = "trade.direction")
+    @Mapping(target = "size", source = "trade.size")
+    @Mapping(target = "profitPrice", source = "trade.profitPrice")
+    @Mapping(target = "lossPrice", source = "trade.lossPrice")
+    @Mapping(target = "costs", source = "trade.costs")
+    @Mapping(target = "notes", source = "trade.notes")
+    @Mapping(target = "strategyIds", source = "trade.strategyIds")
+    Entry toEditEntry(Entry entry, Trade trade);
 }

@@ -11,7 +11,6 @@ import org.mockito.Mock;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +27,26 @@ class S3FileStorageTest {
     @InjectMocks
     S3FileStorage fileStorage;
 
+    @DisplayName("Bucket exists")
+    @Test
+    void bucketExists() {
+        String folder = "folder";
+        when(client.doesBucketExistV2(folder)).thenReturn(true);
+
+        boolean exists = fileStorage.folderExists(folder);
+        assertThat(exists).isTrue();
+    }
+
+    @DisplayName("Bucket does not exists")
+    @Test
+    void bucketNotExists() {
+        String folder = "folder";
+        when(client.doesBucketExistV2(folder)).thenReturn(false);
+
+        boolean exists = fileStorage.folderExists(folder);
+        assertThat(exists).isFalse();
+    }
+
     @DisplayName("Create a new bucket")
     @Test
     void createFolder() {
@@ -35,7 +54,6 @@ class S3FileStorageTest {
         when(client.createBucket(folder)).thenReturn(new Bucket());
 
         fileStorage.createFolder(folder);
-        ;
     }
 
     @DisplayName("Upload a file")
@@ -56,9 +74,9 @@ class S3FileStorageTest {
 
     @DisplayName("Download a file")
     @Test
-    void getFile() throws IOException {
+    void getFile() {
         String folder = "folder";
-        String fileName = "file.txt";
+        String fileName = "prefix/file.txt";
 
         when(client.doesObjectExist(folder, fileName)).thenReturn(true);
 
@@ -69,13 +87,13 @@ class S3FileStorageTest {
         Optional<FileResponse> file = fileStorage.getFile(folder, fileName);
 
         assertThat(file).isPresent();
-        assertThat(file.get().getFileName()).isEqualTo(fileName);
+        assertThat(file.get().getFileName()).isEqualTo("file.txt");
         assertThat(file.get().getFile()).isEqualTo("an file sample".getBytes());
     }
 
     @DisplayName("Download a not existent file return empty")
     @Test
-    void getFileNotFound() throws IOException {
+    void getFileNotFound() {
         String folder = "folder";
         String fileName = "file.txt";
 

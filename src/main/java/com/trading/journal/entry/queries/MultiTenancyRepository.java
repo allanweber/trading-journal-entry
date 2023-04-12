@@ -2,6 +2,7 @@ package com.trading.journal.entry.queries;
 
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.repository.NoRepositoryBean;
 
@@ -29,4 +30,6 @@ public interface MultiTenancyRepository<T, I extends Serializable> extends Mongo
     List<String> distinct(String field, Query query);
 
     <U> List<U> aggregate(Aggregation aggregation, Class<U> clazz);
+
+    long update(Query query, UpdateDefinition update);
 }

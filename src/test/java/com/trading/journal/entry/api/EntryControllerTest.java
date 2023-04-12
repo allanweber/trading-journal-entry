@@ -1,6 +1,7 @@
 package com.trading.journal.entry.api;
 
 import com.trading.journal.entry.entries.*;
+import com.trading.journal.entry.entries.image.data.EntryImageResponse;
 import com.trading.journal.entry.entries.trade.Trade;
 import com.trading.journal.entry.strategy.Strategy;
 import org.bson.types.ObjectId;
@@ -620,41 +621,25 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .value(response -> assertThat(response.getContent()).hasSize(0));
     }
 
-    @DisplayName("Create a new Trade entry and add images to it")
+    @DisplayName("Manage Trade images")
     @Test
     void addImages() {
-        Trade trade = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .build();
 
-        AtomicReference<String> entryId = new AtomicReference<>();
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(trade)
-                .exchange()
-                .expectStatus()
-                .isCreated()
-                .expectHeader()
-                .exists("Location")
-                .expectBody(Entry.class)
-                .value(response -> {
-                    assertThat(response.getId()).isNotNull();
-                    entryId.set(response.getId());
-                    assertThat(response.getDate()).isEqualTo(LocalDateTime.of(2022, 9, 1, 17, 35, 59));
-                    assertThat(response.getType()).isEqualTo(EntryType.TRADE);
-                    assertThat(response.getSymbol()).isEqualTo("USD/EUR");
-                });
+        Entry msft = mongoTemplate.save(Entry.builder()
+                .journalId(journalId)
+                .symbol("MSFT")
+                .date(LocalDateTime.of(2022, 8, 1, 18, 23, 30))
+                .price(BigDecimal.valueOf(10.00))
+                .type(EntryType.TRADE)
+                .build(), entryCollection);
 
+        Entry appl = mongoTemplate.save(Entry.builder()
+                .journalId(journalId)
+                .symbol("APPL")
+                .date(LocalDateTime.of(2022, 8, 1, 18, 23, 30))
+                .price(BigDecimal.valueOf(10.00))
+                .type(EntryType.TRADE)
+                .build(), entryCollection);
 
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("file", new ClassPathResource("java.png"));
@@ -662,42 +647,17 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries/{entry-id}/image")
-                        .queryParam("type", UploadType.IMAGE_BEFORE)
-                        .build(journalId, entryId.get()))
+                        .build(journalId, msft.getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .exchange()
                 .expectStatus()
                 .isOk();
 
-        List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
-        assertThat(all).hasSize(1);
-        assertThat(all.get(0).getScreenshotBefore()).isNotNull();
-        assertThat(all.get(0).getScreenshotAfter()).isNull();
-
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/{entry-id}/image")
-                        .queryParam("type", UploadType.IMAGE_BEFORE)
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk().expectBody(EntryImageResponse.class)
-                .value(response -> assertThat(response.getImage()).isNotNull());
-
-        webTestClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/{entry-id}/image")
-                        .queryParam("type", UploadType.IMAGE_AFTER)
-                        .build(journalId, entryId.get()))
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk().expectBody(EntryImageResponse.class)
-                .value(response -> assertThat(response.getImage()).isNull());
+        Entry entry = mongoTemplate.findById(new ObjectId(msft.getId()), Entry.class, entryCollection);
+        assertThat(entry).isNotNull();
+        assertThat(entry.getSymbol()).isEqualTo("MSFT");
+        assertThat(entry.getImages()).containsExactly("image-1.jpg");
 
         bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("file", new ClassPathResource("java.png"));
@@ -705,42 +665,133 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .post()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries/{entry-id}/image")
-                        .queryParam("type", UploadType.IMAGE_AFTER)
-                        .build(journalId, entryId.get()))
+                        .build(journalId, appl.getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .exchange()
                 .expectStatus()
                 .isOk();
 
-        all = mongoTemplate.findAll(Entry.class, entryCollection);
-        assertThat(all).hasSize(1);
-        assertThat(all.get(0).getScreenshotBefore()).isNotNull();
-        assertThat(all.get(0).getScreenshotAfter()).isNotNull();
+        bodyBuilder = new MultipartBodyBuilder();
+        bodyBuilder.part("file", new ClassPathResource("java.png"));
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/{entry-id}/image")
+                        .build(journalId, appl.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        entry = mongoTemplate.findById(new ObjectId(appl.getId()), Entry.class, entryCollection);
+        assertThat(entry).isNotNull();
+        assertThat(entry.getSymbol()).isEqualTo("APPL");
+        assertThat(entry.getImages()).containsExactly("image-1.jpg", "image-2.jpg");
 
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/{entry-id}/image")
-                        .queryParam("type", UploadType.IMAGE_BEFORE)
-                        .build(journalId, entryId.get()))
+                        .path("/journals/{journal-id}/entries/{entry-id}/images")
+                        .build(journalId, msft.getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isOk().expectBody(EntryImageResponse.class)
-                .value(response -> assertThat(response.getImage()).isNotNull());
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<EntryImageResponse>>() {
+                })
+                .value(images -> {
+                    assertThat(images).hasSize(1);
+                    assertThat(images).extracting(EntryImageResponse::getImageName).containsExactly("image-1.jpg");
+                });
 
         webTestClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/{entry-id}/image")
-                        .queryParam("type", UploadType.IMAGE_AFTER)
-                        .build(journalId, entryId.get()))
+                        .path("/journals/{journal-id}/entries/{entry-id}/images")
+                        .build(journalId, appl.getId()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
-                .isOk().expectBody(EntryImageResponse.class)
-                .value(response -> assertThat(response.getImage()).isNotNull());
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<EntryImageResponse>>() {
+                })
+                .value(images -> {
+                    assertThat(images).hasSize(2);
+                    assertThat(images).extracting(EntryImageResponse::getImageName).containsExactlyInAnyOrder("image-1.jpg", "image-2.jpg");
+                });
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/{entry-id}/image/{image-name}")
+                        .build(journalId, msft.getId(), "image-1.jpg"))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/{entry-id}/image/{image-name}")
+                        .build(journalId, appl.getId(), "image-2.jpg"))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        entry = mongoTemplate.findById(new ObjectId(msft.getId()), Entry.class, entryCollection);
+        assertThat(entry).isNotNull();
+        assertThat(entry.getSymbol()).isEqualTo("MSFT");
+        assertThat(entry.getImages()).isNull();
+
+        entry = mongoTemplate.findById(new ObjectId(appl.getId()), Entry.class, entryCollection);
+        assertThat(entry).isNotNull();
+        assertThat(entry.getSymbol()).isEqualTo("APPL");
+        assertThat(entry.getImages()).containsExactly("image-1.jpg");
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/{entry-id}/images")
+                        .build(journalId, msft.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<EntryImageResponse>>() {
+                })
+                .value(images -> {
+                    assertThat(images).hasSize(0);
+                });
+
+        webTestClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/{entry-id}/images")
+                        .build(journalId, appl.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk()
+                .expectBody(new ParameterizedTypeReference<List<EntryImageResponse>>() {
+                })
+                .value(images -> {
+                    assertThat(images).hasSize(1);
+                    assertThat(images).extracting(EntryImageResponse::getImageName).containsExactly("image-1.jpg");
+                });
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/{entry-id}/image/{image-name}")
+                        .build(journalId, appl.getId(), "image-xxxx.jpg"))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
     }
 
     @DisplayName("Get entry by Id")
