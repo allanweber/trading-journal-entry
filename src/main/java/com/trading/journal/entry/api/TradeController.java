@@ -30,14 +30,14 @@ public class TradeController implements TradeApi {
     }
 
     @Override
-    public ResponseEntity<Entry> update(String journalId, String tradeId, Trade trade) {
-        Entry updated = tradeService.update(journalId, tradeId, trade);
+    public ResponseEntity<Entry> update(String tradeId, Trade trade) {
+        Entry updated = tradeService.update(tradeId, trade);
         return ok(updated);
     }
 
     @Override
-    public ResponseEntity<Entry> close(String journalId, String tradeId, CloseTrade trade) {
-        Entry closed = tradeService.close(journalId, tradeId, trade);
+    public ResponseEntity<Entry> close(String tradeId, CloseTrade trade) {
+        Entry closed = tradeService.close(tradeId, trade);
         return ok(closed);
     }
 

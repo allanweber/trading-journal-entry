@@ -32,14 +32,14 @@ public interface TradeApi {
             @ApiResponse(code = 200, message = "Trade updated")
     })
     @PatchMapping("/{trade-id}")
-    ResponseEntity<Entry> update(@PathVariable(name = "journal-id") String journalId, @PathVariable(name = "trade-id") String tradeId, @RequestBody @Valid Trade trade);
+    ResponseEntity<Entry> update(@PathVariable(name = "trade-id") String tradeId, @RequestBody @Valid Trade trade);
 
     @ApiOperation(notes = "Close Trade", value = "Close Trade")
     @ApiResponses({
             @ApiResponse(code = 200, message = "Trade closed")
     })
     @PatchMapping("/{trade-id}/close")
-    ResponseEntity<Entry> close(@PathVariable(name = "journal-id") String journalId, @PathVariable(name = "trade-id") String tradeId, @RequestBody @Valid CloseTrade trade);
+    ResponseEntity<Entry> close(@PathVariable(name = "trade-id") String tradeId, @RequestBody @Valid CloseTrade trade);
 
     @ApiOperation(notes = "Count open trades", value = "Retrieve number of open trades")
     @ApiResponses(@ApiResponse(code = 200, message = "Open trades"))

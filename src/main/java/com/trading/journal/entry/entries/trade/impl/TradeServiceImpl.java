@@ -28,13 +28,14 @@ public class TradeServiceImpl implements TradeService {
     }
 
     @Override
-    public Entry update(String journalId, String tradeId, Trade trade) {
-        Entry entry = TradeMapper.INSTANCE.toEditEntry(trade, journalId, tradeId);
+    public Entry update(String tradeId, Trade trade) {
+        Entry entrySaved = entryService.getById(tradeId);
+        Entry entry = TradeMapper.INSTANCE.toEditEntry(entrySaved, trade);
         return entryService.save(entry);
     }
 
     @Override
-    public Entry close(String journalId, String tradeId, CloseTrade trade) {
+    public Entry close(String tradeId, CloseTrade trade) {
         Entry entry = entryService.getById(tradeId);
         Entry closeTrade = TradeMapper.INSTANCE.toEntryFromClose(entry, trade);
         return entryService.save(closeTrade);

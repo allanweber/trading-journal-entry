@@ -47,8 +47,6 @@ class DepositMapperTest {
         assertThat(entry.getNetResult()).isNull();
         assertThat(entry.getAccountChange()).isNull();
         assertThat(entry.getAccountBalance()).isNull();
-        assertThat(entry.getScreenshotBefore()).isNull();
-        assertThat(entry.getScreenshotAfter()).isNull();
         assertThat(entry.isFinished()).isFalse();
     }
 

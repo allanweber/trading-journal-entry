@@ -1,4 +1,4 @@
-package com.trading.journal.entry.entries;
+package com.trading.journal.entry.entries.image.data;
 
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 @EqualsAndHashCode
 public class EntryImageResponse {
     private String image;
+
+    private String imageName;
 }

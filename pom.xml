@@ -106,6 +106,12 @@
             <version>1.9</version>
         </dependency>
 
+        <dependency>
+            <groupId>com.ibm.cos</groupId>
+            <artifactId>ibm-cos-java-sdk</artifactId>
+            <version>2.13.0</version>
+        </dependency>
+
         <!--Test-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -190,7 +196,7 @@
                         <ruleset>${project.basedir}/pmd/pmd-ruleset.xml</ruleset>
                     </rulesets>
                     <excludes>
-                        <exclude>com/trading/journal/authentication/api/**Api.java</exclude>
+                        <exclude>com/trading/journal/entry/storage/impl/ImageSimpleCompression.java</exclude>
                     </excludes>
                 </configuration>
             </plugin>
@@ -201,6 +207,8 @@
                 <configuration>
                     <excludes>
                         <exclude>com/trading/**/EntryApplication.class</exclude>
+                        <exclude>com/trading/**/ImageSimpleCompression.class</exclude>
+                        <exclude>com/trading/**/LocalFileStorage.class</exclude>
                     </excludes>
                 </configuration>
                 <executions>

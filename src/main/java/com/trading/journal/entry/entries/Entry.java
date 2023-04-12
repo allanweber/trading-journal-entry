@@ -71,13 +71,8 @@ public class Entry {
     @JsonFormat(pattern = DateHelper.DATE_FORMAT)
     private LocalDateTime exitDate;
 
-    @Setter
     @JsonIgnore
-    private String screenshotBefore;
-
-    @Setter
-    @JsonIgnore
-    private String screenshotAfter;
+    private List<String> images;
 
     private String notes;
 

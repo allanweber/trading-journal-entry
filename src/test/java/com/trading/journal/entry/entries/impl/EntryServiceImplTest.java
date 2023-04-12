@@ -21,9 +21,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDateTime;
@@ -34,8 +32,6 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-import static java.util.Objects.isNull;
-import static java.util.Objects.nonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -591,80 +587,6 @@ class EntryServiceImplTest {
         assertThat(entry).isNotNull();
 
         verify(balanceService, never()).calculateCurrentBalance(anyString());
-    }
-
-    @DisplayName("Save image before")
-    @Test
-    void imageBefore() throws IOException {
-        String entryId = UUID.randomUUID().toString();
-        Entry entry = Entry.builder()
-                .type(EntryType.TRADE)
-                .price(BigDecimal.valueOf(234.56))
-                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .build();
-        MultipartFile file = mock(MultipartFile.class);
-
-        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
-        when(file.getBytes()).thenReturn(new byte[]{0});
-        when(repository.save(argThat(save -> nonNull(entry.getScreenshotBefore()) && isNull(entry.getScreenshotAfter())))).thenReturn(entry);
-
-        entryService.uploadImage(entryId, UploadType.IMAGE_BEFORE, file);
-    }
-
-    @DisplayName("Save image after")
-    @Test
-    void imageAfter() throws IOException {
-        String entryId = UUID.randomUUID().toString();
-        Entry entry = Entry.builder()
-                .type(EntryType.TRADE)
-                .price(BigDecimal.valueOf(234.56))
-                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .build();
-        MultipartFile file = mock(MultipartFile.class);
-
-        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
-        when(file.getBytes()).thenReturn(new byte[]{0});
-        when(repository.save(argThat(save -> isNull(entry.getScreenshotBefore()) && nonNull(entry.getScreenshotAfter())))).thenReturn(entry);
-
-        entryService.uploadImage(entryId, UploadType.IMAGE_AFTER, file);
-    }
-
-    @DisplayName("Return image before")
-    @Test
-    void getImageBefore() {
-        String entryId = UUID.randomUUID().toString();
-        Entry entry = Entry.builder()
-                .type(EntryType.TRADE)
-                .price(BigDecimal.valueOf(234.56))
-                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .screenshotBefore("image")
-                .build();
-
-        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
-
-        EntryImageResponse response = entryService.returnImage(entryId, UploadType.IMAGE_BEFORE);
-        assertThat(response.getImage()).isNotNull();
-    }
-
-    @DisplayName("Return image after")
-    @Test
-    void getImageAfter() {
-        String entryId = UUID.randomUUID().toString();
-        Entry entry = Entry.builder()
-                .type(EntryType.TRADE)
-                .price(BigDecimal.valueOf(234.56))
-                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .screenshotAfter("image")
-                .build();
-
-        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
-
-        EntryImageResponse response = entryService.returnImage(entryId, UploadType.IMAGE_AFTER);
-        assertThat(response.getImage()).isNotNull();
     }
 
     @DisplayName("Get a entry by id")

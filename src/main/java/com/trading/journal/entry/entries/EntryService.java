@@ -1,7 +1,6 @@
 package com.trading.journal.entry.entries;
 
 import org.springframework.data.domain.Page;
-import org.springframework.web.multipart.MultipartFile;
 
 public interface EntryService {
 
@@ -12,8 +11,4 @@ public interface EntryService {
     Entry save(Entry entry);
 
     void delete(String entryId);
-
-    void uploadImage(String entryId, UploadType type, MultipartFile file);
-
-    EntryImageResponse returnImage(String entryId, UploadType type);
 }

@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.UpdateDefinition;
 import org.springframework.data.mongodb.repository.query.MongoEntityInformation;
 import org.springframework.data.mongodb.repository.support.SimpleMongoRepository;
 import org.springframework.lang.NonNull;
@@ -106,6 +107,11 @@ public class MultiTenancyPageableRepositoryImpl<T, I extends Serializable> exten
     @Override
     public <U> List<U> aggregate(Aggregation aggregation, Class<U> clazz) {
         return mongoOperations.aggregate(aggregation, getCollectionName(), clazz).getMappedResults();
+    }
+
+    @Override
+    public long update(Query query, UpdateDefinition update) {
+        return mongoOperations.updateFirst(query, update, getCollectionName()).getModifiedCount();
     }
 
     private String getCollectionName() {
