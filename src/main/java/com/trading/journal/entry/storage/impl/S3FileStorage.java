@@ -1,8 +1,8 @@
 package com.trading.journal.entry.storage.impl;
 
-import com.ibm.cloud.objectstorage.services.s3.AmazonS3;
-import com.ibm.cloud.objectstorage.services.s3.model.*;
-import com.ibm.cloud.objectstorage.util.IOUtils;
+import com.amazonaws.services.s3.AmazonS3;
+import com.amazonaws.services.s3.model.*;
+import com.amazonaws.util.IOUtils;
 import com.trading.journal.entry.storage.FileStorage;
 import com.trading.journal.entry.storage.data.FileResponse;
 import lombok.RequiredArgsConstructor;
