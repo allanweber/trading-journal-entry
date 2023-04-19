@@ -1,9 +1,7 @@
 package com.trading.journal.entry.storage.impl;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.GetObjectRequest;
-import com.amazonaws.services.s3.model.ObjectMetadata;
-import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.*;
 import com.amazonaws.util.IOUtils;
 import com.trading.journal.entry.storage.FileStorage;
 import com.trading.journal.entry.storage.data.FileResponse;
@@ -42,7 +40,9 @@ public class S3FileStorage implements FileStorage {
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType("image/jpg");
         metadata.setContentLength(file.length);
-        client.putObject(folder, fileName, input, metadata);
+        PutObjectRequest request = new PutObjectRequest(folder, fileName, input, metadata)
+                .withCannedAcl(CannedAccessControlList.PublicRead);
+        client.putObject(request);
     }
 
     @SneakyThrows

@@ -62,10 +62,13 @@ class S3FileStorageTest {
         byte[] file = "an file sample".getBytes();
 
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType("application/x-java-serialized-object");
+        metadata.setContentType("image/jpg");
         metadata.setContentLength(file.length);
 
-        when(client.putObject(folder, fileName, new ByteArrayInputStream(file), metadata)).thenReturn(new PutObjectResult());
+        PutObjectRequest request = new PutObjectRequest(folder, fileName, new ByteArrayInputStream(file), metadata)
+                .withCannedAcl(CannedAccessControlList.PublicRead);
+
+        when(client.putObject(request)).thenReturn(new PutObjectResult());
 
         fileStorage.uploadFile(folder, fileName, file);
     }
