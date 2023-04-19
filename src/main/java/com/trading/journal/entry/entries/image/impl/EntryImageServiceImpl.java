@@ -1,6 +1,7 @@
 package com.trading.journal.entry.entries.image.impl;
 
 import com.trading.journal.entry.ApplicationException;
+import com.trading.journal.entry.entries.Entry;
 import com.trading.journal.entry.entries.EntryRepository;
 import com.trading.journal.entry.entries.image.EntryImageService;
 import com.trading.journal.entry.entries.image.data.EntryImageResponse;
@@ -21,6 +22,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 
 @RequiredArgsConstructor
@@ -56,9 +58,9 @@ public class EntryImageServiceImpl implements EntryImageService {
     @Override
     public List<EntryImageResponse> returnImages(String entryId) {
         String folder = getFolder();
-        return fileStorage.listFiles(folder, entryId)
+        return entryRepository.getById(entryId).map(Entry::getImages).orElse(emptyList())
                 .stream()
-                .map(fileName -> fileStorage.getFile(folder, fileName)
+                .map(fileName -> fileStorage.getFile(folder, "%s/%s".formatted(entryId, fileName))
                         .map(file -> new EntryImageResponse(Base64.getEncoder().encodeToString(file.getFile()), file.getFileName()))
                         .orElse(null)
                 )

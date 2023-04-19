@@ -1,7 +1,9 @@
 package com.trading.journal.entry.storage.impl;
 
 import com.amazonaws.services.s3.AmazonS3;
-import com.amazonaws.services.s3.model.*;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.util.IOUtils;
 import com.trading.journal.entry.storage.FileStorage;
 import com.trading.journal.entry.storage.data.FileResponse;
@@ -12,8 +14,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.empty;
@@ -40,7 +40,7 @@ public class S3FileStorage implements FileStorage {
     public void uploadFile(String folder, String fileName, byte[] file) {
         InputStream input = new ByteArrayInputStream(file);
         ObjectMetadata metadata = new ObjectMetadata();
-        metadata.setContentType("application/x-java-serialized-object");
+        metadata.setContentType("image/jpg");
         metadata.setContentLength(file.length);
         client.putObject(folder, fileName, input, metadata);
     }
@@ -61,31 +61,5 @@ public class S3FileStorage implements FileStorage {
     @Override
     public void deleteFile(String folder, String fileName) {
         client.deleteObject(folder, fileName);
-    }
-
-    @Override
-    public List<String> listFiles(String rootFolder, String targetFolder) {
-        boolean moreResults = true;
-        String nextToken = "";
-        List<String> files = new ArrayList<>();
-
-        while (moreResults) {
-            ListObjectsV2Request request = new ListObjectsV2Request()
-                    .withBucketName(rootFolder)
-                    .withPrefix(targetFolder)
-                    .withContinuationToken(nextToken);
-
-            ListObjectsV2Result result = client.listObjectsV2(request);
-            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
-                files.add(objectSummary.getKey());
-            }
-            if (result.isTruncated()) {
-                nextToken = result.getNextContinuationToken();
-            } else {
-                nextToken = "";
-                moreResults = false;
-            }
-        }
-        return files;
     }
 }

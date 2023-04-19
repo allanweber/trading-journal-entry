@@ -6,12 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Profile("local | test")
 @RequiredArgsConstructor
@@ -53,13 +50,5 @@ public class LocalFileStorage implements FileStorage {
         if (files.containsKey(folder)) {
             files.get(folder).remove(fileName);
         }
-    }
-
-    @Override
-    public List<String> listFiles(String rootFolder, String targetFolder) {
-        if (files.containsKey(rootFolder)) {
-            return files.get(rootFolder).keySet().stream().filter(key -> key.startsWith(targetFolder)).collect(Collectors.toList());
-        }
-        return Collections.emptyList();
     }
 }

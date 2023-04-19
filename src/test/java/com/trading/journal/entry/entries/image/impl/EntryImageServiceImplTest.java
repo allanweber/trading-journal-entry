@@ -28,6 +28,7 @@ import java.util.UUID;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
@@ -121,8 +122,8 @@ class EntryImageServiceImplTest {
     void returnImages() {
         String entryId = UUID.randomUUID().toString();
         byte[] file = "some-file".getBytes();
-        when(fileStorage.listFiles("Test-Tenancy", entryId)).thenReturn(singletonList("image-1.jpg"));
-        when(fileStorage.getFile("Test-Tenancy", "image-1.jpg")).thenReturn(of(new FileResponse("image-1.jpg", file)));
+        when(entryRepository.getById(entryId)).thenReturn(of(Entry.builder().id(entryId).images(singletonList("image-1.jpg")).build()));
+        when(fileStorage.getFile("Test-Tenancy", "%s/image-1.jpg".formatted(entryId))).thenReturn(of(new FileResponse("image-1.jpg", file)));
 
         List<EntryImageResponse> images = entryImage.returnImages(entryId);
         assertThat(images).hasSize(1);
@@ -136,9 +137,9 @@ class EntryImageServiceImplTest {
         String entryId = UUID.randomUUID().toString();
         byte[] file = "some-file".getBytes();
         byte[] file2 = "some-file-2".getBytes();
-        when(fileStorage.listFiles("Test-Tenancy", entryId)).thenReturn(asList("image-1.jpg", "image-2"));
-        when(fileStorage.getFile("Test-Tenancy", "image-1.jpg")).thenReturn(of(new FileResponse("image-1.jpg", file)));
-        when(fileStorage.getFile("Test-Tenancy", "image-2")).thenReturn(of(new FileResponse("image-2", file2)));
+        when(entryRepository.getById(entryId)).thenReturn(of(Entry.builder().id(entryId).images(asList("image-1.jpg", "image-2")).build()));
+        when(fileStorage.getFile("Test-Tenancy", "%s/image-1.jpg".formatted(entryId))).thenReturn(of(new FileResponse("image-1.jpg", file)));
+        when(fileStorage.getFile("Test-Tenancy", "%s/image-2".formatted(entryId))).thenReturn(of(new FileResponse("image-2", file2)));
 
         List<EntryImageResponse> images = entryImage.returnImages(entryId);
         assertThat(images).hasSize(2);
@@ -151,7 +152,7 @@ class EntryImageServiceImplTest {
     void returnImagesEmpty() {
         String entryId = UUID.randomUUID().toString();
 
-        when(fileStorage.listFiles("Test-Tenancy", entryId)).thenReturn(emptyList());
+        when(entryRepository.getById(entryId)).thenReturn(empty());
 
         List<EntryImageResponse> images = entryImage.returnImages(entryId);
         assertThat(images).isEmpty();
