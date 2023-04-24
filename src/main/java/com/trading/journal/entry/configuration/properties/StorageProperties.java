@@ -19,4 +19,6 @@ public class StorageProperties {
     private String endpoint;
 
     private String location;
+
+    private String cnd;
 }

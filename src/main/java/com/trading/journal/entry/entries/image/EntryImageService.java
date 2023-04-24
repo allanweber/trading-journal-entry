@@ -11,5 +11,5 @@ public interface EntryImageService {
 
     List<EntryImageResponse> returnImages(String entryId);
 
-    void deleteImage(String entryId, String imageName);
+    void deleteImage(String entryId, String imageId);
 }

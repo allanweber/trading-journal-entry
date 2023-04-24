@@ -68,8 +68,8 @@ public class EntryController implements EntryApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteImage(String entryId, String imageName) {
-        entryImageService.deleteImage(entryId, imageName);
+    public ResponseEntity<Void> deleteImage(String entryId, String imageId) {
+        entryImageService.deleteImage(entryId, imageId);
         return ok().build();
     }
 }

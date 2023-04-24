@@ -56,7 +56,7 @@ public interface EntryApi {
 
     @ApiOperation(notes = "Return Trade image", value = "Return Trade image")
     @ApiResponses(@ApiResponse(code = 200, message = "Trade image returned"))
-    @DeleteMapping("/{entry-id}/image/{image-name}")
+    @DeleteMapping("/{entry-id}/image/{image-id}")
     ResponseEntity<Void> deleteImage(@PathVariable(name = "entry-id") String entryId,
-                                     @PathVariable(name = "image-name") String imageName);
+                                     @PathVariable(name = "image-id") String imageId);
 }

@@ -10,6 +10,9 @@ import lombok.NoArgsConstructor;
 @Getter
 @EqualsAndHashCode
 public class EntryImageResponse {
+
+    private String id;
+
     private String image;
 
     private String imageName;

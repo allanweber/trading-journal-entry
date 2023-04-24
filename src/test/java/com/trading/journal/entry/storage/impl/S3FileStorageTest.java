@@ -2,7 +2,7 @@ package com.trading.journal.entry.storage.impl;
 
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.model.*;
-import com.trading.journal.entry.storage.data.FileResponse;
+import com.trading.journal.entry.configuration.properties.StorageProperties;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -12,15 +12,20 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.io.ByteArrayInputStream;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(SpringExtension.class)
 class S3FileStorageTest {
 
     @Mock
     AmazonS3 client;
+
+    @Mock
+    StorageProperties properties;
 
     @InjectMocks
     S3FileStorage fileStorage;
@@ -57,63 +62,49 @@ class S3FileStorageTest {
     @DisplayName("Upload a file")
     @Test
     void uploadFile() {
-        String folder = "folder";
-        String fileName = "file.txt";
+        String rootFolder = "rootFolder";
+        String folder = UUID.randomUUID().toString();
+        String storedName = "%s.jpg".formatted(UUID.randomUUID().toString());
         byte[] file = "an file sample".getBytes();
 
         ObjectMetadata metadata = new ObjectMetadata();
         metadata.setContentType("image/jpg");
         metadata.setContentLength(file.length);
 
-        PutObjectRequest request = new PutObjectRequest(folder, fileName, new ByteArrayInputStream(file), metadata)
+        String fileName = "%s/%s".formatted(folder, storedName);
+        PutObjectRequest request = new PutObjectRequest(rootFolder, fileName, new ByteArrayInputStream(file), metadata)
                 .withCannedAcl(CannedAccessControlList.PublicRead);
 
         when(client.putObject(request)).thenReturn(new PutObjectResult());
 
-        fileStorage.uploadFile(folder, fileName, file);
+        fileStorage.uploadFile(rootFolder, folder, storedName, file);
     }
 
     @DisplayName("Download a file")
     @Test
     void getFile() {
-        String folder = "folder";
-        String fileName = "prefix/file.txt";
+        String rootFolder = "rootFolder";
+        String folder = UUID.randomUUID().toString();
+        String storedName = "%s.jpg".formatted(UUID.randomUUID().toString());
 
-        when(client.doesObjectExist(folder, fileName)).thenReturn(true);
+        when(properties.getCnd()).thenReturn("https://cdn.trading-jounal.com");
 
-        S3Object s3Object = new S3Object();
-        s3Object.setObjectContent(new ByteArrayInputStream("an file sample".getBytes()));
-        when(client.getObject(new GetObjectRequest(folder, fileName))).thenReturn(s3Object);
-
-        Optional<FileResponse> file = fileStorage.getFile(folder, fileName);
+        Optional<String> file = fileStorage.getFile(rootFolder, folder, storedName);
 
         assertThat(file).isPresent();
-        assertThat(file.get().getFileName()).isEqualTo("file.txt");
-        assertThat(file.get().getFile()).isEqualTo("an file sample".getBytes());
-    }
-
-    @DisplayName("Download a not existent file return empty")
-    @Test
-    void getFileNotFound() {
-        String folder = "folder";
-        String fileName = "file.txt";
-
-        when(client.doesObjectExist(folder, fileName)).thenReturn(false);
-
-        Optional<FileResponse> file = fileStorage.getFile(folder, fileName);
-
-        assertThat(file).isNotPresent();
-        verify(client, never()).getObject(any());
+        assertThat(file.get()).isEqualTo("https://cdn.trading-jounal.com/%s/%s/%s".formatted(rootFolder, folder, storedName));
     }
 
     @DisplayName("Delete a file")
     @Test
     void deleteFile() {
-        String folder = "folder";
-        String fileName = "file.txt";
+        String rootFolder = "rootFolder";
+        String folder = UUID.randomUUID().toString();
+        String storedName = "%s.jpg".formatted(UUID.randomUUID().toString());
 
-        doNothing().when(client).deleteObject(folder, fileName);
+        String fileName = "%s/%s".formatted(folder, storedName);
+        doNothing().when(client).deleteObject(rootFolder, fileName);
 
-        fileStorage.deleteFile(folder, fileName);
+        fileStorage.deleteFile(rootFolder, folder, storedName);
     }
 }
