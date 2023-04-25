@@ -66,6 +66,12 @@ public class JournalServiceImpl implements JournalService {
         Query query = new Query(Criteria.where("journalId").is(journalId));
         entryRepository.delete(query);
         journalRepository.delete(journal);
+
+        long count = journalRepository.count();
+        if (count == 0) {
+            entryRepository.drop();
+            journalRepository.drop();
+        }
     }
 
     @Override

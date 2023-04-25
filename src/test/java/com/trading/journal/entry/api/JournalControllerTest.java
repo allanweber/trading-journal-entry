@@ -291,6 +291,72 @@ class JournalControllerTest extends IntegratedTest {
         assertThat(mongoTemplate.findAll(Entry.class, entryCollection)).extracting(Entry::getSymbol).containsExactly("JOURNAL2-ENTRY");
     }
 
+    @DisplayName("Create a journal and delete it, should drop entry and journal collection because they are empty")
+    @Test
+    void deleteDrop() {
+        AtomicReference<String> journal1Id = new AtomicReference<>();
+        Journal journal1 = Journal.builder().name("journal-1").startBalance(BigDecimal.valueOf(100.00)).startJournal(LocalDateTime.now()).currency(Currency.DOLLAR).build();
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .build())
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(journal1)
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Journal.class)
+                .value(response -> {
+                    assertThat(response.getId()).isNotNull();
+                    assertThat(response.getName()).isEqualTo("journal-1");
+                    journal1Id.set(response.getId());
+                });
+
+        assertThat(mongoTemplate.findAll(Journal.class, journalCollection)).hasSize(1);
+
+        webTestClient
+                .post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals/{journal-id}/entries/trade")
+                        .build(journal1Id.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .bodyValue(Trade.builder()
+                        .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
+                        .symbol("JOURNAL1-ENTRY")
+                        .direction(EntryDirection.LONG)
+                        .price(BigDecimal.valueOf(1.1234))
+                        .size(BigDecimal.valueOf(500.00))
+                        .build())
+                .exchange()
+                .expectStatus()
+                .isCreated()
+                .expectHeader()
+                .exists("Location")
+                .expectBody(Entry.class)
+                .value(response -> assertThat(response.getId()).isNotNull());
+
+        assertThat(mongoTemplate.collectionExists(journalCollection)).isTrue();
+        assertThat(mongoTemplate.collectionExists(entryCollection)).isTrue();
+        assertThat(mongoTemplate.findAll(Entry.class, entryCollection)).hasSize(1);
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/journals")
+                        .pathSegment("{journal-id}")
+                        .build(journal1Id.get()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isOk();
+
+        assertThat(mongoTemplate.collectionExists(journalCollection)).isFalse();
+        assertThat(mongoTemplate.collectionExists(entryCollection)).isFalse();
+    }
 
     @DisplayName("Get journal balance for a journal with no entries return Zero")
     @Test

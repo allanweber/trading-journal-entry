@@ -21,7 +21,6 @@ import java.time.LocalDateTime;
 import java.time.Month;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -642,6 +641,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .type(EntryType.TRADE)
                 .build(), entryCollection);
 
+        AtomicReference<String> msftImageId = new AtomicReference<>();
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("file", new ClassPathResource("java.png"));
         webTestClient
@@ -653,7 +653,12 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBody(EntryImageResponse.class)
+                .value(response -> {
+                    assertThat(response.getImageName()).isEqualTo("image-1");
+                    msftImageId.set(response.getId());
+                });
 
         Entry entry = mongoTemplate.findById(new ObjectId(msft.getId()), Entry.class, entryCollection);
         assertThat(entry).isNotNull();
@@ -671,8 +676,13 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBody(EntryImageResponse.class)
+                .value(response -> {
+                    assertThat(response.getImageName()).isEqualTo("image-1");
+                });
 
+        AtomicReference<String> secondApplImageId = new AtomicReference<>();
         bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("file", new ClassPathResource("java.png"));
         webTestClient
@@ -684,7 +694,12 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBody(EntryImageResponse.class)
+                .value(response -> {
+                    assertThat(response.getImageName()).isEqualTo("image-2");
+                    secondApplImageId.set(response.getId());
+                });
 
         entry = mongoTemplate.findById(new ObjectId(appl.getId()), Entry.class, entryCollection);
         assertThat(entry).isNotNull();
@@ -723,25 +738,21 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                     assertThat(images).extracting(EntryImageResponse::getImageName).containsExactlyInAnyOrder("image-1", "image-2");
                 });
 
-        EntryImage entryImage1 = Objects.requireNonNull(mongoTemplate.findById(new ObjectId(msft.getId()), Entry.class, entryCollection)).getImages().stream().filter(image -> image.getName().equals("image-1")).findFirst().orElse(null);
-        assert entryImage1 != null;
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries/{entry-id}/image/{image-name}")
-                        .build(journalId, msft.getId(), entryImage1.getImageId()))
+                        .build(journalId, msft.getId(), msftImageId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
                 .isOk();
 
-        EntryImage entryImage2 = Objects.requireNonNull(mongoTemplate.findById(new ObjectId(appl.getId()), Entry.class, entryCollection)).getImages().stream().filter(image -> image.getName().equals("image-2")).findFirst().orElse(null);
-        assert entryImage2 != null;
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries/{entry-id}/image/{image-name}")
-                        .build(journalId, appl.getId(), entryImage2.getImageId()))
+                        .build(journalId, appl.getId(), secondApplImageId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()

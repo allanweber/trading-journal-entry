@@ -46,7 +46,7 @@ public interface EntryApi {
     @ApiOperation(notes = "Upload Trade image", value = "Upload Trade image")
     @ApiResponses(@ApiResponse(code = 200, message = "Trade image uploaded"))
     @PostMapping("/{entry-id}/image")
-    ResponseEntity<Void> uploadImage(@PathVariable(name = "entry-id") String entryId,
+    ResponseEntity<EntryImageResponse> uploadImage(@PathVariable(name = "entry-id") String entryId,
                                      @RequestParam("file") MultipartFile file);
 
     @ApiOperation(notes = "Return Trade image", value = "Return Trade image")

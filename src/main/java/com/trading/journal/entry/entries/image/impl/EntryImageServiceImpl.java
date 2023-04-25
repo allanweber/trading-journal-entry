@@ -33,7 +33,7 @@ public class EntryImageServiceImpl implements EntryImageService {
 
     @SneakyThrows
     @Override
-    public void uploadImage(String entryId, MultipartFile file) {
+    public EntryImageResponse uploadImage(String entryId, MultipartFile file) {
         List<EntryImage> entryImages = getEntryImages(entryId);
         String imageName = "image-%s".formatted(entryImages.size() + 1);
         String imageId = UUID.randomUUID().toString();
@@ -49,6 +49,7 @@ public class EntryImageServiceImpl implements EntryImageService {
         fileStorage.uploadFile(folder, entryId, storedName, compressedImage);
 
         entryService.updateImages(entryId, entryImages);
+        return EntryImageResponse.builder().id(imageId).imageName(imageName).build();
     }
 
     @Override

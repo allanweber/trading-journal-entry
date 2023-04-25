@@ -97,7 +97,7 @@ class JournalServiceImplTest {
         verify(journalRepository, never()).save(any());
     }
 
-    @DisplayName("Delete a journal and do not drop collection because there is more items in it")
+    @DisplayName("Delete a journal and drop Entry and Journal collection because there is no more journals")
     @Test
     void delete() {
         Journal to_delete = buildJournal("123", "to_delete", 1);
@@ -107,6 +107,25 @@ class JournalServiceImplTest {
         doNothing().when(journalRepository).delete(to_delete);
 
         journalService.delete("123");
+
+        verify(entryRepository).drop();
+        verify(journalRepository).drop();
+    }
+
+    @DisplayName("Delete a journal and DO NOT drop Entry and Journal collection because there is no more journals")
+    @Test
+    void deleteNotDrop() {
+        Journal to_delete = buildJournal("123", "to_delete", 1);
+        when(journalRepository.getById("123")).thenReturn(Optional.of(to_delete));
+        Query query = new Query(Criteria.where("journalId").is("123"));
+        when(entryRepository.delete(query)).thenReturn(1L);
+        doNothing().when(journalRepository).delete(to_delete);
+        when(journalRepository.count()).thenReturn(1L);
+
+        journalService.delete("123");
+
+        verify(entryRepository, never()).drop();
+        verify(journalRepository, never()).drop();
     }
 
     @DisplayName("Delete a journal does not exist")

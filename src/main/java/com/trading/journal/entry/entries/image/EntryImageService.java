@@ -7,7 +7,7 @@ import java.util.List;
 
 public interface EntryImageService {
 
-    void uploadImage(String entryId, MultipartFile file);
+    EntryImageResponse uploadImage(String entryId, MultipartFile file);
 
     List<EntryImageResponse> returnImages(String entryId);
 

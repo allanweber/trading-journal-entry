@@ -56,9 +56,9 @@ public class EntryController implements EntryApi {
     }
 
     @Override
-    public ResponseEntity<Void> uploadImage(String entryId, MultipartFile file) {
-        entryImageService.uploadImage(entryId, file);
-        return ok().build();
+    public ResponseEntity<EntryImageResponse> uploadImage(String entryId, MultipartFile file) {
+        EntryImageResponse imageResponse = entryImageService.uploadImage(entryId, file);
+        return ok(imageResponse);
     }
 
     @Override

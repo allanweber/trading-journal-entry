@@ -63,7 +63,8 @@ class EntryImageServiceImplTest {
         when(imageCompression.compressImage(any())).thenReturn(new byte[]{0});
         doNothing().when(fileStorage).uploadFile(eq(rootFolder), eq(entryId), anyString(), any());
 
-        entryImage.uploadImage(entryId, file);
+        EntryImageResponse response = entryImage.uploadImage(entryId, file);
+        assertThat(response.getImageName()).isEqualTo("image-1");
 
         verify(entryService).updateImages(eq(entryId), argThat(images -> images.size() == 1));
         verify(fileStorage, never()).createFolder(anyString());
@@ -84,7 +85,8 @@ class EntryImageServiceImplTest {
         when(imageCompression.compressImage(any())).thenReturn(new byte[]{0});
         doNothing().when(fileStorage).uploadFile(eq(rootFolder), eq(entryId), anyString(), any());
 
-        entryImage.uploadImage(entryId, file);
+        EntryImageResponse response = entryImage.uploadImage(entryId, file);
+        assertThat(response.getImageName()).isEqualTo("image-1");
 
         verify(entryService).updateImages(eq(entryId), argThat(images -> images.size() == 1));
         verify(fileStorage).createFolder(anyString());
@@ -107,7 +109,9 @@ class EntryImageServiceImplTest {
         when(imageCompression.compressImage(any())).thenReturn(new byte[]{0});
         doNothing().when(fileStorage).uploadFile(eq(rootFolder), eq(entryId), anyString(), any());
 
-        entryImage.uploadImage(entryId, file);
+        EntryImageResponse response = entryImage.uploadImage(entryId, file);
+        assertThat(response.getImageName()).isEqualTo("image-2");
+
         verify(entryService).updateImages(eq(entryId), argThat(images -> images.size() == 2));
     }
 
