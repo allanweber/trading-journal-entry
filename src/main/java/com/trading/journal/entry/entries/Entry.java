@@ -72,7 +72,7 @@ public class Entry {
     private LocalDateTime exitDate;
 
     @JsonIgnore
-    private List<String> images;
+    private List<EntryImage> images;
 
     private String notes;
 

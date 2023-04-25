@@ -10,7 +10,9 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
@@ -76,6 +78,16 @@ public class EntryServiceImpl implements EntryService {
         if (entry.isFinished()) {
             balanceService.calculateCurrentBalance(entry.getJournalId());
         }
+    }
+
+    @Override
+    public void updateImages(String entryId, List<EntryImage> entryImages) {
+        Query query = new Query(Criteria.where("_id").is(entryId));
+        Update update = new Update().set("images", entryImages);
+        if (entryImages == null || entryImages.isEmpty()) {
+            update = new Update().unset("images");
+        }
+        repository.update(query, update);
     }
 
     private Entry get(String entryId) {

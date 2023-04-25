@@ -12,11 +12,13 @@ import org.springframework.context.annotation.Configuration;
 @AllArgsConstructor
 @NoArgsConstructor
 public class StorageProperties {
-    private String apiKey;
+    private String accessKey;
 
-    private String serviceId;
+    private String secret;
 
     private String endpoint;
 
     private String location;
+
+    private String cnd;
 }

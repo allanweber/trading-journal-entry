@@ -1444,6 +1444,12 @@
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {\r",
                   "  pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Test response\", () => {\r",
+                  "    const response = pm.response.json();\r",
+                  "\tpm.expect(response.id).not.eql(null);\r",
+                  "\tpm.collectionVariables.set(\"msft-image1-id\", response.id);\r",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -1499,6 +1505,12 @@
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {\r",
                   "  pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Test response\", () => {\r",
+                  "    const response = pm.response.json();\r",
+                  "\tpm.expect(response.id).not.eql(null);\r",
+                  "\tpm.collectionVariables.set(\"sp500-image1-id\", response.id);\r",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -1554,6 +1566,12 @@
                 "exec": [
                   "pm.test(\"Status code is 200\", function () {\r",
                   "  pm.response.to.have.status(200);\r",
+                  "});\r",
+                  "\r",
+                  "pm.test(\"Test response\", () => {\r",
+                  "    const response = pm.response.json();\r",
+                  "\tpm.expect(response.id).not.eql(null);\r",
+                  "\tpm.collectionVariables.set(\"sp500-image2-id\", response.id);\r",
                   "});"
                 ],
                 "type": "text/javascript"
@@ -1775,7 +1793,7 @@
               }
             ],
             "url": {
-              "raw": "{{entry-api}}/journals/{{journal-id}}/entries/{{entry1-id}}/image/image-1.jpg",
+              "raw": "{{entry-api}}/journals/{{journal-id}}/entries/{{entry1-id}}/image/{{msft-image1-id}}",
               "host": ["{{entry-api}}"],
               "path": [
                 "journals",
@@ -1783,7 +1801,7 @@
                 "entries",
                 "{{entry1-id}}",
                 "image",
-                "image-1.jpg"
+                "{{msft-image1-id}}"
               ]
             }
           },
@@ -1871,7 +1889,7 @@
               }
             ],
             "url": {
-              "raw": "{{entry-api}}/journals/{{journal-id}}/entries/{{entry3-id}}/image/image-2.jpg",
+              "raw": "{{entry-api}}/journals/{{journal-id}}/entries/{{entry3-id}}/image/{{sp500-image2-id}}",
               "host": ["{{entry-api}}"],
               "path": [
                 "journals",
@@ -1879,7 +1897,7 @@
                 "entries",
                 "{{entry3-id}}",
                 "image",
-                "image-2.jpg"
+                "{{sp500-image2-id}}"
               ]
             }
           },
@@ -4807,6 +4825,18 @@
     },
     {
       "key": "closedPositions",
+      "value": ""
+    },
+    {
+      "key": "msft-image1-id",
+      "value": ""
+    },
+    {
+      "key": "sp500-image1-id",
+      "value": ""
+    },
+    {
+      "key": "sp500-image2-id",
       "value": ""
     }
   ]

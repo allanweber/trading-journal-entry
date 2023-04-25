@@ -641,6 +641,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .type(EntryType.TRADE)
                 .build(), entryCollection);
 
+        AtomicReference<String> msftImageId = new AtomicReference<>();
         MultipartBodyBuilder bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("file", new ClassPathResource("java.png"));
         webTestClient
@@ -652,12 +653,17 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBody(EntryImageResponse.class)
+                .value(response -> {
+                    assertThat(response.getImageName()).isEqualTo("image-1");
+                    msftImageId.set(response.getId());
+                });
 
         Entry entry = mongoTemplate.findById(new ObjectId(msft.getId()), Entry.class, entryCollection);
         assertThat(entry).isNotNull();
         assertThat(entry.getSymbol()).isEqualTo("MSFT");
-        assertThat(entry.getImages()).containsExactly("image-1.jpg");
+        assertThat(entry.getImages()).extracting(EntryImage::getName).containsExactly("image-1");
 
         bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("file", new ClassPathResource("java.png"));
@@ -670,8 +676,13 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBody(EntryImageResponse.class)
+                .value(response -> {
+                    assertThat(response.getImageName()).isEqualTo("image-1");
+                });
 
+        AtomicReference<String> secondApplImageId = new AtomicReference<>();
         bodyBuilder = new MultipartBodyBuilder();
         bodyBuilder.part("file", new ClassPathResource("java.png"));
         webTestClient
@@ -683,12 +694,17 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .body(BodyInserters.fromMultipartData(bodyBuilder.build()))
                 .exchange()
                 .expectStatus()
-                .isOk();
+                .isOk()
+                .expectBody(EntryImageResponse.class)
+                .value(response -> {
+                    assertThat(response.getImageName()).isEqualTo("image-2");
+                    secondApplImageId.set(response.getId());
+                });
 
         entry = mongoTemplate.findById(new ObjectId(appl.getId()), Entry.class, entryCollection);
         assertThat(entry).isNotNull();
         assertThat(entry.getSymbol()).isEqualTo("APPL");
-        assertThat(entry.getImages()).containsExactly("image-1.jpg", "image-2.jpg");
+        assertThat(entry.getImages()).extracting(EntryImage::getName).containsExactly("image-1", "image-2");
 
         webTestClient
                 .get()
@@ -703,7 +719,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 })
                 .value(images -> {
                     assertThat(images).hasSize(1);
-                    assertThat(images).extracting(EntryImageResponse::getImageName).containsExactly("image-1.jpg");
+                    assertThat(images).extracting(EntryImageResponse::getImageName).containsExactly("image-1");
                 });
 
         webTestClient
@@ -719,14 +735,14 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 })
                 .value(images -> {
                     assertThat(images).hasSize(2);
-                    assertThat(images).extracting(EntryImageResponse::getImageName).containsExactlyInAnyOrder("image-1.jpg", "image-2.jpg");
+                    assertThat(images).extracting(EntryImageResponse::getImageName).containsExactlyInAnyOrder("image-1", "image-2");
                 });
 
         webTestClient
                 .delete()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries/{entry-id}/image/{image-name}")
-                        .build(journalId, msft.getId(), "image-1.jpg"))
+                        .build(journalId, msft.getId(), msftImageId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -736,7 +752,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 .delete()
                 .uri(uriBuilder -> uriBuilder
                         .path("/journals/{journal-id}/entries/{entry-id}/image/{image-name}")
-                        .build(journalId, appl.getId(), "image-2.jpg"))
+                        .build(journalId, appl.getId(), secondApplImageId.get()))
                 .accept(MediaType.APPLICATION_JSON)
                 .exchange()
                 .expectStatus()
@@ -750,7 +766,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
         entry = mongoTemplate.findById(new ObjectId(appl.getId()), Entry.class, entryCollection);
         assertThat(entry).isNotNull();
         assertThat(entry.getSymbol()).isEqualTo("APPL");
-        assertThat(entry.getImages()).containsExactly("image-1.jpg");
+        assertThat(entry.getImages()).extracting(EntryImage::getName).containsExactly("image-1");
 
         webTestClient
                 .get()
@@ -780,7 +796,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                 })
                 .value(images -> {
                     assertThat(images).hasSize(1);
-                    assertThat(images).extracting(EntryImageResponse::getImageName).containsExactly("image-1.jpg");
+                    assertThat(images).extracting(EntryImageResponse::getImageName).containsExactly("image-1");
                 });
 
         webTestClient

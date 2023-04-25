@@ -1,21 +1,16 @@
 package com.trading.journal.entry.storage;
 
-import com.trading.journal.entry.storage.data.FileResponse;
-
-import java.util.List;
 import java.util.Optional;
 
 public interface FileStorage {
 
-    boolean folderExists(String folderName);
+    boolean folderExists(String rootFolder);
 
-    void createFolder(String folderName);
+    void createFolder(String rootFolder);
 
-    void uploadFile(String folder, String fileName, byte[] file);
+    void uploadFile(String rootFolder, String folder, String storedName, byte[] file);
 
-    Optional<FileResponse> getFile(String folder, String fileName);
+    Optional<String> getFile(String rootFolder, String folder, String storedName);
 
-    void deleteFile(String folder, String fileName);
-
-    List<String> listFiles(String rootFolder, String targetFolder);
+    void deleteFile(String rootFolder, String folder, String storedName);
 }

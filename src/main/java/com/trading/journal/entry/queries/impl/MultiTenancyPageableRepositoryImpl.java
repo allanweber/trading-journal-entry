@@ -100,6 +100,11 @@ public class MultiTenancyPageableRepositoryImpl<T, I extends Serializable> exten
     }
 
     @Override
+    public long count() {
+        return mongoOperations.count(new Query(), getCollectionName());
+    }
+
+    @Override
     public List<String> distinct(String field, Query query) {
         return mongoOperations.findDistinct(query, field, getCollectionName(), metadata.getJavaType(), String.class);
     }

@@ -1,17 +1,14 @@
 package com.trading.journal.entry.storage.impl;
 
 import com.trading.journal.entry.storage.FileStorage;
-import com.trading.journal.entry.storage.data.FileResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
+import java.util.Base64;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Collectors;
 
 @Profile("local | test")
 @RequiredArgsConstructor
@@ -22,44 +19,38 @@ public class LocalFileStorage implements FileStorage {
     private static final Map<String, Map<String, byte[]>> files = new ConcurrentHashMap<>();
 
     @Override
-    public boolean folderExists(String folderName) {
-        return files.containsKey(folderName);
+    public boolean folderExists(String rootFolder) {
+        return files.containsKey(rootFolder);
     }
 
     @Override
-    public void createFolder(String folderName) {
-        files.put(folderName, new ConcurrentHashMap<>());
+    public void createFolder(String rootFolder) {
+        files.put(rootFolder, new ConcurrentHashMap<>());
     }
 
     @Override
-    public void uploadFile(String folder, String fileName, byte[] file) {
-        if (files.containsKey(folder)) {
-            files.get(folder).put(fileName, file);
+    public void uploadFile(String rootFolder, String folder, String storedName, byte[] file) {
+        if (files.containsKey(rootFolder)) {
+            String fileName = "%s/%s".formatted(folder, storedName);
+            files.get(rootFolder).put(fileName, file);
         }
     }
 
     @Override
-    public Optional<FileResponse> getFile(String folder, String fileName) {
-        if (files.containsKey(folder)) {
-            byte[] bytes = files.get(folder).get(fileName);
-            String name = fileName.substring(fileName.indexOf('/') + 1);
-            return Optional.of(new FileResponse(name, bytes));
+    public Optional<String> getFile(String rootFolder, String folder, String storedName) {
+        if (files.containsKey(rootFolder)) {
+            String fileName = "%s/%s".formatted(folder, storedName);
+            byte[] bytes = files.get(rootFolder).get(fileName);
+            return Optional.of(Base64.getEncoder().encodeToString(bytes));
         }
         return Optional.empty();
     }
 
     @Override
-    public void deleteFile(String folder, String fileName) {
-        if (files.containsKey(folder)) {
-            files.get(folder).remove(fileName);
-        }
-    }
-
-    @Override
-    public List<String> listFiles(String rootFolder, String targetFolder) {
+    public void deleteFile(String rootFolder, String folder, String storedName) {
         if (files.containsKey(rootFolder)) {
-            return files.get(rootFolder).keySet().stream().filter(key -> key.startsWith(targetFolder)).collect(Collectors.toList());
+            String fileName = "%s/%s".formatted(folder, storedName);
+            files.get(rootFolder).remove(fileName);
         }
-        return Collections.emptyList();
     }
 }

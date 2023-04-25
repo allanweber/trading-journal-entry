@@ -1,9 +1,6 @@
 package com.trading.journal.entry.entries.trade;
 
-import com.trading.journal.entry.entries.Entry;
-import com.trading.journal.entry.entries.EntryDirection;
-import com.trading.journal.entry.entries.EntryType;
-import com.trading.journal.entry.entries.GraphType;
+import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.strategy.Strategy;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -261,7 +258,7 @@ class TradeMapperTest {
                 .costs(BigDecimal.valueOf(1.25))
                 .notes("some notes")
                 .strategies(singletonList(Strategy.builder().color("red").build()))
-                .images(List.of("image1, image2"))
+                .images(List.of(new EntryImage("1", "image-1", "1.jpg"), new EntryImage("2", "image-2", "2.jpg")))
                 .build();
 
         Trade trade = Trade.builder()
@@ -297,7 +294,7 @@ class TradeMapperTest {
         assertThat(entry.getNotes()).isEqualTo("some notes");
         assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1", "2");
         assertThat(entry.getStrategies()).extracting(Strategy::getColor).containsExactly("red");
-        assertThat(entry.getImages()).containsExactly("image1, image2");
+        assertThat(entry.getImages()).containsExactly(new EntryImage("1", "image-1", "1.jpg"), new EntryImage("2", "image-2", "2.jpg"));
         assertThat(entry.getExitDate()).isNull();
         assertThat(entry.getExitPrice()).isNull();
         assertThat(entry.getAccountRisked()).isNull();

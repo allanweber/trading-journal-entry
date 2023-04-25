@@ -1,7 +1,8 @@
 package com.trading.journal.entry.entries.image.impl;
 
-import com.trading.journal.entry.ApplicationException;
-import com.trading.journal.entry.entries.EntryRepository;
+import com.trading.journal.entry.entries.Entry;
+import com.trading.journal.entry.entries.EntryImage;
+import com.trading.journal.entry.entries.EntryService;
 import com.trading.journal.entry.entries.image.EntryImageService;
 import com.trading.journal.entry.entries.image.data.EntryImageResponse;
 import com.trading.journal.entry.queries.TokenRequestScope;
@@ -9,18 +10,15 @@ import com.trading.journal.entry.storage.FileStorage;
 import com.trading.journal.entry.storage.ImageCompression;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static java.util.Collections.emptyList;
 import static java.util.Optional.ofNullable;
 
 @RequiredArgsConstructor
@@ -29,62 +27,59 @@ public class EntryImageServiceImpl implements EntryImageService {
 
     private final FileStorage fileStorage;
 
-    private final EntryRepository entryRepository;
+    private final EntryService entryService;
 
     private final ImageCompression imageCompression;
 
     @SneakyThrows
     @Override
-    public void uploadImage(String entryId, MultipartFile file) {
-        List<String> entryImages = getEntryImages(entryId);
-        String imageFileName = "image-%s.jpg".formatted(entryImages.size() + 1);
-        entryImages.add(imageFileName);
+    public EntryImageResponse uploadImage(String entryId, MultipartFile file) {
+        List<EntryImage> entryImages = getEntryImages(entryId);
+        String imageName = "image-%s".formatted(entryImages.size() + 1);
+        String imageId = UUID.randomUUID().toString();
+        String storedName = "%s.jpg".formatted(imageId);
+        entryImages.add(EntryImage.builder().imageId(imageId).name(imageName).storedName(storedName).build());
 
         String folder = getFolder();
         if (!fileStorage.folderExists(folder)) {
             fileStorage.createFolder(folder);
         }
-        String fileName = "%s/%s".formatted(entryId, imageFileName);
-        byte[] compressedImage = imageCompression.compressImage(file.getBytes());
-        fileStorage.uploadFile(folder, fileName, compressedImage);
 
-        Query query = new Query(Criteria.where("_id").is(entryId));
-        Update update = new Update().set("images", entryImages);
-        entryRepository.update(query, update);
+        byte[] compressedImage = imageCompression.compressImage(file.getBytes());
+        fileStorage.uploadFile(folder, entryId, storedName, compressedImage);
+
+        entryService.updateImages(entryId, entryImages);
+        return EntryImageResponse.builder().id(imageId).imageName(imageName).build();
     }
 
     @Override
     public List<EntryImageResponse> returnImages(String entryId) {
         String folder = getFolder();
-        return fileStorage.listFiles(folder, entryId)
+        return ofNullable(entryService.getById(entryId).getImages()).orElse(emptyList())
                 .stream()
-                .map(fileName -> fileStorage.getFile(folder, fileName)
-                        .map(file -> new EntryImageResponse(Base64.getEncoder().encodeToString(file.getFile()), file.getFileName()))
+                .map(image -> fileStorage.getFile(folder, entryId, image.getStoredName())
+                        .map(file -> new EntryImageResponse(image.getImageId(), file, image.getName()))
                         .orElse(null)
                 )
                 .collect(Collectors.toList());
     }
 
     @Override
-    public void deleteImage(String entryId, String imageName) {
-        List<String> entryImages = getEntryImages(entryId);
-        entryImages.remove(imageName);
-        String fileName = "%s/%s".formatted(entryId, imageName);
-        fileStorage.deleteFile(getFolder(), fileName);
-
-        Update update = new Update().set("images", entryImages);
-        if (entryImages.isEmpty()) {
-            update = new Update().unset("images");
-        }
-        Query query = new Query(Criteria.where("_id").is(entryId));
-        entryRepository.update(query, update);
+    public void deleteImage(String entryId, String imageId) {
+        List<EntryImage> entryImages = getEntryImages(entryId);
+        List<EntryImage> updatedImages = entryImages.stream().filter(image -> !imageId.equals(image.getImageId())).toList();
+        fileStorage.deleteFile(getFolder(), entryId, "%s.jpg".formatted(imageId));
+        entryService.updateImages(entryId, updatedImages);
     }
 
     private String getFolder() {
         return TokenRequestScope.get().tenancyName();
     }
 
-    private List<String> getEntryImages(String entryId) {
-        return entryRepository.getById(entryId).map(entry -> ofNullable(entry.getImages()).map(ArrayList::new).orElse(new ArrayList<>())).orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Entry not found"));
+    private List<EntryImage> getEntryImages(String entryId) {
+        return ofNullable(entryService.getById(entryId))
+                .map(Entry::getImages)
+                .map(ArrayList::new)
+                .orElse(new ArrayList<>());
     }
 }

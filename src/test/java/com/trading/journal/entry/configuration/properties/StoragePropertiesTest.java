@@ -21,8 +21,8 @@ class StoragePropertiesTest {
     @DisplayName("Storage properties are filled")
     @Test
     void storage() {
-        assertThat(properties.getApiKey()).isEqualTo("123456789");
-        assertThat(properties.getServiceId()).isEqualTo("storeme");
+        assertThat(properties.getAccessKey()).isEqualTo("123456789");
+        assertThat(properties.getSecret()).isEqualTo("storeme");
         assertThat(properties.getEndpoint()).isEqualTo("http://store.com");
         assertThat(properties.getLocation()).isEqualTo("here");
     }

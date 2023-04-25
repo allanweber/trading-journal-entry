@@ -56,9 +56,9 @@ public class EntryController implements EntryApi {
     }
 
     @Override
-    public ResponseEntity<Void> uploadImage(String entryId, MultipartFile file) {
-        entryImageService.uploadImage(entryId, file);
-        return ok().build();
+    public ResponseEntity<EntryImageResponse> uploadImage(String entryId, MultipartFile file) {
+        EntryImageResponse imageResponse = entryImageService.uploadImage(entryId, file);
+        return ok(imageResponse);
     }
 
     @Override
@@ -68,8 +68,8 @@ public class EntryController implements EntryApi {
     }
 
     @Override
-    public ResponseEntity<Void> deleteImage(String entryId, String imageName) {
-        entryImageService.deleteImage(entryId, imageName);
+    public ResponseEntity<Void> deleteImage(String entryId, String imageId) {
+        entryImageService.deleteImage(entryId, imageId);
         return ok().build();
     }
 }
