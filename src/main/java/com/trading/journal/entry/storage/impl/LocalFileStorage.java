@@ -2,7 +2,7 @@ package com.trading.journal.entry.storage.impl;
 
 import com.trading.journal.entry.storage.FileStorage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 
 import java.util.Base64;
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-@Profile("local | test")
+@ConditionalOnProperty(prefix = "journal.entries.storage", name = "option", havingValue = "local", matchIfMissing = true)
 @RequiredArgsConstructor
 @Service
 @SuppressWarnings("PMD")

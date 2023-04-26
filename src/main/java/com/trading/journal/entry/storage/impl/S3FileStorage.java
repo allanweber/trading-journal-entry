@@ -8,7 +8,7 @@ import com.trading.journal.entry.configuration.properties.StorageProperties;
 import com.trading.journal.entry.storage.FileStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.context.annotation.Profile;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -16,7 +16,7 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.util.Optional;
 
-@Profile("!(local | test)")
+@ConditionalOnProperty(prefix = "journal.entries.storage", name = "option", havingValue = "s3")
 @RequiredArgsConstructor
 @Service
 public class S3FileStorage implements FileStorage {
