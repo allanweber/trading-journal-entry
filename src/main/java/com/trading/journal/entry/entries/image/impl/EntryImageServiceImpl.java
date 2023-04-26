@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -61,6 +62,7 @@ public class EntryImageServiceImpl implements EntryImageService {
                         .map(file -> new EntryImageResponse(image.getImageId(), file, image.getName()))
                         .orElse(null)
                 )
+                .filter(Objects::nonNull)
                 .collect(Collectors.toList());
     }
 
