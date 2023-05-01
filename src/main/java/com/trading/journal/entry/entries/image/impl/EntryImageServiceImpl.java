@@ -13,10 +13,7 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
@@ -75,7 +72,7 @@ public class EntryImageServiceImpl implements EntryImageService {
     }
 
     private String getFolder() {
-        return TokenRequestScope.get().tenancyName();
+        return TokenRequestScope.get().tenancyName().toLowerCase(Locale.getDefault()).replaceAll("\\s+", "");
     }
 
     private List<EntryImage> getEntryImages(String entryId) {

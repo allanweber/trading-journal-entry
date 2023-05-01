@@ -50,7 +50,7 @@ class EntryImageServiceImplTest {
     @DisplayName("Upload one image")
     @Test
     void uploadImage() throws IOException {
-        String rootFolder = "Test-Tenancy";
+        String rootFolder = "test-tenancy";
         String entryId = UUID.randomUUID().toString();
 
         when(entryService.getById(entryId)).thenReturn(Entry.builder().id(entryId).build());
@@ -95,7 +95,7 @@ class EntryImageServiceImplTest {
     @DisplayName("Upload one image when there is already one image uploaded")
     @Test
     void uploadSecondImage() throws IOException {
-        String rootFolder = "Test-Tenancy";
+        String rootFolder = "test-tenancy";
         String entryId = UUID.randomUUID().toString();
 
         when(entryService.getById(entryId))
@@ -118,7 +118,7 @@ class EntryImageServiceImplTest {
     @DisplayName("Return one image")
     @Test
     void returnImages() {
-        String rootFolder = "Test-Tenancy";
+        String rootFolder = "test-tenancy";
         String entryId = UUID.randomUUID().toString();
 
         when(entryService.getById(entryId))
@@ -134,7 +134,7 @@ class EntryImageServiceImplTest {
     @DisplayName("Return two images")
     @Test
     void returnMultipleImages() {
-        String rootFolder = "Test-Tenancy";
+        String rootFolder = "test-tenancy";
         String entryId = UUID.randomUUID().toString();
 
         when(entryService.getById(entryId))
