@@ -68,7 +68,12 @@ public class EntriesQuery {
         queryAppend(query, addFromDate, () -> Criteria.where(DATE).gte(LocalDateTime.parse(from, DATE_FORMATTER)));
 
         boolean addFromExitDate = StringUtils.hasText(from) && CLOSED.equals(getStatus());
-        queryAppend(query, addFromExitDate, () -> Criteria.where(EXIT_DATE).gte(LocalDateTime.parse(from, DATE_FORMATTER)));
+        queryAppend(query, addFromExitDate, () ->
+                new Criteria()
+                        .orOperator(Criteria.where(TYPE).is(EntryType.TRADE).and(EXIT_DATE).gte(LocalDateTime.parse(from, DATE_FORMATTER)),
+                                Criteria.where(TYPE).ne(EntryType.TRADE).and(DATE).gte(LocalDateTime.parse(from, DATE_FORMATTER))
+                        )
+        );
 
         queryAppend(query, Objects.nonNull(direction), () -> Criteria.where(DIRECTION).is(direction.name()));
 

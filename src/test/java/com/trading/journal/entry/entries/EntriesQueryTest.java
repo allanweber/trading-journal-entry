@@ -77,7 +77,13 @@ class EntriesQueryTest {
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
                 .addCriteria(Criteria.where("journalId").is(null))
-                .addCriteria(Criteria.where("exitDate").gte(LocalDateTime.parse("2022-01-01 00:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))))
+                .addCriteria(
+                        new Criteria()
+                                .orOperator(Criteria.where("type").is(EntryType.TRADE).and("exitDate").gte(LocalDateTime.parse("2022-01-01 00:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))),
+                                        Criteria.where("type").ne(EntryType.TRADE).and("date").gte(LocalDateTime.parse("2022-01-01 00:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                                )
+                )
+
                 .addCriteria(Criteria.where("netResult").exists(true))
         );
     }

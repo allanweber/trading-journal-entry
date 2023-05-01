@@ -76,7 +76,12 @@ class EntryServiceImplTest {
                 .addCriteria(Criteria.where("journalId").is("1"))
                 .addCriteria(Criteria.where("symbol").is("MSFT"))
                 .addCriteria(Criteria.where("type").is("DEPOSIT"))
-                .addCriteria(Criteria.where("exitDate").gte(LocalDateTime.parse("2022-12-01 13:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))))
+                .addCriteria(
+                        new Criteria()
+                                .orOperator(Criteria.where("type").is(EntryType.TRADE).and("exitDate").gte(LocalDateTime.parse("2022-12-01 13:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))),
+                                        Criteria.where("type").ne(EntryType.TRADE).and("date").gte(LocalDateTime.parse("2022-12-01 13:00:00", DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                                )
+                )
                 .addCriteria(Criteria.where("netResult").exists(true));
         Page<Entry> page = new PageImpl<>(singletonList(Entry.builder().build()), pageable, 1L);
         when(repository.findAll(pageable, query)).thenReturn(page);
