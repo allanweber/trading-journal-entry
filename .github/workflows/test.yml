@@ -2,40 +2,48 @@ name: API Tests with postman and newman
 on:
   workflow_dispatch:
     inputs:
-      env:
-        description: Environment to run
-        default: test
-        required: true
       iterations:
         description: Number of iterations
         default: "1"
         required: true
+env:
+  APP_NAME: trading-journal-entry
+  NAMESPACE: trading-journal-tst
+
 jobs:
   test:
+    name: Test Latest Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - name: Install Node
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - name: Kubernetes Port Forward
+        uses: tale/kubectl-action@v1
         with:
-          node-version: '12.x'
-      # Install the newman command line utility and also install the html extra reporter
-      - name: Install newman
+          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
+      - run: |
+          POD=$(kubectl get pod -n ${{ env.NAMESPACE }} -l app=${{ env.APP_NAME }} -o jsonpath="{.items[0].metadata.name}")
+          kubectl port-forward -n ${{ env.NAMESPACE }} $POD 8081 &>/dev/null &
+          
+          POD_AUTH=$(kubectl get pod -n ${{ env.NAMESPACE }} -l app=trading-journal-authentication -o jsonpath="{.items[0].metadata.name}")
+          kubectl port-forward -n ${{ env.NAMESPACE }} $POD_AUTH 8080 &>/dev/null &
+          
+          sleep 10
+      - run: |
+          curl -i http://localhost:8081/health
+          curl -i http://localhost:8080/health
+      - name: Install Node
+        uses: actions/setup-node@v3
+      - name: Install Newman
         run: |
           npm install -g newman
           npm install -g newman-reporter-htmlextra
-      # Make directory to upload the test results
       - name: Make Directory for results
         run: mkdir -p testResults
-      # Run the POSTMAN collection
-      - name: Run POSTMAN collection
+      - name: Run Postman collection
         run: |
-          newman run ./postman/TJA.postman_collection.json -e ./postman/TJA_${{ github.event.inputs.env }}.postman_environment.json -n ${{ github.event.inputs.iterations }} -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport.html
-      # Upload the contents of Test Results directory to workspace
+          newman run postman/TJA.postman_collection.json -e postman/TJA_test.postman_environment.json n ${{ github.event.inputs.iterations }} -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
       - name: Output the run Details
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: Report
-          path: testResults/htmlreport.html
-          collection: postman/TJA.postman_collection.json
-          environment: postman/TJA_test.postman_environment.json
+          name: RunReports
+          path: testResults

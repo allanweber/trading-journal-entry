@@ -1,10 +1,9 @@
 # Trading Journal Entries
 
-## PENDING
+## Change Log
 
-* Calculate actual RR when trade finishes
-* Calculate actual account risked when trade finishes
-* Create Strategy Entity: Graph, measure, Profit and Loss percentage, apply it to entry 
+### 1.0.0
+Complete solution with many entry types, journal balance and entry images
 
 ## Swagger
 
@@ -35,6 +34,13 @@ Default application properties used on deployed/container run require a set of E
     * **JWT_PUBLIC_KEY**: public key file based on private key used to read access tokens used to sign the JWT
     * **JWT_ISSUER**: Access token issuer must be the same of JWT received
     * **JWT_AUDIENCE**: Access token audience must be the same of JWT received
+* File Storage properties:
+  * if **journal.entries.storage.option <> s3** none of bellow needs to be provides
+  * **STORAGE_ACCESS_KEY**: access to key to the cloud storage
+  * **STORAGE_SECRET**: secret to the cloud storage
+  * **STORAGE_ENDPOINT**: endpoint to the cloud storage
+  * **STORAGE_LOCATION**: location/region to the cloud storage
+  * **STORAGE_CDN**: CND url to access the stored objects
 
 ### Container Dependencies
 
