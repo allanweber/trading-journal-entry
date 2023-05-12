@@ -8,6 +8,7 @@ import com.trading.journal.entry.configuration.properties.StorageProperties;
 import com.trading.journal.entry.storage.FileStorage;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -19,6 +20,7 @@ import java.util.Optional;
 @ConditionalOnProperty(prefix = "journal.entries.storage", name = "option", havingValue = "s3")
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class S3FileStorage implements FileStorage {
 
     private final AmazonS3 client;
@@ -50,6 +52,7 @@ public class S3FileStorage implements FileStorage {
     @SneakyThrows
     @Override
     public Optional<String> getFile(String rootFolder, String folder, String storedName) {
+        log.info("GET FILE CONTENT: CDN: {}  ROOT: {}  FOLDER:{} NAME:{}",properties.getCnd(), rootFolder, folder,storedName);
         return Optional.of(UriComponentsBuilder.fromUriString(properties.getCnd())
                 .pathSegment(rootFolder)
                 .pathSegment(folder)
