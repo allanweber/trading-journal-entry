@@ -16,21 +16,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      - name: Kubernetes Port Forward
-        uses: tale/kubectl-action@v1
-        with:
-          base64-kube-config: ${{ secrets.KUBE_CONFIG }}
-      - run: |
-          POD=$(kubectl get pod -n ${{ env.NAMESPACE }} -l app=${{ env.APP_NAME }} -o jsonpath="{.items[0].metadata.name}")
-          kubectl port-forward -n ${{ env.NAMESPACE }} $POD 8081 &>/dev/null &
-          
-          POD_AUTH=$(kubectl get pod -n ${{ env.NAMESPACE }} -l app=trading-journal-authentication -o jsonpath="{.items[0].metadata.name}")
-          kubectl port-forward -n ${{ env.NAMESPACE }} $POD_AUTH 8080 &>/dev/null &
-          
-          sleep 10
-      - run: |
-          curl -i http://localhost:8081/health
-          curl -i http://localhost:8080/health
       - name: Install Node
         uses: actions/setup-node@v3
       - name: Install Newman
