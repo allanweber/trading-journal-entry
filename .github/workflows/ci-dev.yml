@@ -82,7 +82,7 @@ jobs:
   test:
     name: Test Latest Deploy
     runs-on: ubuntu-latest
-    needs: [build, docker, deploy]
+    needs: [ build, docker, deploy ]
     steps:
       - uses: actions/checkout@v3
       - name: Install Node
