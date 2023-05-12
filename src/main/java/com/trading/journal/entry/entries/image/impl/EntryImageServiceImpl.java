@@ -72,7 +72,7 @@ public class EntryImageServiceImpl implements EntryImageService {
     }
 
     private String getFolder() {
-        return TokenRequestScope.get().tenancyName().toLowerCase(Locale.getDefault()).replaceAll("\\s+", "");
+        return TokenRequestScope.get().tenancyName().toLowerCase(Locale.getDefault()).replaceAll("[^A-Za-z0-9]", "");
     }
 
     private List<EntryImage> getEntryImages(String entryId) {

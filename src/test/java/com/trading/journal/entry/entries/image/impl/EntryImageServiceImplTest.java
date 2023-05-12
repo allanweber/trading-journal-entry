@@ -47,10 +47,34 @@ class EntryImageServiceImplTest {
         TokenRequestScope.set(new AccessTokenInfo("user", 1L, "Test-Tenancy", singletonList("ROLE_USER")));
     }
 
+    @DisplayName("Upload one image when tenancy name has special chars, replace it")
+    @Test
+    void uploadImageSpecial() throws IOException {
+
+        TokenRequestScope.set(new AccessTokenInfo("user", 1L, "Testt@#$%enan%^&()cY123?{}|", singletonList("ROLE_USER")));
+        String entryId = UUID.randomUUID().toString();
+
+        when(entryService.getById(entryId)).thenReturn(Entry.builder().id(entryId).build());
+
+        when(fileStorage.folderExists("testtenancy123")).thenReturn(true);
+
+        MultipartFile file = mock(MultipartFile.class);
+        when(file.getBytes()).thenReturn(new byte[]{0});
+
+        when(imageCompression.compressImage(any())).thenReturn(new byte[]{0});
+        doNothing().when(fileStorage).uploadFile(eq("testtenancy123"), eq(entryId), anyString(), any());
+
+        EntryImageResponse response = entryImage.uploadImage(entryId, file);
+        assertThat(response.getImageName()).isEqualTo("image-1");
+
+        verify(entryService).updateImages(eq(entryId), argThat(images -> images.size() == 1));
+        verify(fileStorage, never()).createFolder(anyString());
+    }
+
     @DisplayName("Upload one image")
     @Test
     void uploadImage() throws IOException {
-        String rootFolder = "test-tenancy";
+        String rootFolder = "testtenancy";
         String entryId = UUID.randomUUID().toString();
 
         when(entryService.getById(entryId)).thenReturn(Entry.builder().id(entryId).build());
@@ -118,7 +142,7 @@ class EntryImageServiceImplTest {
     @DisplayName("Return one image")
     @Test
     void returnImages() {
-        String rootFolder = "test-tenancy";
+        String rootFolder = "testtenancy";
         String entryId = UUID.randomUUID().toString();
 
         when(entryService.getById(entryId))
@@ -134,7 +158,7 @@ class EntryImageServiceImplTest {
     @DisplayName("Return two images")
     @Test
     void returnMultipleImages() {
-        String rootFolder = "test-tenancy";
+        String rootFolder = "testtenancy";
         String entryId = UUID.randomUUID().toString();
 
         when(entryService.getById(entryId))
