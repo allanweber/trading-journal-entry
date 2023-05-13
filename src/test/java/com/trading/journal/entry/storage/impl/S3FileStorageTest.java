@@ -87,7 +87,7 @@ class S3FileStorageTest {
         String folder = UUID.randomUUID().toString();
         String storedName = "%s.jpg".formatted(UUID.randomUUID().toString());
 
-        when(properties.getCnd()).thenReturn("https://cdn.trading-jounal.com");
+        when(properties.getCdn()).thenReturn("https://cdn.trading-jounal.com");
 
         Optional<String> file = fileStorage.getFile(rootFolder, folder, storedName);
 

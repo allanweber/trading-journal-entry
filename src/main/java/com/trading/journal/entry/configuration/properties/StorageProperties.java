@@ -20,5 +20,5 @@ public class StorageProperties {
 
     private String location;
 
-    private String cnd;
+    private String cdn;
 }
