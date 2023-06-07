@@ -2,40 +2,30 @@ name: API Tests with postman and newman
 on:
   workflow_dispatch:
     inputs:
-      env:
-        description: Environment to run
-        default: test
-        required: true
       iterations:
         description: Number of iterations
         default: "1"
         required: true
+
 jobs:
   test:
+    name: Test Latest Deploy
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install Node
-        uses: actions/setup-node@v1
-        with:
-          node-version: '12.x'
-      # Install the newman command line utility and also install the html extra reporter
-      - name: Install newman
+        uses: actions/setup-node@v3
+      - name: Install Newman
         run: |
           npm install -g newman
           npm install -g newman-reporter-htmlextra
-      # Make directory to upload the test results
       - name: Make Directory for results
         run: mkdir -p testResults
-      # Run the POSTMAN collection
-      - name: Run POSTMAN collection
+      - name: Run Postman collection
         run: |
-          newman run ./postman/TJA.postman_collection.json -e ./postman/TJA_${{ github.event.inputs.env }}.postman_environment.json -n ${{ github.event.inputs.iterations }} -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport.html
-      # Upload the contents of Test Results directory to workspace
+          newman run postman/TJE.postman_collection.json --insecure -e postman/TJE_test.postman_environment.json n ${{ github.event.inputs.iterations }} -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
       - name: Output the run Details
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
-          name: Report
-          path: testResults/htmlreport.html
-          collection: postman/TJA.postman_collection.json
-          environment: postman/TJA_test.postman_environment.json
+          name: RunReports
+          path: testResults
