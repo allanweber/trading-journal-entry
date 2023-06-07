@@ -1,9 +1,9 @@
 name: Build and Publish Docker Image - MASTER
 
 on:
+  workflow_dispatch:
   push:
     branches: [master]
-  workflow_dispatch:
 
 env:
   APP_NAME: trading-journal-entry
