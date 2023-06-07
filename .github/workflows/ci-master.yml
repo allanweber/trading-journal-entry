@@ -7,7 +7,7 @@ on:
 env:
   APP_NAME: trading-journal-entry
   NAMESPACE: trading-journal
-  CONTEXT: admin@trading-journal
+  CONTEXT: trading-journal
 
 jobs:
   build:
@@ -56,7 +56,7 @@ jobs:
       - name: Docker Login
         run: echo ${{ secrets.DOCKER_PASS }} | docker login -u ${{ secrets.DOCKER_USER }} --password-stdin
       - name: Docker Build Version PRD
-        run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/DockerfileTest .
+        run: docker build -t allanweber/$APP_NAME:${{needs.build.outputs.app-version}} -f docker/Dockerfile .
       - name: Build and Push Version
         run: docker push allanweber/$APP_NAME:${{needs.build.outputs.app-version}}
       - name: Docker Build Latest
