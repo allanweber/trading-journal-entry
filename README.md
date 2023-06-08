@@ -2,6 +2,9 @@
 
 ## Change Log
 
+### 1.1.1
+* Fix CORS configuration
+
 ### 1.1.0
 * Improvements and image upload for trade entries
 

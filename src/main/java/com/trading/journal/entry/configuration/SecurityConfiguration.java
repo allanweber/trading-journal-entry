@@ -14,8 +14,6 @@ import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
-
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
@@ -36,23 +34,16 @@ public class SecurityConfiguration {
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtTokenAuthenticationCheck), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        httpSecurity.cors().configurationSource(request -> getCorsConfiguration());
+        httpSecurity.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
         httpSecurity.csrf().disable();
         httpSecurity.headers().frameOptions().disable();
         httpSecurity.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_USER");
         return httpSecurity.build();
     }
 
-    private static CorsConfiguration getCorsConfiguration() {
-        CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
-        corsConfiguration.setAllowedMethods(asList(HttpMethod.GET.name(), HttpMethod.HEAD.name(), HttpMethod.POST.name(), HttpMethod.DELETE.name(), HttpMethod.PATCH.name()));
-        return corsConfiguration;
-    }
-
     private String[] getPublicPath() {
         String[] monitoring = {"/health/**", "/prometheus", "/metrics*/**"};
-        String[] authentication = {"/authentication*/**"};
         String[] swagger = {"/", "/v2/api-docs", "/swagger*/**", "/webjars/**"};
-        return Stream.of(monitoring, authentication, swagger).flatMap(Stream::of).toArray(String[]::new);
+        return Stream.of(monitoring, swagger).flatMap(Stream::of).toArray(String[]::new);
     }
 }
