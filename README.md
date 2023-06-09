@@ -2,11 +2,12 @@
 
 ## Change Log
 
-### 1.1.1
-* Fix CORS configuration
-
 ### 1.1.0
 * Improvements and image upload for trade entries
+  *  1.1.1
+    * Fix CORS configuration
+  * 1.1.2
+    * Accept more METHODS for cors
 
 ### 1.0.0
 * Complete solution with many entry types, journal balance and entry images
