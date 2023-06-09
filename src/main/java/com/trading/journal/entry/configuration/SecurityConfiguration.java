@@ -11,6 +11,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 
 import java.util.stream.Stream;
 
@@ -34,11 +35,19 @@ public class SecurityConfiguration {
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtTokenAuthenticationCheck), UsernamePasswordAuthenticationFilter.class)
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        httpSecurity.cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues());
+        httpSecurity.cors().configurationSource(getCorsConfigurationSource());
         httpSecurity.csrf().disable();
         httpSecurity.headers().frameOptions().disable();
         httpSecurity.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_USER");
         return httpSecurity.build();
+    }
+
+    private static CorsConfigurationSource getCorsConfigurationSource() {
+        return request -> {
+            CorsConfiguration corsConfiguration = new CorsConfiguration().applyPermitDefaultValues();
+            corsConfiguration.setAllowedMethods(Stream.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH").toList());
+            return corsConfiguration;
+        };
     }
 
     private String[] getPublicPath() {
