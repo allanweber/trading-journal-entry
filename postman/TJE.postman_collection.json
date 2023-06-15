@@ -1646,7 +1646,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/Allan/developer/trading-journal/trading-journal-entry/postman/image.jpg"
+									"src": "./postman/image.jpg"
 								}
 							]
 						},
@@ -1776,7 +1776,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "/C:/Users/Allan/developer/trading-journal/trading-journal-entry/postman/image.jpg"
+									"src": "./postman/image.jpg"
 								}
 							]
 						},
