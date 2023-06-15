@@ -1,9 +1,9 @@
 package com.trading.journal.entry.configuration;
 
+import jakarta.annotation.PostConstruct;
 import lombok.NoArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 
-import javax.annotation.PostConstruct;
 import java.util.TimeZone;
 
 @Configuration

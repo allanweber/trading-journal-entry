@@ -37,6 +37,7 @@ class FileStorageBeanTest {
                 .run(context -> {
                     assertThat(context).hasSingleBean(LocalFileStorage.class);
                     assertThat(context).doesNotHaveBean(S3FileStorage.class);
+
                 });
     }
 

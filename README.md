@@ -2,6 +2,9 @@
 
 ## Change Log
 
+### 2.0.0
+* Spring 3.1.0
+
 ### 1.1.0
 * Improvements and image upload for trade entries
   *  1.1.1
@@ -55,37 +58,33 @@ Run mongo on docker
 
 `docker run -p 27017:27017 --name trading-journal -d mongo`
 
-## Docker
+### Build
 
-### Build Locally or for Pipeline test
+```docker build -t allanweber/trading-journal-entry:<VERSION> -f docker/Dockerfile .```
 
-This docker file copies the sample public keys in **/src/main/resources/** to the image, so you can refer the key from **/etc/ssl/certs/public.pem**
+Tag your image to latest: ```docker tag allanweber/trading-journal-entry:<VERSION> allanweber/trading-journal-authentication:latest```
 
-```docker build -t allanweber/trading-journal-entry:1.0.0 -f docker/DockerfileTest .```
+Push image to registry: ```docker push allanweber/trading-journal-entry:<VERSION>```
 
-### Build for deployment
+#### Docker Composer
 
-For this option, you must provide your own private and public keys, add it to the image and configure the proper environment variables to read those files
+Helpful for local testing
 
-```docker build -t allanweber/trading-journal-entry:1.0.0 -f docker/Dockerfile .```
-
-Tag your image to latest: ```docker tag allanweber/trading-journal-entry:1.0.0 allanweber/trading-journal-entry:latest```
-
-Push image to registry: ```docker push allanweber/trading-journal-entry:latest```
-
-### Run it with env variables
-
-* Get mongo container ip: ```docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' CONTAINER_ID```
-* 
+```docker-compose up```
+ 
 ```bash
 docker run -p 8080:8080 --name trading-journal-entry \
--e MONGO_USER= \
--e MONGO_PASS= \
--e MONGO_HOST= \
--e MONGO_DATABASE= \
 -e JWT_AUDIENCE= \
 -e JWT_ISSUER= \
--e JWT_PRIVATE_KEY= \
 -e JWT_PUBLIC_KEY= \
+-e MONGO_USER= \
+-e MONGO_HOST= \
+-e MONGO_DATABASE= \
+-e STORAGE_ENDPOINT= \
+-e STORAGE_LOCATION= \
+-e STORAGE_CDN= \
+-e MONGO_PASS= \
+-e STORAGE_ACCESS_KEY= \
+-e STORAGE_SECRET= \
 allanweber/trading-journal-entry:VERSION
 ```

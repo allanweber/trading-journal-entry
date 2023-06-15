@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -27,18 +29,17 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .exceptionHandling().authenticationEntryPoint(serverAuthenticationExceptionEntryPoint).and()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers(getPublicPath()).permitAll()
-                .and()
+                .exceptionHandling(custom -> custom.authenticationEntryPoint(serverAuthenticationExceptionEntryPoint))
+                .authorizeHttpRequests(auth ->
+                        auth.requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                                .requestMatchers(getPublicPath()).permitAll()
+                                .anyRequest().hasAnyAuthority("ROLE_USER")
+                )
                 .addFilterBefore(new JwtTokenAuthenticationFilter(jwtTokenAuthenticationCheck), UsernamePasswordAuthenticationFilter.class)
-                .sessionManagement()
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
-        httpSecurity.cors().configurationSource(getCorsConfigurationSource());
-        httpSecurity.csrf().disable();
-        httpSecurity.headers().frameOptions().disable();
-        httpSecurity.authorizeRequests().anyRequest().hasAnyAuthority("ROLE_USER");
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .cors(cors -> cors.configurationSource(getCorsConfigurationSource()))
+                .csrf(AbstractHttpConfigurer::disable)
+                .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable));
         return httpSecurity.build();
     }
 
@@ -52,7 +53,6 @@ public class SecurityConfiguration {
 
     private String[] getPublicPath() {
         String[] monitoring = {"/health/**", "/prometheus", "/metrics*/**"};
-        String[] swagger = {"/", "/v2/api-docs", "/swagger*/**", "/webjars/**"};
-        return Stream.of(monitoring, swagger).flatMap(Stream::of).toArray(String[]::new);
+        return Stream.of(monitoring).toArray(String[]::new);
     }
 }
