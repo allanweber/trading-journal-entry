@@ -466,13 +466,12 @@
 							}
 						],
 						"url": {
-							"raw": "{{entry-api}}/journals/",
+							"raw": "{{entry-api}}/journals",
 							"host": [
 								"{{entry-api}}"
 							],
 							"path": [
-								"journals",
-								""
+								"journals"
 							]
 						}
 					},
@@ -1647,7 +1646,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "./postman/image.jpg"
+									"src": "/C:/Users/Allan/developer/trading-journal/trading-journal-entry/postman/image.jpg"
 								}
 							]
 						},
@@ -1712,7 +1711,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "./postman/image.jpg"
+									"src": "/C:/Users/Allan/developer/trading-journal/trading-journal-entry/postman/image.jpg"
 								}
 							]
 						},
@@ -1777,7 +1776,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "./postman/image.jpg"
+									"src": "/C:/Users/Allan/developer/trading-journal/trading-journal-entry/postman/image.jpg"
 								}
 							]
 						},
@@ -5303,10 +5302,6 @@
 			"value": ""
 		},
 		{
-			"key": "msft-image1-id",
-			"value": ""
-		},
-		{
 			"key": "entry2-graph",
 			"value": ""
 		},
@@ -5332,6 +5327,10 @@
 		},
 		{
 			"key": "entry-date",
+			"value": ""
+		},
+		{
+			"key": "msft-image1-id",
 			"value": ""
 		},
 		{

@@ -31,7 +31,7 @@ class ApiExceptionHandlerTest {
     void handleClientExceptionNoMessage() {
         ResponseEntity<Map<String, String>> response = apiExceptionHandler.handleClientException(
                 new HttpClientErrorException(HttpStatus.NOT_FOUND));
-        assertEquals(404, response.getStatusCodeValue());
+        assertEquals(404, response.getStatusCode().value());
         assertTrue(Objects.requireNonNull(response.getBody()).containsKey("error"));
         assertEquals("NOT_FOUND", Objects.requireNonNull(response.getBody()).get("error"));
     }
@@ -41,7 +41,7 @@ class ApiExceptionHandlerTest {
     void handleClientExceptionWithMessage() {
         ResponseEntity<Map<String, String>> response = apiExceptionHandler.handleClientException(
                 new HttpClientErrorException(HttpStatus.BAD_REQUEST, "any message"));
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertTrue(Objects.requireNonNull(response.getBody()).containsKey("error"));
         assertEquals("any message", Objects.requireNonNull(response.getBody()).get("error"));
     }
@@ -51,7 +51,7 @@ class ApiExceptionHandlerTest {
     void handleException() {
         ResponseEntity<Map<String, String>> response = apiExceptionHandler
                 .handleException(new RuntimeException("any message"));
-        assertEquals(500, response.getStatusCodeValue());
+        assertEquals(500, response.getStatusCode().value());
         assertTrue(Objects.requireNonNull(response.getBody()).containsKey("error"));
         assertEquals("any message", Objects.requireNonNull(response.getBody()).get("error"));
     }
@@ -62,7 +62,7 @@ class ApiExceptionHandlerTest {
         RuntimeException causeMessage = new RuntimeException("cause message");
         ResponseEntity<Map<String, String>> response = apiExceptionHandler
                 .handleException(new RuntimeException("any message", causeMessage));
-        assertEquals(500, response.getStatusCodeValue());
+        assertEquals(500, response.getStatusCode().value());
         assertTrue(Objects.requireNonNull(response.getBody()).containsKey("error"));
         assertEquals("cause message", Objects.requireNonNull(response.getBody()).get("error"));
     }
@@ -72,7 +72,7 @@ class ApiExceptionHandlerTest {
     void handleAuthenticationException() {
         AuthenticationException exception = new AuthenticationCredentialsNotFoundException("message");
         ResponseEntity<Map<String, String>> response = apiExceptionHandler.handleAuthenticationException(exception);
-        assertEquals(401, response.getStatusCodeValue());
+        assertEquals(401, response.getStatusCode().value());
         assertTrue(Objects.requireNonNull(response.getBody()).containsKey("error"));
         assertEquals("message", Objects.requireNonNull(response.getBody()).get("error"));
     }
@@ -93,7 +93,7 @@ class ApiExceptionHandlerTest {
 
         ResponseEntity<Map<String, List<String>>> response = apiExceptionHandler.handleMethodArgumentNotValidException(ex);
 
-        assertEquals(400, response.getStatusCodeValue());
+        assertEquals(400, response.getStatusCode().value());
         assertTrue(Objects.requireNonNull(response.getBody()).containsKey("errors"));
         assertEquals("default message", Objects.requireNonNull(response.getBody()).get("errors").get(0));
     }

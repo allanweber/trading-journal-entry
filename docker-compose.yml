@@ -1,0 +1,33 @@
+services:
+  app:
+    image: allanweber/trading-journal-entry:2.0.0
+    depends_on:
+      - mongoDb
+    ports:
+      - "8081:8081"
+    environment:
+      - JWT_AUDIENCE=trade-journal
+      - JWT_ISSUER=https://tradejournal.biz
+      - JWT_PUBLIC_KEY=/etc/ssl/certs/public_key.pem
+      - STORAGE_OPTION=local
+      - MONGO_USER=root
+      - MONGO_HOST=mongodb
+      - MONGO_DATABASE=db
+      - MONGO_PASS=example
+    volumes:
+      - ./src/main/resources/public_key.pem:/etc/ssl/certs/public_key.pem
+
+  mongoDb:
+    image: mongo
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=root
+      - MONGO_INITDB_ROOT_PASSWORD=example
+    expose:
+      - 2701
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5

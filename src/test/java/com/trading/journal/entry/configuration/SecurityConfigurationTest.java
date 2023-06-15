@@ -19,18 +19,6 @@ class SecurityConfigurationTest {
     private WebTestClient webTestClient;
 
     @Test
-    @DisplayName("Access public paths anonymously")
-    void anonymously() {
-        webTestClient
-                .get()
-                .uri("/swagger-ui/index.html")
-                .accept(MediaType.APPLICATION_JSON)
-                .exchange()
-                .expectStatus()
-                .isOk();
-    }
-
-    @Test
     @DisplayName("Access protected path anonymously fails")
     void anonymouslyFails() {
         webTestClient

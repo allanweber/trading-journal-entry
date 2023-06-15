@@ -9,6 +9,7 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.trading.journal.entry.configuration.properties.StorageProperties;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -18,6 +19,7 @@ public class StorageClient {
 
     private final StorageProperties properties;
 
+    @ConditionalOnProperty(prefix = "journal.entries.storage", name = "option", havingValue = "s3")
     @Bean
     public AmazonS3 s3Client() {
         ClientConfiguration clientConfig = new ClientConfiguration()
