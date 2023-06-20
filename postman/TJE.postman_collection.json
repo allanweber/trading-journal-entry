@@ -31,7 +31,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal('admin');\r",
+									"    pm.expect(response.user).to.equal('admtradefastapp@gmail.com');\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -87,7 +87,6 @@
 									"pm.collectionVariables.set(\"company-name\", getCompanyName());\r",
 									"pm.collectionVariables.set(\"first-name\", pm.collectionVariables.replaceIn(\"{{$randomFirstName}}\"));\r",
 									"pm.collectionVariables.set(\"last-name\", pm.collectionVariables.replaceIn(\"{{$randomLastName}}\"));\r",
-									"pm.collectionVariables.set(\"user-name\", gerUserName());\r",
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
@@ -135,7 +134,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"userName\": \"{{user-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -266,7 +265,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -500,10 +499,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(0.00);\r",
@@ -642,10 +637,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
@@ -786,11 +777,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(0.00);\r",
@@ -927,11 +913,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(0.00);\r",
@@ -1060,10 +1041,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(17000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -1191,11 +1168,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(16849.50);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -1324,10 +1296,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(11849.50);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
@@ -1646,7 +1614,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "./postman/image.jpg"
+									"src": "/C:/Users/Allan/developer/trading-journal/trading-journal-entry/postman/image.jpg"
 								}
 							]
 						},
@@ -1711,7 +1679,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "./postman/image.jpg"
+									"src": "/C:/Users/Allan/developer/trading-journal/trading-journal-entry/postman/image.jpg"
 								}
 							]
 						},
@@ -1776,7 +1744,7 @@
 								{
 									"key": "file",
 									"type": "file",
-									"src": "./postman/image.jpg"
+									"src": "/C:/Users/Allan/developer/trading-journal/trading-journal-entry/postman/image.jpg"
 								}
 							]
 						},
@@ -2258,11 +2226,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(11958.07);\r",
 									"\tpm.expect(response.closedPositions).to.equal(108.57);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -2518,11 +2481,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(11939.06);\r",
 									"\tpm.expect(response.closedPositions).to.equal(89.56);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -2652,10 +2610,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(12303.36);\r",
 									"\tpm.expect(response.closedPositions).to.equal(453.86);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -3558,11 +3512,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(12194.79);\r",
 									"\tpm.expect(response.closedPositions).to.equal(345.29);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -5259,10 +5208,6 @@
 		},
 		{
 			"key": "last-name",
-			"value": ""
-		},
-		{
-			"key": "user-name",
 			"value": ""
 		},
 		{

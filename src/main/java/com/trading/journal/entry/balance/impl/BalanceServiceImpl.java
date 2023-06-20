@@ -18,8 +18,10 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
+import java.util.Optional;
 
 import static java.util.Optional.ofNullable;
+import static org.springframework.data.util.Lazy.of;
 
 @RequiredArgsConstructor
 @Service
@@ -37,11 +39,7 @@ public class BalanceServiceImpl implements BalanceService {
     @Override
     public Balance getCurrentBalance(String journalId) {
         Journal journal = journalService.get(journalId);
-        Balance balance = journal.getCurrentBalance();
-        balance.setStartBalance(journal.getStartBalance().setScale(2, RoundingMode.HALF_EVEN));
-        balance.setCurrency(journal.getCurrency());
-        balance.setStartJournal(journal.getStartJournal());
-        return balance;
+        return journal.getCurrentBalance();
     }
 
     @Override
@@ -66,13 +64,13 @@ public class BalanceServiceImpl implements BalanceService {
                 closedPositions = closedPositions.add(ofNullable(entry.getNetResult()).orElse(BigDecimal.ZERO));
             }
             if (EntryType.DEPOSIT.equals(entry.getType())) {
-                deposits = deposits.add(ofNullable(entry.getPrice()).orElse(BigDecimal.ZERO));
+                deposits = deposits.add(of(entry.getPrice()).orElse(BigDecimal.ZERO));
             }
             if (EntryType.WITHDRAWAL.equals(entry.getType())) {
-                withdrawals = withdrawals.add(ofNullable(entry.getPrice()).orElse(BigDecimal.ZERO));
+                withdrawals = withdrawals.add(Optional.of(entry.getPrice()).orElse(BigDecimal.ZERO));
             }
             if (EntryType.TAXES.equals(entry.getType())) {
-                taxes = taxes.add(ofNullable(entry.getPrice()).orElse(BigDecimal.ZERO));
+                taxes = taxes.add(Optional.of(entry.getPrice()).orElse(BigDecimal.ZERO));
             }
         }
 
