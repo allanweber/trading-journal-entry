@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.trading.journal.entry.entries.EntryDirection;
 import com.trading.journal.entry.entries.GraphType;
+import com.trading.journal.entry.strategy.Strategy;
 import lombok.*;
 import org.springframework.format.annotation.NumberFormat;
 
@@ -58,5 +59,5 @@ public class Trade {
 
     private String notes;
 
-    private List<String> strategyIds;
+    private List<Strategy> strategies;
 }

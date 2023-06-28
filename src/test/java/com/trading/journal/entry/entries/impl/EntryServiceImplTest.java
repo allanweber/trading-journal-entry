@@ -7,7 +7,7 @@ import com.trading.journal.entry.entries.*;
 import com.trading.journal.entry.journal.Journal;
 import com.trading.journal.entry.journal.JournalService;
 import com.trading.journal.entry.strategy.Strategy;
-import com.trading.journal.entry.strategy.StrategyService;
+import org.bson.types.ObjectId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -50,9 +50,6 @@ class EntryServiceImplTest {
 
     @Mock
     BalanceService balanceService;
-
-    @Mock
-    StrategyService strategyService;
 
     @InjectMocks
     EntryServiceImpl entryService;
@@ -151,7 +148,7 @@ class EntryServiceImplTest {
                 .lossPrice(BigDecimal.valueOf(180))
                 .exitPrice(BigDecimal.valueOf(240))
                 .costs(BigDecimal.valueOf(5.59))
-                .strategyIds(asList("ST1", "ST2"))
+                .strategies(asList(Strategy.builder().id("ST1").name("Strategy 1").build(), (Strategy.builder().id("ST2").name("Strategy 2").build())))
                 .build();
 
         Entry calculated = Entry.builder()
@@ -171,13 +168,10 @@ class EntryServiceImplTest {
                 .netResult(BigDecimal.valueOf(74.41))
                 .accountChange(BigDecimal.valueOf(0.0744).setScale(4, RoundingMode.HALF_EVEN))
                 .accountBalance(BigDecimal.valueOf(1074.41).setScale(2, RoundingMode.HALF_EVEN))
-                .strategyIds(asList("ST1", "ST2"))
+                .strategies(asList(Strategy.builder().id("ST1").name("Strategy 1").build(), (Strategy.builder().id("ST2").name("Strategy 2").build())))
                 .build();
 
         when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-
-        when(strategyService.getById("ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
-        when(strategyService.getById("ST2")).thenReturn(Optional.of(Strategy.builder().id("ST2").name("Strategy 2").build()));
 
         when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
         when(repository.save(calculated)).thenReturn(calculated);
@@ -188,60 +182,6 @@ class EntryServiceImplTest {
         assertThat(entry.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder("Strategy 1", "Strategy 2");
 
         verify(balanceService).calculateCurrentBalance(anyString());
-    }
-
-    @DisplayName("Save a TRADE entry with invalid strategy throw an exception")
-    @Test
-    void saveWithInvalidST() {
-        Entry toSave = Entry.builder()
-                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .type(EntryType.TRADE)
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(200))
-                .size(BigDecimal.valueOf(2))
-                .profitPrice(BigDecimal.valueOf(240))
-                .lossPrice(BigDecimal.valueOf(180))
-                .exitPrice(BigDecimal.valueOf(240))
-                .costs(BigDecimal.valueOf(5.59))
-                .strategyIds(asList("ST1", "ST2"))
-                .build();
-
-        Entry calculated = Entry.builder()
-                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .type(EntryType.TRADE)
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(200))
-                .size(BigDecimal.valueOf(2))
-                .profitPrice(BigDecimal.valueOf(240))
-                .lossPrice(BigDecimal.valueOf(180))
-                .accountRisked(BigDecimal.valueOf(0.0400).setScale(4, RoundingMode.HALF_EVEN))
-                .plannedRR(BigDecimal.valueOf(2.00).setScale(2, RoundingMode.HALF_EVEN))
-                .exitPrice(BigDecimal.valueOf(240))
-                .costs(BigDecimal.valueOf(5.59))
-                .grossResult(BigDecimal.valueOf(80.00).setScale(2, RoundingMode.HALF_EVEN))
-                .netResult(BigDecimal.valueOf(74.41))
-                .accountChange(BigDecimal.valueOf(0.0744).setScale(4, RoundingMode.HALF_EVEN))
-                .accountBalance(BigDecimal.valueOf(1074.41).setScale(2, RoundingMode.HALF_EVEN))
-                .strategyIds(asList("ST1", "ST2"))
-                .build();
-
-        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-
-        when(strategyService.getById("ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
-        when(strategyService.getById("ST2")).thenReturn(Optional.empty());
-
-        when(balanceService.getCurrentBalance(JOURNAL_ID)).thenReturn(Balance.builder().accountBalance(BigDecimal.valueOf(1000)).build());
-        when(repository.save(calculated)).thenReturn(calculated);
-        when(repository.findAll(any(Pageable.class))).thenReturn(new PageImpl<>(emptyList()));
-
-        ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.save(toSave));
-        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.BAD_REQUEST);
-        assertThat(exception.getStatusText()).isEqualTo("Invalid Strategy ST2");
-
-        verify(balanceService, never()).getCurrentBalance(anyString());
-        verify(repository, never()).save(any());
-        verify(repository, never()).findAll(any(Pageable.class));
-
     }
 
     @DisplayName("Save a TRADE entry and other entries need balance")
@@ -623,66 +563,17 @@ class EntryServiceImplTest {
                 .price(BigDecimal.valueOf(234.56))
                 .netResult(BigDecimal.valueOf(234.56))
                 .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .strategyIds(asList("ST1", "ST2"))
+                .strategies(asList(Strategy.builder().id("ST1").name("Strategy 1").build(), (Strategy.builder().id("ST2").name("Strategy 2").build())))
                 .build();
 
         when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
         when(repository.getById(entryId)).thenReturn(Optional.of(entry));
-        when(strategyService.getById("ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
-        when(strategyService.getById("ST2")).thenReturn(Optional.of(Strategy.builder().id("ST2").name("Strategy 2").build()));
 
         Entry byId = entryService.getById(entryId);
 
         assertThat(byId).isEqualTo(entry);
         assertThat(byId.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("ST1", "ST2");
         assertThat(byId.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder("Strategy 1", "Strategy 2");
-    }
-
-    @DisplayName("Get a entry by id with strategies but one does not exist, return only one")
-    @Test
-    void getByIdWithStrategiesInvalidOne() {
-        String entryId = UUID.randomUUID().toString();
-        Entry entry = Entry.builder()
-                .type(EntryType.DEPOSIT)
-                .price(BigDecimal.valueOf(234.56))
-                .netResult(BigDecimal.valueOf(234.56))
-                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .strategyIds(asList("ST1", "ST2"))
-                .build();
-
-        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
-        when(strategyService.getById("ST1")).thenReturn(Optional.of(Strategy.builder().id("ST1").name("Strategy 1").build()));
-        when(strategyService.getById("ST2")).thenReturn(Optional.empty());
-
-        Entry byId = entryService.getById(entryId);
-
-        assertThat(byId).isEqualTo(entry);
-        assertThat(byId.getStrategies()).extracting(Strategy::getId).containsExactly("ST1");
-        assertThat(byId.getStrategies()).extracting(Strategy::getName).containsExactly("Strategy 1");
-    }
-
-    @DisplayName("Get a entry by id with strategies none exist return strategies empty")
-    @Test
-    void getByIdWithStrategiesAllInvalid() {
-        String entryId = UUID.randomUUID().toString();
-        Entry entry = Entry.builder()
-                .type(EntryType.DEPOSIT)
-                .price(BigDecimal.valueOf(234.56))
-                .netResult(BigDecimal.valueOf(234.56))
-                .date(LocalDateTime.of(2022, 9, 8, 15, 31, 23))
-                .strategyIds(asList("ST1", "ST2"))
-                .build();
-
-        when(journalService.get(JOURNAL_ID)).thenReturn(Journal.builder().name("my-journal").build());
-        when(repository.getById(entryId)).thenReturn(Optional.of(entry));
-        when(strategyService.getById("ST1")).thenReturn(Optional.empty());
-        when(strategyService.getById("ST2")).thenReturn(Optional.empty());
-
-        Entry byId = entryService.getById(entryId);
-
-        assertThat(byId).isEqualTo(entry);
-        assertThat(byId.getStrategies()).isNull();
     }
 
     @DisplayName("Get a entry by id not found return an exception")
@@ -696,5 +587,16 @@ class EntryServiceImplTest {
         ApplicationException exception = assertThrows(ApplicationException.class, () -> entryService.getById(entryId));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Entry not found");
+    }
+
+    @DisplayName("Count entries by strategy")
+    @Test
+    void countByStrategy() {
+        String strategyId = new ObjectId().toString();
+        Criteria criteria = new Criteria("strategies._id").is(new ObjectId(strategyId));
+        when(repository.count(Query.query(criteria))).thenReturn(1L);
+
+        Long count = entryService.countByStrategy(strategyId);
+        assertThat(count).isEqualTo(1L);
     }
 }

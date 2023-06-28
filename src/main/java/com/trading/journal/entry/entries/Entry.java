@@ -79,9 +79,6 @@ public class Entry {
     @Setter
     private List<Strategy> strategies;
 
-    @JsonIgnore
-    private List<String> strategyIds;
-
     /**
      * Calculated fields
      * Begin

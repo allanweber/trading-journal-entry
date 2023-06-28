@@ -1,6 +1,7 @@
 package com.trading.journal.entry.strategy.impl;
 
 import com.trading.journal.entry.ApplicationException;
+import com.trading.journal.entry.entries.EntryService;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyRepository;
 import org.junit.jupiter.api.DisplayName;
@@ -26,6 +27,9 @@ class StrategyServiceImplTest {
 
     @Mock
     StrategyRepository strategyRepository;
+
+    @Mock
+    EntryService entryService;
 
     @InjectMocks
     StrategyServiceImpl strategyService;
@@ -97,6 +101,22 @@ class StrategyServiceImplTest {
         ApplicationException exception = assertThrows(ApplicationException.class, () -> strategyService.delete(id));
         assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.NOT_FOUND);
         assertThat(exception.getStatusText()).isEqualTo("Strategy not found");
+
+        verify(strategyRepository, never()).delete(any(Strategy.class));
+        verify(strategyRepository, never()).drop();
+    }
+
+    @DisplayName("Delete strategy by id has entries, throw an exception")
+    @Test
+    void deleteHasTrades(){
+        String id = "1";
+
+        when(strategyRepository.getById(id)).thenReturn(Optional.of(Strategy.builder().id("1").build()));
+        when(entryService.countByStrategy(id)).thenReturn(1L);
+
+        ApplicationException exception = assertThrows(ApplicationException.class, () -> strategyService.delete(id));
+        assertThat(exception.getStatusCode()).isEqualTo(HttpStatus.CONFLICT);
+        assertThat(exception.getStatusText()).isEqualTo("Strategy has entries");
 
         verify(strategyRepository, never()).delete(any(Strategy.class));
         verify(strategyRepository, never()).drop();

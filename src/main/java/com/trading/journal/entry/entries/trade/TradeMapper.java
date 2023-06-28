@@ -35,6 +35,6 @@ public interface TradeMapper {
     @Mapping(target = "lossPrice", source = "trade.lossPrice")
     @Mapping(target = "costs", source = "trade.costs")
     @Mapping(target = "notes", source = "trade.notes")
-    @Mapping(target = "strategyIds", source = "trade.strategyIds")
+    @Mapping(target = "strategies", source = "trade.strategies")
     Entry toEditEntry(Entry entry, Trade trade);
 }
