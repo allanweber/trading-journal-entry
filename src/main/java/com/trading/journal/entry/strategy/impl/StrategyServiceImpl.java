@@ -1,6 +1,7 @@
 package com.trading.journal.entry.strategy.impl;
 
 import com.trading.journal.entry.ApplicationException;
+import com.trading.journal.entry.entries.EntryService;
 import com.trading.journal.entry.strategy.Strategy;
 import com.trading.journal.entry.strategy.StrategyRepository;
 import com.trading.journal.entry.strategy.StrategyService;
@@ -17,6 +18,8 @@ import java.util.Optional;
 public class StrategyServiceImpl implements StrategyService {
 
     private final StrategyRepository strategyRepository;
+
+    private final EntryService entryService;
 
     @Override
     public Page<Strategy> getAll(Pageable pageable) {
@@ -37,8 +40,12 @@ public class StrategyServiceImpl implements StrategyService {
     public void delete(String strategyId) {
         Strategy strategy = getById(strategyId)
                 .orElseThrow(() -> new ApplicationException(HttpStatus.NOT_FOUND, "Strategy not found"));
-        strategyRepository.delete(strategy);
 
+        if(entryService.countByStrategy(strategy.getId()) > 0){
+            throw new ApplicationException(HttpStatus.CONFLICT, "Strategy has entries");
+        }
+
+        strategyRepository.delete(strategy);
         boolean hasItems = strategyRepository.hasItems();
         if (!hasItems) {
             strategyRepository.drop();

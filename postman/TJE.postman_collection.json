@@ -31,7 +31,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal('admin');\r",
+									"    pm.expect(response.user).to.equal('admtradefastapp@gmail.com');\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -87,7 +87,6 @@
 									"pm.collectionVariables.set(\"company-name\", getCompanyName());\r",
 									"pm.collectionVariables.set(\"first-name\", pm.collectionVariables.replaceIn(\"{{$randomFirstName}}\"));\r",
 									"pm.collectionVariables.set(\"last-name\", pm.collectionVariables.replaceIn(\"{{$randomLastName}}\"));\r",
-									"pm.collectionVariables.set(\"user-name\", gerUserName());\r",
 									"pm.collectionVariables.set(\"user-email\", gerUserEmail());\r",
 									"\r",
 									"function getCompanyName() {\r",
@@ -135,7 +134,7 @@
 						"header": [],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"userName\": \"{{user-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
+							"raw": "{\r\n    \"companyName\": \"{{company-name}}\",\r\n    \"firstName\": \"{{first-name}}\",\r\n    \"lastName\": \"{{last-name}}\",\r\n    \"email\": \"{{user-email}}\",\r\n    \"password\": \"{{user-password}}\",\r\n    \"confirmPassword\": \"{{user-password}}\"\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -266,7 +265,7 @@
 									"\r",
 									"\tpm.expect(response.refreshToken).not.equal(null);\r",
 									"\r",
-									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-name\"));\r",
+									"    pm.expect(response.user).to.equal(pm.collectionVariables.get(\"user-email\"));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -500,10 +499,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(0.00);\r",
@@ -642,10 +637,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
@@ -786,11 +777,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(0.00);\r",
@@ -927,11 +913,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(15000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(0.00);\r",
@@ -1060,10 +1041,6 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(17000.00);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -1191,11 +1168,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(16849.50);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -1324,10 +1296,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
 									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(11849.50);\r",
 									"\tpm.expect(response.closedPositions).to.equal(0.00);\r",
@@ -2258,11 +2226,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(11958.07);\r",
 									"\tpm.expect(response.closedPositions).to.equal(108.57);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -2518,11 +2481,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(11939.06);\r",
 									"\tpm.expect(response.closedPositions).to.equal(89.56);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -2652,10 +2610,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"\r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(12303.36);\r",
 									"\tpm.expect(response.closedPositions).to.equal(453.86);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -3558,11 +3512,6 @@
 									"\r",
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.currency).to.equal(\"DOLLAR\");\r",
-									"\tpm.expect(response.startJournal).to.equal(pm.collectionVariables.get(\"journal-date\"));\r",
-									"\tpm.expect(response.startBalance).to.equal(15000.00);\r",
-									"\r",
 									"\tpm.expect(response.accountBalance).to.equal(12194.79);\r",
 									"\tpm.expect(response.closedPositions).to.equal(345.29);\r",
 									"\tpm.expect(response.deposits).to.equal(2000.00);\r",
@@ -3744,6 +3693,7 @@
 									"\tpm.expect(response.name).to.equal(\"strategy-1\");\r",
 									"\r",
 									"\tpm.collectionVariables.set(\"strategy-1\", response.id);\r",
+									"\tpm.collectionVariables.set(\"strategy-1-data\", JSON.stringify(response));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4253,7 +4203,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\"]\r\n}",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategies\" :[{{strategy-1-data}}]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4302,6 +4252,7 @@
 									"\tpm.expect(response.name).to.equal(\"strategy-2-new\");\r",
 									"\r",
 									"\tpm.collectionVariables.set(\"strategy-2\", response.id);\r",
+									"\tpm.collectionVariables.set(\"strategy-2-data\", JSON.stringify(response));\r",
 									"});"
 								],
 								"type": "text/javascript"
@@ -4361,6 +4312,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.collectionVariables.set(\"entry2-id\", response.id);\r",
 									"\r",
 									"\tpm.expect(response.strategies.length).to.eql(2);\r",
 									"});"
@@ -4380,7 +4332,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\", \"{{strategy-2}}\"]\r\n}",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategies\" :[{{strategy-1-data}}, {{strategy-2-data}}]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4425,6 +4377,7 @@
 									"pm.test(\"Test response\", () => {\r",
 									"    const response = pm.response.json();\r",
 									"\tpm.expect(response.id).not.eql(null);\r",
+									"\tpm.collectionVariables.set(\"entry3-id\", response.id);\r",
 									"\r",
 									"\tpm.expect(response.strategies.length).to.eql(1);\r",
 									"});"
@@ -4444,7 +4397,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategyIds\" :[\"{{strategy-2}}\"]\r\n}",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategies\" :[{{strategy-2-data}}]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4508,7 +4461,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\", \"{{strategy-2}}\"]\r\n}",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"strategies\" :[{{strategy-1-data}}, {{strategy-2-data}}]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4526,69 +4479,6 @@
 								"entries",
 								"trade",
 								"{{entry1-id}}"
-							]
-						}
-					},
-					"response": []
-				},
-				{
-					"name": "Create a entry with one invalid strategy id return error",
-					"event": [
-						{
-							"listen": "prerequest",
-							"script": {
-								"exec": [
-									""
-								],
-								"type": "text/javascript"
-							}
-						},
-						{
-							"listen": "test",
-							"script": {
-								"exec": [
-									"pm.test(\"Status code is 400\", function () {\r",
-									"  pm.response.to.have.status(400);\r",
-									"});\r",
-									"\r",
-									"pm.test(\"Test response\", () => {\r",
-									"    const response = pm.response.json();\r",
-									"    \r",
-									"\tpm.expect(response.error).to.equal(\"Invalid Strategy 6413640af797e679b86feb18\");\r",
-									"});"
-								],
-								"type": "text/javascript"
-							}
-						}
-					],
-					"request": {
-						"method": "POST",
-						"header": [
-							{
-								"key": "Authorization",
-								"value": "Bearer {{access-token}}",
-								"type": "text"
-							}
-						],
-						"body": {
-							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"IBOV\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\",\"6413640af797e679b86feb18\"]\r\n}",
-							"options": {
-								"raw": {
-									"language": "json"
-								}
-							}
-						},
-						"url": {
-							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade",
-							"host": [
-								"{{entry-api}}"
-							],
-							"path": [
-								"journals",
-								"{{journal-id}}",
-								"entries",
-								"trade"
 							]
 						}
 					},
@@ -4687,7 +4577,7 @@
 						],
 						"body": {
 							"mode": "raw",
-							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"strategyIds\" :[\"{{strategy-1}}\"]\r\n}",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"strategies\" :[{{strategy-1-data}}]\r\n}",
 							"options": {
 								"raw": {
 									"language": "json"
@@ -4882,6 +4772,253 @@
 									"key": "strategies",
 									"value": "123123132131"
 								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete Strategy 1 invalid One Entry using it",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 409\", function () {\r",
+									"  pm.response.to.have.status(409);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"    \r",
+									"\tpm.expect(response.error).to.equal(\"Strategy has entries\");\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{entry-api}}/strategies/{{strategy-1}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"strategies",
+								"{{strategy-1}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update first entry Removing strategies",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.strategies).to.eql(undefined);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"MSFT\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"profitPrice\": 280.61,\r\n\t\"lossPrice\": 231.80,\r\n\t\"costs\": 1.23,\r\n\t\"strategies\" : null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/{{entry1-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade",
+								"{{entry1-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update second entry Removing strategies",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.strategies.length).to.eql(0);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategies\" : []\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/{{entry2-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade",
+								"{{entry2-id}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Update third entry Removing strategies",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.test(\"Status code is 200\", function () {\r",
+									"  pm.response.to.have.status(200);\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Test response\", () => {\r",
+									"    const response = pm.response.json();\r",
+									"\tpm.expect(response.id).not.eql(null);\r",
+									"\r",
+									"\tpm.expect(response.strategies).to.eql(undefined);\r",
+									"});"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{access-token}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n\t\"date\": \"2022-12-30 17:00:00\",\r\n\t\"symbol\": \"SP500\",\r\n\t\"direction\": \"LONG\",\r\n\t\"price\": 244.01,\r\n\t\"size\": 3,\r\n\t\"strategies\" : null\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{entry-api}}/journals/{{journal-id}}/entries/trade/{{entry3-id}}",
+							"host": [
+								"{{entry-api}}"
+							],
+							"path": [
+								"journals",
+								"{{journal-id}}",
+								"entries",
+								"trade",
+								"{{entry3-id}}"
 							]
 						}
 					},
@@ -5262,15 +5399,7 @@
 			"value": ""
 		},
 		{
-			"key": "user-name",
-			"value": ""
-		},
-		{
 			"key": "user-email",
-			"value": ""
-		},
-		{
-			"key": "user-verification-hash",
 			"value": ""
 		},
 		{
@@ -5286,19 +5415,11 @@
 			"value": ""
 		},
 		{
-			"key": "journal-id",
-			"value": ""
-		},
-		{
 			"key": "entry1-graph",
 			"value": ""
 		},
 		{
 			"key": "entry1-measure",
-			"value": ""
-		},
-		{
-			"key": "entry1-id",
 			"value": ""
 		},
 		{
@@ -5310,10 +5431,6 @@
 			"value": ""
 		},
 		{
-			"key": "entry2-id",
-			"value": ""
-		},
-		{
 			"key": "entry3-graph",
 			"value": ""
 		},
@@ -5322,23 +5439,7 @@
 			"value": ""
 		},
 		{
-			"key": "entry3-id",
-			"value": ""
-		},
-		{
 			"key": "entry-date",
-			"value": ""
-		},
-		{
-			"key": "msft-image1-id",
-			"value": ""
-		},
-		{
-			"key": "sp500-image1-id",
-			"value": ""
-		},
-		{
-			"key": "sp500-image2-id",
 			"value": ""
 		},
 		{
@@ -5362,11 +5463,51 @@
 			"value": ""
 		},
 		{
+			"key": "user-verification-hash",
+			"value": ""
+		},
+		{
+			"key": "journal-id",
+			"value": ""
+		},
+		{
+			"key": "entry1-id",
+			"value": ""
+		},
+		{
+			"key": "entry2-id",
+			"value": ""
+		},
+		{
+			"key": "entry3-id",
+			"value": ""
+		},
+		{
+			"key": "msft-image1-id",
+			"value": ""
+		},
+		{
+			"key": "sp500-image1-id",
+			"value": ""
+		},
+		{
+			"key": "sp500-image2-id",
+			"value": ""
+		},
+		{
 			"key": "strategy-1",
 			"value": ""
 		},
 		{
+			"key": "strategy-1-data",
+			"value": ""
+		},
+		{
 			"key": "strategy-2",
+			"value": ""
+		},
+		{
+			"key": "strategy-2-data",
 			"value": ""
 		},
 		{

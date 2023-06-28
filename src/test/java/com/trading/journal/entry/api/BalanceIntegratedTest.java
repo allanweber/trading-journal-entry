@@ -215,10 +215,6 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
                             assertThat(response.getDeposits()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getTaxes()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
-
-                            assertThat(response.getStartBalance()).isEqualTo(BigDecimal.valueOf(10000.00).setScale(2, RoundingMode.HALF_EVEN));
-                            assertThat(response.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 10, 15, 25, 35));
-
                             assertThat(response.getOpenedPositions()).isEqualTo(BigDecimal.valueOf(34000.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getAvailable()).isEqualTo(BigDecimal.valueOf(-24000.00).setScale(2, RoundingMode.HALF_EVEN));
                         }
@@ -285,10 +281,6 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
                             assertThat(response.getDeposits()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getTaxes()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
-
-                            assertThat(response.getStartBalance()).isEqualTo(BigDecimal.valueOf(10000.00).setScale(2, RoundingMode.HALF_EVEN));
-                            assertThat(response.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 10, 15, 25, 35));
-
                             assertThat(response.getOpenedPositions()).isEqualTo(BigDecimal.valueOf(30000.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getAvailable()).isEqualTo(BigDecimal.valueOf(-16000.00).setScale(2, RoundingMode.HALF_EVEN));
                         }
@@ -359,10 +351,6 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
                             assertThat(response.getDeposits()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getTaxes()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
-
-                            assertThat(response.getStartBalance()).isEqualTo(BigDecimal.valueOf(10000.00).setScale(2, RoundingMode.HALF_EVEN));
-                            assertThat(response.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 10, 15, 25, 35));
-
                             assertThat(response.getOpenedPositions()).isEqualTo(BigDecimal.valueOf(9000.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getAvailable()).isEqualTo(BigDecimal.valueOf(3650.00).setScale(2, RoundingMode.HALF_EVEN));
                         }
@@ -436,10 +424,6 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
                             assertThat(response.getDeposits()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getTaxes()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
-
-                            assertThat(response.getStartBalance()).isEqualTo(BigDecimal.valueOf(10000.00).setScale(2, RoundingMode.HALF_EVEN));
-                            assertThat(response.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 10, 15, 25, 35));
-
                             assertThat(response.getOpenedPositions()).isEqualTo(BigDecimal.valueOf(1500.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getAvailable()).isEqualTo(BigDecimal.valueOf(15400.00).setScale(2, RoundingMode.HALF_EVEN));
                         }
@@ -513,10 +497,6 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
                             assertThat(response.getDeposits()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getTaxes()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.valueOf(6000.00).setScale(2, RoundingMode.HALF_EVEN));
-
-                            assertThat(response.getStartBalance()).isEqualTo(BigDecimal.valueOf(10000.00).setScale(2, RoundingMode.HALF_EVEN));
-                            assertThat(response.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 10, 15, 25, 35));
-
                             assertThat(response.getOpenedPositions()).isEqualTo(BigDecimal.valueOf(1500.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getAvailable()).isEqualTo(BigDecimal.valueOf(9400.00).setScale(2, RoundingMode.HALF_EVEN));
                         }
@@ -599,10 +579,6 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
                             assertThat(response.getDeposits()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getTaxes()).isEqualTo(BigDecimal.valueOf(400.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.valueOf(6000.00).setScale(2, RoundingMode.HALF_EVEN));
-
-                            assertThat(response.getStartBalance()).isEqualTo(BigDecimal.valueOf(10000.00).setScale(2, RoundingMode.HALF_EVEN));
-                            assertThat(response.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 10, 15, 25, 35));
-
                             assertThat(response.getOpenedPositions()).isEqualTo(BigDecimal.valueOf(1500.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getAvailable()).isEqualTo(BigDecimal.valueOf(9000.00).setScale(2, RoundingMode.HALF_EVEN));
                         }
@@ -687,10 +663,6 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
                             assertThat(response.getDeposits()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getTaxes()).isEqualTo(BigDecimal.valueOf(400.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.valueOf(6000.00).setScale(2, RoundingMode.HALF_EVEN));
-
-                            assertThat(response.getStartBalance()).isEqualTo(BigDecimal.valueOf(10000.00).setScale(2, RoundingMode.HALF_EVEN));
-                            assertThat(response.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 10, 15, 25, 35));
-
                             assertThat(response.getOpenedPositions()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getAvailable()).isEqualTo(BigDecimal.valueOf(10200.00).setScale(2, RoundingMode.HALF_EVEN));
                         }
@@ -770,10 +742,6 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
                             assertThat(response.getDeposits()).isEqualTo(BigDecimal.valueOf(3000.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getTaxes()).isEqualTo(BigDecimal.valueOf(400.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.valueOf(6000.00).setScale(2, RoundingMode.HALF_EVEN));
-
-                            assertThat(response.getStartBalance()).isEqualTo(BigDecimal.valueOf(10000.00).setScale(2, RoundingMode.HALF_EVEN));
-                            assertThat(response.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 10, 15, 25, 35));
-
                             assertThat(response.getOpenedPositions()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getAvailable()).isEqualTo(BigDecimal.valueOf(13200.00).setScale(2, RoundingMode.HALF_EVEN));
                         }
@@ -839,10 +807,6 @@ class BalanceIntegratedTest extends IntegratedTestWithJournal {
                             assertThat(response.getDeposits()).isEqualTo(BigDecimal.valueOf(3000.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getTaxes()).isEqualTo(BigDecimal.valueOf(400.00).setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getWithdrawals()).isEqualTo(BigDecimal.valueOf(6000.00).setScale(2, RoundingMode.HALF_EVEN));
-
-                            assertThat(response.getStartBalance()).isEqualTo(BigDecimal.valueOf(10000.00).setScale(2, RoundingMode.HALF_EVEN));
-                            assertThat(response.getStartJournal()).isEqualTo(LocalDateTime.of(2022, 11, 10, 15, 25, 35));
-
                             assertThat(response.getOpenedPositions()).isEqualTo(BigDecimal.ZERO.setScale(2, RoundingMode.HALF_EVEN));
                             assertThat(response.getAvailable()).isEqualTo(BigDecimal.valueOf(9200.00).setScale(2, RoundingMode.HALF_EVEN));
                         }

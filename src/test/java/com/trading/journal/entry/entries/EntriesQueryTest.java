@@ -201,7 +201,7 @@ class EntriesQueryTest {
         Query query = entriesQuery.buildQuery();
         assertThat(query).isEqualTo(new Query()
                 .addCriteria(Criteria.where("journalId").is(null))
-                .addCriteria(Criteria.where("strategyIds").in(asList("123456", "456789")))
+                .addCriteria(Criteria.where("strategies.id").in(asList("123456", "456789")))
         );
     }
 

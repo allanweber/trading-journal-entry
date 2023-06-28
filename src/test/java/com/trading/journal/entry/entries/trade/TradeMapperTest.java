@@ -78,7 +78,7 @@ class TradeMapperTest {
                 .lossPrice(BigDecimal.valueOf(180.23))
                 .costs(BigDecimal.valueOf(1.25))
                 .notes("some notes")
-                .strategyIds(asList("1", "2"))
+                .strategies(asList(Strategy.builder().id("ST1").name("Strategy 1").build(), (Strategy.builder().id("ST2").name("Strategy 2").build())))
                 .build();
 
         Entry entry = TradeMapper.INSTANCE.toEntry(trade, journalId);
@@ -97,7 +97,7 @@ class TradeMapperTest {
         assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
         assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
         assertThat(entry.getNotes()).isEqualTo("some notes");
-        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1", "2");
+        assertThat(entry.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("ST1", "ST2");
         assertThat(entry.getExitDate()).isNull();
         assertThat(entry.getExitPrice()).isNull();
         assertThat(entry.getAccountRisked()).isNull();
@@ -206,7 +206,7 @@ class TradeMapperTest {
                 .lossPrice(BigDecimal.valueOf(180.23))
                 .costs(BigDecimal.valueOf(1.25))
                 .notes("some notes")
-                .strategyIds(asList("1", "2"))
+                .strategies(asList(Strategy.builder().id("ST1").name("Strategy 1").build(), (Strategy.builder().id("ST2").name("Strategy 2").build())))
                 .build();
 
         Entry entry = TradeMapper.INSTANCE.toEditEntry(originalEntry, trade);
@@ -225,7 +225,7 @@ class TradeMapperTest {
         assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
         assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
         assertThat(entry.getNotes()).isEqualTo("some notes");
-        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1", "2");
+        assertThat(entry.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("ST1", "ST2");
         assertThat(entry.getExitDate()).isNull();
         assertThat(entry.getExitPrice()).isNull();
         assertThat(entry.getAccountRisked()).isNull();
@@ -273,7 +273,7 @@ class TradeMapperTest {
                 .lossPrice(BigDecimal.valueOf(180.23))
                 .costs(BigDecimal.valueOf(1.25))
                 .notes("some notes")
-                .strategyIds(asList("1", "2"))
+                .strategies(asList(Strategy.builder().id("ST1").name("Strategy 1").build(), (Strategy.builder().id("ST2").name("Strategy 2").build())))
                 .build();
 
         Entry entry = TradeMapper.INSTANCE.toEditEntry(originalEntry, trade);
@@ -292,8 +292,7 @@ class TradeMapperTest {
         assertThat(entry.getLossPrice()).isEqualTo(BigDecimal.valueOf(180.23));
         assertThat(entry.getCosts()).isEqualTo(BigDecimal.valueOf(1.25));
         assertThat(entry.getNotes()).isEqualTo("some notes");
-        assertThat(entry.getStrategyIds()).containsExactlyInAnyOrder("1", "2");
-        assertThat(entry.getStrategies()).extracting(Strategy::getColor).containsExactly("red");
+        assertThat(entry.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("ST1", "ST2");
         assertThat(entry.getImages()).containsExactly(new EntryImage("1", "image-1", "1.jpg"), new EntryImage("2", "image-2", "2.jpg"));
         assertThat(entry.getExitDate()).isNull();
         assertThat(entry.getExitPrice()).isNull();

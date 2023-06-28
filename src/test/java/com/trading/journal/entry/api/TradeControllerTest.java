@@ -24,11 +24,9 @@ import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -173,10 +171,6 @@ class TradeControllerTest extends IntegratedTestWithJournal {
     @DisplayName("Create a new Trade entry with strategies")
     @Test
     void createTradeWithStrategies() {
-
-        Strategy strategy1 = mongoTemplate.save(Strategy.builder().name("Strategy1").build(), strategyCollection);
-        Strategy strategy2 = mongoTemplate.save(Strategy.builder().name("Strategy2").build(), strategyCollection);
-
         Trade trade = Trade.builder()
                 .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
                 .symbol("USD/EUR")
@@ -185,7 +179,7 @@ class TradeControllerTest extends IntegratedTestWithJournal {
                 .size(BigDecimal.valueOf(500.00))
                 .graphType(GraphType.CANDLESTICK)
                 .graphMeasure("1M")
-                .strategyIds(asList(strategy1.getId(), strategy2.getId()))
+                .strategies(asList(Strategy.builder().id("ST1").name("Strategy1").build(), Strategy.builder().id("ST2").name("Strategy2").build()))
                 .build();
 
         AtomicReference<String> entryId = new AtomicReference<>();
@@ -212,8 +206,7 @@ class TradeControllerTest extends IntegratedTestWithJournal {
                     assertThat(response.getPrice()).isEqualTo(BigDecimal.valueOf(1.1234));
                     assertThat(response.getSize()).isEqualTo(BigDecimal.valueOf(500.00));
                     assertThat(response.getPlannedRR()).isEqualTo(BigDecimal.valueOf(-1.00).setScale(2, RoundingMode.HALF_EVEN));
-                    assertThat(response.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder(strategy1.getId(), strategy2.getId());
-                    assertThat(response.getStrategies()).extracting(Strategy::getName).containsExactlyInAnyOrder(strategy1.getName(), strategy2.getName());
+                    assertThat(response.getStrategies()).extracting(Strategy::getId).containsExactlyInAnyOrder("ST1", "ST2");
 
                     assertThat(response.getProfitPrice()).isNull();
                     assertThat(response.getLossPrice()).isNull();
@@ -290,36 +283,6 @@ class TradeControllerTest extends IntegratedTestWithJournal {
 
         List<Entry> all = mongoTemplate.findAll(Entry.class, entryCollection);
         assertThat(all).hasSize(1);
-    }
-
-    @DisplayName("Create a new Trade entry with invalid strategy")
-    @Test
-    void createTradeWithInvalidStrategies() {
-        String strategyId = UUID.randomUUID().toString();
-        Trade trade = Trade.builder()
-                .date(LocalDateTime.of(2022, 9, 1, 17, 35, 59))
-                .symbol("USD/EUR")
-                .direction(EntryDirection.LONG)
-                .price(BigDecimal.valueOf(1.1234))
-                .size(BigDecimal.valueOf(500.00))
-                .graphType(GraphType.CANDLESTICK)
-                .graphMeasure("1M")
-                .strategyIds(singletonList(strategyId))
-                .build();
-
-        webTestClient
-                .post()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/journals/{journal-id}/entries/trade")
-                        .build(journalId))
-                .accept(MediaType.APPLICATION_JSON)
-                .bodyValue(trade)
-                .exchange()
-                .expectStatus()
-                .isBadRequest()
-                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
-                })
-                .value(response -> assertThat(response.get("error")).isEqualTo("Invalid Strategy " + strategyId));
     }
 
     @DisplayName("Try to create an invalid Trade entry")

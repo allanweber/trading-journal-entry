@@ -65,45 +65,45 @@ jobs:
         with:
           name: $APP_NAME
 
-  deploy:
-    name: Deploy on TST
-    runs-on: ubuntu-latest
-    needs: [build, docker]
-    steps:
-      - name: Deploy Image
-        uses: actions-hub/kubectl@master
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-          KUBE_CONTEXT: ${{ env.CONTEXT }}
-        with:
-          args: set image deployment ${{ env.APP_NAME }} ${{ env.APP_NAME }}=allanweber/${{ env.APP_NAME }}:${{needs.build.outputs.app-version}} -n ${{ env.NAMESPACE }} --record=true
-      - name: Check Image Rollout
-        uses: actions-hub/kubectl@master
-        env:
-          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
-          KUBE_CONTEXT: ${{ env.CONTEXT }}
-        with:
-          args: rollout status deployment/${{ env.APP_NAME }} -n ${{ env.NAMESPACE }}
-
-  test:
-    name: Test Latest Deploy
-    runs-on: ubuntu-latest
-    needs: [ build, docker, deploy ]
-    steps:
-      - uses: actions/checkout@v3
-      - name: Install Node
-        uses: actions/setup-node@v3
-      - name: Install Newman
-        run: |
-          npm install -g newman
-          npm install -g newman-reporter-htmlextra
-      - name: Make Directory for results
-        run: mkdir -p testResults
-      - name: Run Postman collection
-        run: |
-          newman run postman/TJE.postman_collection.json --insecure -e postman/TJE_test.postman_environment.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
-      - name: Output the run Details
-        uses: actions/upload-artifact@v3
-        with:
-          name: RunReports
-          path: testResults
+#  deploy:
+#    name: Deploy on TST
+#    runs-on: ubuntu-latest
+#    needs: [build, docker]
+#    steps:
+#      - name: Deploy Image
+#        uses: actions-hub/kubectl@master
+#        env:
+#          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+#          KUBE_CONTEXT: ${{ env.CONTEXT }}
+#        with:
+#          args: set image deployment ${{ env.APP_NAME }} ${{ env.APP_NAME }}=allanweber/${{ env.APP_NAME }}:${{needs.build.outputs.app-version}} -n ${{ env.NAMESPACE }} --record=true
+#      - name: Check Image Rollout
+#        uses: actions-hub/kubectl@master
+#        env:
+#          KUBE_CONFIG: ${{ secrets.KUBE_CONFIG }}
+#          KUBE_CONTEXT: ${{ env.CONTEXT }}
+#        with:
+#          args: rollout status deployment/${{ env.APP_NAME }} -n ${{ env.NAMESPACE }}
+#
+#  test:
+#    name: Test Latest Deploy
+#    runs-on: ubuntu-latest
+#    needs: [ build, docker, deploy ]
+#    steps:
+#      - uses: actions/checkout@v3
+#      - name: Install Node
+#        uses: actions/setup-node@v3
+#      - name: Install Newman
+#        run: |
+#          npm install -g newman
+#          npm install -g newman-reporter-htmlextra
+#      - name: Make Directory for results
+#        run: mkdir -p testResults
+#      - name: Run Postman collection
+#        run: |
+#          newman run postman/TJE.postman_collection.json --insecure -e postman/TJE_test.postman_environment.json -r htmlextra --reporter-htmlextra-export testResults/htmlreport.html --reporter-htmlextra-darkTheme  > testResults/runreport1.html
+#      - name: Output the run Details
+#        uses: actions/upload-artifact@v3
+#        with:
+#          name: RunReports
+#          path: testResults

@@ -15,4 +15,6 @@ public interface EntryService {
     void delete(String entryId);
 
     void updateImages(String entryId, List<EntryImage> entryImages);
+
+    Long countByStrategy(String strategyId);
 }

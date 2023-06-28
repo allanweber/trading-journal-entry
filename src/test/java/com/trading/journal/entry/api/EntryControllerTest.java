@@ -517,29 +517,29 @@ class EntryControllerTest extends IntegratedTestWithJournal {
         Strategy strategy2 = mongoTemplate.save(Strategy.builder().name("ST2").build(), strategyCollection);
 
         mongoTemplate.save(
-                Entry.builder()
-                        .journalId(journalId)
-                        .price(BigDecimal.valueOf(10.00))
-                        .symbol("TRADE_ST1")
-                        .direction(EntryDirection.LONG)
-                        .type(EntryType.TRADE)
-                        .netResult(BigDecimal.valueOf(100))
-                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
-                        .strategyIds(singletonList(strategy1.getId()))
-                        .build(),
+                        Entry.builder()
+                                .journalId(journalId)
+                                .price(BigDecimal.valueOf(10.00))
+                                .symbol("TRADE_ST1")
+                                .direction(EntryDirection.LONG)
+                                .type(EntryType.TRADE)
+                                .netResult(BigDecimal.valueOf(100))
+                                .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                                .strategies(singletonList(strategy1))
+                .build(),
                 entryCollection);
 
         mongoTemplate.save(
-                Entry.builder()
-                        .journalId(journalId)
-                        .price(BigDecimal.valueOf(10.00))
-                        .symbol("TRADE_ST2")
-                        .direction(EntryDirection.SHORT)
-                        .type(EntryType.TRADE)
-                        .netResult(BigDecimal.valueOf(-100))
-                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
-                        .strategyIds(singletonList(strategy2.getId()))
-                        .build(),
+                        Entry.builder()
+                                .journalId(journalId)
+                                .price(BigDecimal.valueOf(10.00))
+                                .symbol("TRADE_ST2")
+                                .direction(EntryDirection.SHORT)
+                                .type(EntryType.TRADE)
+                                .netResult(BigDecimal.valueOf(-100))
+                                .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                                .strategies(singletonList(strategy2))
+                .build(),
                 entryCollection);
 
         mongoTemplate.save(
@@ -551,7 +551,7 @@ class EntryControllerTest extends IntegratedTestWithJournal {
                         .type(EntryType.TRADE)
                         .netResult(BigDecimal.valueOf(-100))
                         .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
-                        .strategyIds(asList(strategy1.getId(), strategy2.getId()))
+                        .strategies(asList(strategy1, strategy2))
                         .build(),
                 entryCollection);
 

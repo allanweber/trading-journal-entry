@@ -1,5 +1,8 @@
 package com.trading.journal.entry.api;
 
+import com.trading.journal.entry.entries.Entry;
+import com.trading.journal.entry.entries.EntryDirection;
+import com.trading.journal.entry.entries.EntryType;
 import com.trading.journal.entry.strategy.Strategy;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -8,24 +11,32 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import tooling.IntegratedTest;
+import tooling.IntegratedTestWithJournal;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import static java.util.Collections.singletonList;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-class StrategyControllerTest extends IntegratedTest {
+class StrategyControllerTest extends IntegratedTestWithJournal {
     private static final String strategyCollection = "TestTenancy_strategies";
+    private static final String entryCollection = "TestTenancy_entries";
 
     @Autowired
     public MongoTemplate mongoTemplate;
 
     @BeforeEach
     public void beforeEach() {
+        mongoTemplate.dropCollection(entryCollection);
         mongoTemplate.dropCollection(strategyCollection);
     }
 
@@ -387,6 +398,42 @@ class StrategyControllerTest extends IntegratedTest {
                 .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
                 })
                 .value(response -> assertThat(response.get("error")).isEqualTo("Strategy not found"));
+
+        List<Strategy> all = mongoTemplate.findAll(Strategy.class, strategyCollection);
+        assertThat(all).hasSize(1);
+    }
+
+    @DisplayName("Delete strategy by Id, but it has entries return error")
+    @Test
+    void deleteHasEntry() {
+        Strategy strategy = mongoTemplate.save(Strategy.builder().name("strategy-1").build(), strategyCollection);
+
+        mongoTemplate.save(
+                Entry.builder()
+                        .journalId(journalId)
+                        .price(BigDecimal.valueOf(10.00))
+                        .symbol("CLOSED")
+                        .direction(EntryDirection.LONG)
+                        .type(EntryType.TRADE)
+                        .netResult(BigDecimal.valueOf(100))
+                        .date(LocalDateTime.of(2022, 1, 1, 1, 1, 0))
+                        .strategies(singletonList(strategy))
+                        .build(),
+                entryCollection);
+
+        webTestClient
+                .delete()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/strategies")
+                        .pathSegment("{strategy-id}")
+                        .build(strategy.getId()))
+                .accept(MediaType.APPLICATION_JSON)
+                .exchange()
+                .expectStatus()
+                .isEqualTo(HttpStatus.CONFLICT)
+                .expectBody(new ParameterizedTypeReference<Map<String, Object>>() {
+                })
+                .value(response -> assertThat(response.get("error")).isEqualTo("Strategy has entries"));
 
         List<Strategy> all = mongoTemplate.findAll(Strategy.class, strategyCollection);
         assertThat(all).hasSize(1);

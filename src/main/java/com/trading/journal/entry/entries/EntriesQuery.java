@@ -35,7 +35,7 @@ public class EntriesQuery {
     public static final String NET_RESULT = "netResult";
     public static final String DIRECTION = "direction";
 
-    private static final String STRATEGIES = "strategyIds";
+    private static final String STRATEGIES = "strategies.id";
     public static final String JOURNAL_ID = "journalId";
 
     @NotEmpty(message = "Journal Id is required")

@@ -28,11 +28,6 @@ public class CollectionName {
         return builder.append(metadata.getCollectionName()).toString();
     }
 
-    public String collectionName(String collectionName) {
-        StringBuilder builder = buildWithTenancy();
-        return builder.append(collectionName).toString();
-    }
-
     private StringBuilder buildWithTenancy() {
         String tenancyName = CaseUtils.toCamelCase(accessToken.tenancyName(), true, ' ', '-');
         tenancyName = tenancyName.replace(" ", SEPARATOR);
